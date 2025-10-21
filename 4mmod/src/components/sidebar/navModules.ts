@@ -111,5 +111,14 @@ export const navModules: NavModule[] = [
     icon: Database,
     description: 'Comprehensive manufacturing management',
     status: 'development'
+  },
+    { 
+    id: 'cdb', 
+    title: 'CDB', 
+    fullName: 'Change Display Board', 
+    color: 'from-cyan-500 to-cyan-600',
+    icon: Database,
+    description: '',
+    status: 'development'
   }
 ];

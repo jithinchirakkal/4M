@@ -977,6 +977,8 @@ import {
   PieChart as RechartsPieChart, Cell, Pie, LineChart, Line
 } from 'recharts';
 
+import QuarterlyMonitoringChart, { DataPoint } from "./QuarterlyMonitoringChart";
+
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
 
 // Define types for better TypeScript support
@@ -1142,6 +1144,72 @@ const DashboardView = () => {
     );
   }
 
+
+  // Utility to get month name
+    const getMonthName = (dateStr: string) => {
+      const date = new Date(dateStr);
+      return date.toLocaleString('default', { month: 'short' });
+    };
+    
+    type MonthlyCountAccumulator = Record<string, { value: number, count: number, name: string }>;
+
+    // New function to prepare the trend chart data
+    const prepareMonthlyTrendData = (): DataPoint[] => {
+        // 1. Group changes by month and count them
+        // FIX: Use the MonthlyCountAccumulator type for the accumulator
+        const monthlyCounts = changeList.reduce((acc: MonthlyCountAccumulator, item) => {
+            const dateStr = item.date || item.created;
+            if (!dateStr) return acc;
+
+            // Use YYYY-MM as the key to ensure correct order
+            const yearMonth = dateStr.substring(0, 7);
+            const monthName = getMonthName(dateStr); 
+
+            // FIX: Ensure 'name' is initialized on the accumulator object
+            acc[yearMonth] = acc[yearMonth] || { value: 0, count: 0, name: monthName };
+            acc[yearMonth].value += 1;
+            acc[yearMonth].count += 1;
+
+            return acc;
+        // FIX: Initialize with an empty object of the correct type
+        }, {} as MonthlyCountAccumulator); 
+
+        // 2. Sort by month key and map to the required format
+        const sortedMonths = Object.keys(monthlyCounts).sort();
+        const monthlyData: DataPoint[] = sortedMonths.map(key => ({
+            // This line is now valid because monthlyCounts[key] is guaranteed to have 'name'
+            name: monthlyCounts[key].name, 
+            value: monthlyCounts[key].value,
+        }));
+
+        // ... rest of the function (average calculation)
+        const totalValue = monthlyData.reduce((sum, item) => sum + item.value, 0);
+        const averageValue = monthlyData.length > 0 ? totalValue / monthlyData.length : 0;
+
+        if (monthlyData.length > 0) {
+            monthlyData.push({
+                name: "AVG (All)",
+                value: parseFloat(averageValue.toFixed(2)),
+                isAverage: true,
+            });
+        }
+
+        // Fallback logic
+        if (monthlyData.length === 0) {
+            return [
+                { name: "Apr", value: 10 },
+                { name: "May", value: 8 },
+                { name: "Jun", value: 6 },
+                { name: "Jul", value: 3 },
+                { name: "AVG (QTR)", value: 6.75, isAverage: true },
+            ];
+        }
+
+        return monthlyData;
+    };
+
+    const monthlyTrendData = prepareMonthlyTrendData();
+
   return (
     <div className="bg-[#f6faff] min-h-screen p-6">
       {/* Header */}
@@ -1180,9 +1248,42 @@ const DashboardView = () => {
         ))}
       </div>
 
+      {/* New Quarterly Monitoring Chart Section */}
+          {monthlyTrendData.length > 0 && (
+            <div className="grid grid-cols-1 mb-8">
+              <QuarterlyMonitoringChart
+                data={monthlyTrendData}
+                title="Monthly Change Count Trend"
+                subtitle="Total changes per month vs. target & average"
+                targetValue={3} // Set your target here
+                yAxisLabel="Change Count"
+                barColor="#3498db"
+                averageColor="#e74c3c"
+                trendLineColor="#000"
+              />
+            </div>
+          )}
+
       {/* Enhanced Charts Section */}
       {changeList.length > 0 ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8"> */}
+          {/* New Quarterly Monitoring Chart Section */}
+          {/* {monthlyTrendData.length > 0 && (
+            <div className="grid grid-cols-1 mb-8">
+              <QuarterlyMonitoringChart
+                data={monthlyTrendData}
+                title="Monthly Change Count Trend"
+                subtitle="Total changes per month vs. target & average"
+                targetValue={3} // Set your target here
+                yAxisLabel="Change Count"
+                barColor="#3498db"
+                averageColor="#e74c3c"
+                trendLineColor="#000"
+              />
+            </div>
+          )} */}
+          
           {/* Enhanced 4M Distribution Bar Chart */}
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 transition-transform duration-200 hover:shadow-2xl hover:-translate-y-1">
             <div className="flex items-center justify-between mb-6">
@@ -1401,6 +1502,7 @@ const DashboardView = () => {
           </div>
         </div>
       )}
+      
 
       {/* Additional Analytics */}
       {changeList.length > 0 && (
