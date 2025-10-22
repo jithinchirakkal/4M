@@ -18,6 +18,7 @@ import FourMChangeResponsibility from './components/FourMChangeResponsibility/Fo
 import FourMChangeProcedure from './components/FourMChangeProcedure/FourMChangeProcedure';
 import ChangeValidationForm from './components/ChangeValidationForm/ChangeValidationForm';
 import Suspected from './components/suspected/suspected';
+import ChangeInformationNote from './components/ChangeInformationNote/ChangeInformationNote';
 
 const Home = () => {
     const [selectedModule, setSelectedModule] = useState('dashboard');
@@ -59,6 +60,7 @@ const Home = () => {
                     {selectedModule === '4MP' && < FourMChangeProcedure />}
                     {selectedModule === 'valid' && <ChangeValidationForm />}
                     {selectedModule === 'sps' && <Suspected />}
+                    {selectedModule === 'CIN' && <ChangeInformationNote />}
                 </main>
             </div>
         </div>

@@ -156,5 +156,14 @@ export const navModules: NavModule[] = [
     icon: Database,
     description: 'Comprehensive manufacturing management',
     status: 'development'
+  },
+  { 
+    id: 'CIN', 
+    title: 'Change Intimation Note', 
+    fullName: 'Change Intimation Note', 
+    color: 'from-cyan-500 to-cyan-600',
+    icon: Database,
+    description: 'Change Intimation Note',
+    status: 'development'
   }
 ];
