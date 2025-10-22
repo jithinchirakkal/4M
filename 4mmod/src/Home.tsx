@@ -12,6 +12,8 @@ import ManMachineMatrix from './components/ManMachineMatrix/ManMachineMatrix';
 import DashboardView from './components/Dashboard/DashboardView';
 import ChangeManagementView from './components/cm/ChangeManagementView';
 import ChangeDisplayBoard from './components/ChangeDisplayBoard/ChangeDisplayBoard';
+import FlowDiagram from './components/ProcessFlowDiagram/4MFlow';
+
 
 const Home = () => {
     const [selectedModule, setSelectedModule] = useState('dashboard');
@@ -47,6 +49,7 @@ const Home = () => {
                     {selectedModule === 'mmm' && <ManMachineMatrix />}
                     {selectedModule === 'cm' && <ChangeManagementView />}
                     {selectedModule === 'cdb' && <ChangeDisplayBoard />}
+                    {selectedModule === '4m-flow' && <FlowDiagram />}
                 </main>
             </div>
         </div>
