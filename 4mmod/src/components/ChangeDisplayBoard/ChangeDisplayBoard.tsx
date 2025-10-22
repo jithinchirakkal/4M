@@ -318,15 +318,15 @@ const ChangeDisplayBoard = () => {
           <h2 className="text-2xl font-bold text-gray-700 mb-4 border-l-4 border-red-500 pl-3">Action Plan for 4M Changes</h2>
           <div className="overflow-x-auto bg-white rounded-xl shadow-lg border border-gray-200">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-100">
+              <thead className="bg-gradient-to-r from-blue-700 to-blue-500 text-white text-center">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">M/C No.</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Part No.</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Change Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Action Taken</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Resp.</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Target Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">M/C No.</th>
+                  <th className="px-6 py- text-left text-xs font-semibold uppercase tracking-wider">Part No.</th>
+                  <th className="px-6 py- text-left text-xs font-semibold uppercase tracking-wider">Change Type</th>
+                  <th className="px-6 py- text-left text-xs font-semibold uppercase tracking-wider">Action Taken</th>
+                  <th className="px-6 py- text-left text-xs font-semibold uppercase tracking-wider">Resp.</th>
+                  <th className="px-6 py- text-left text-xs font-semibold uppercase tracking-wider">Target Date</th>
+                  <th className="px-6 py- text-left text-xs font-semibold uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">

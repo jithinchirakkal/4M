@@ -357,9 +357,9 @@ const NavModule: React.FC<NavModuleProps> = ({
         <div className="flex items-center justify-between">
           {!sidebarCollapsed && (
             <div>
-              <h2 className="text-xl font-bold text-gray-800">
-                4 M{/* 4M System */}
-              </h2>
+              {/* <h2 className="text-xl font-bold text-gray-800">
+                4 M
+              </h2> */}
               {/* <p className="text-sm text-gray-500">
                 Change Management
               </p> */}

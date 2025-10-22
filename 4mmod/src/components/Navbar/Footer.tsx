@@ -27,7 +27,7 @@ const Footer: React.FC<FooterProps> = ({
         <img 
           src={logo} 
           alt={logoAlt}
-          className="h-10 w-auto max-w-[160px] object-contain mr-3"
+          className="h-14 w-auto object-contain mr-9"
         />
       ) : (
         // Fallback to the circular NL badge

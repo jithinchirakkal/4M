@@ -330,7 +330,7 @@ const Navbar: React.FC<NavbarProps> = ({
               <img 
                 src={logo1} 
                 alt={logoAlt}
-                className="h-10 w-auto max-w-[200px] object-contain scale-150"
+                className="h-12 w-auto max-w-[200px] object-contain scale-150"
               />
               {/* <div className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
                 {companyName}
