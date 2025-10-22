@@ -1,5 +1,8 @@
 import React from 'react';
 import { ArrowDown, Diamond } from 'lucide-react';
+import logo from '../../assets/logo.png';
+
+
 
 const FourMChangeProcedure = () => {
   const steps = [
@@ -84,7 +87,13 @@ const FourMChangeProcedure = () => {
         {/* Header */}
         <div className="grid grid-cols-12 border-b-2 border-gray-800">
           <div className="col-span-1 border-r border-gray-300 p-4 bg-green-50 flex items-center justify-center">
-            <div className="text-2xl font-bold text-green-600">LOGO</div>
+            <div className="text-2xl font-bold text-green-600">
+                <img
+                    src={logo}
+                    alt='LOGO'
+                    className='w-auto h-10'
+                />
+            </div>
           </div>
           <div className="col-span-8 p-4 flex items-center justify-center">
             <h1 className="text-3xl font-bold">4M CHANGE PROCEDURE</h1>
