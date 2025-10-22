@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 
 type TrackingStatus = "noplan" | "nochange" | "change";
@@ -78,7 +79,28 @@ export default function FourMChangeTrackingSheet() {
   const [fourMChanges, setFourMChanges] = useState<FourMChangeRecord[]>([]);
   const [trackingMatrix, setTrackingMatrix] = useState<TrackingCell[][]>([]);
   const [changeDetailRows, setChangeDetailRows] = useState<ChangeDetailRow[]>([]);
+  const [allChangeDetailRows, setAllChangeDetailRows] = useState<ChangeDetailRow[]>([]);
+  
+  // Filter states
+  const [filterDate, setFilterDate] = useState('');
+  const [filterShopfloor, setFilterShopfloor] = useState('');
+  const [filterLine, setFilterLine] = useState('');
+  const [filterStation, setFilterStation] = useState('');
+  
+  // Dropdown data for filters
+  const [shopfloors, setShopfloors] = useState<any[]>([]);
+  const [lines, setLines] = useState<any[]>([]);
+  const [stations, setStations] = useState<any[]>([]);
 
+  // Fetch shopfloors on mount
+  useEffect(() => {
+    fetch('http://127.0.0.1:8000/api/shopfloors/')
+      .then(res => res.json())
+      .then(data => setShopfloors(data))
+      .catch(err => console.error('Error fetching shopfloors:', err));
+  }, []);
+
+  // Fetch 4M Changes and saved change details
   useEffect(() => {
     Promise.all([
       fetch('http://127.0.0.1:8000/api/4m-changes/').then(res => res.json()),
@@ -92,13 +114,77 @@ export default function FourMChangeTrackingSheet() {
       .catch(err => console.error('Error fetching data:', err));
   }, [month]);
 
+  // Fetch lines when shopfloor filter changes
+  useEffect(() => {
+    if (filterShopfloor) {
+      fetch(`http://127.0.0.1:8000/api/lines/?shopfloor=${filterShopfloor}`)
+        .then(res => res.json())
+        .then(data => setLines(data))
+        .catch(err => console.error('Error fetching lines:', err));
+    } else {
+      setLines([]);
+      setFilterLine('');
+    }
+  }, [filterShopfloor]);
+
+  // Fetch stations when line filter changes
+  useEffect(() => {
+    if (filterLine) {
+      fetch(`http://127.0.0.1:8000/api/stations/?line=${filterLine}`)
+        .then(res => res.json())
+        .then(data => setStations(data))
+        .catch(err => console.error('Error fetching stations:', err));
+    } else {
+      setStations([]);
+      setFilterStation('');
+    }
+  }, [filterLine]);
+
+  // Apply filters to change detail rows
+  useEffect(() => {
+    let filtered = [...allChangeDetailRows];
+
+    if (filterDate) {
+      filtered = filtered.filter(row => row.date === filterDate);
+    }
+
+    // For shopfloor, line, station - we need to match with the original fourMChanges data
+    if (filterShopfloor || filterLine || filterStation) {
+      filtered = filtered.filter(row => {
+        const originalChange = fourMChanges.find(
+          change => change.record_id === row.record_id
+        );
+        if (!originalChange) return true;
+
+        if (filterShopfloor && originalChange.shopfloor_name !== shopfloors.find(s => s.id === parseInt(filterShopfloor))?.name) {
+          return false;
+        }
+        if (filterLine && originalChange.line_name !== lines.find(l => l.id === parseInt(filterLine))?.name) {
+          return false;
+        }
+        if (filterStation && originalChange.station_name !== stations.find(s => s.id === parseInt(filterStation))?.name) {
+          return false;
+        }
+        return true;
+      });
+    }
+
+    setChangeDetailRows(filtered);
+  }, [filterDate, filterShopfloor, filterLine, filterStation, allChangeDetailRows, fourMChanges, shopfloors, lines, stations]);
+
+  const clearFilters = () => {
+    setFilterDate('');
+    setFilterShopfloor('');
+    setFilterLine('');
+    setFilterStation('');
+  };
+
   const processTrackingMatrix = (changes: FourMChangeRecord[], selectedMonth: string) => {
     const matrix: TrackingCell[][] = [];
     const today = new Date();
     const currentDay = today.getDate();
     const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
 
-    // Map four_m values to category names
     const fourMToCategoryMap: { [key: string]: string } = {
       'Man': 'MAN',
       'Machine/Tool': 'MACHINE',
@@ -109,44 +195,33 @@ export default function FourMChangeTrackingSheet() {
     categories.forEach((category) => {
       const categoryRow: TrackingCell[] = [];
 
-      // Filter changes for this category and month
       const categoryChanges = changes.filter(change => {
         if (!change.date) return false;
         const changeDate = new Date(change.date);
         const changeDateStr = `${changeDate.getFullYear()}-${String(changeDate.getMonth() + 1).padStart(2, "0")}`;
-
-        // Map the four_m value to category name for comparison
         const mappedCategory = fourMToCategoryMap[change.four_m] || change.four_m.toUpperCase();
-
         return changeDateStr === selectedMonth && mappedCategory === category.name;
       });
 
-      // Get all change days for this category
       const changeDays = categoryChanges.map(change => new Date(change.date).getDate());
 
       dayColumns.forEach(day => {
         let status: TrackingStatus = "noplan";
         let hasChange = false;
 
-        // Check if this day has a change
         if (changeDays.includes(day)) {
           status = "change";
           hasChange = true;
         } else {
-          // If selected month is current month
           if (selectedMonth === currentMonth) {
             if (day <= currentDay) {
-              // Past or today: no change (green)
               status = "nochange";
             } else {
-              // Future: no plan (blue)
               status = "noplan";
             }
           } else if (selectedMonth < currentMonth) {
-            // Past months: all days without changes are "no change" (green)
             status = "nochange";
           } else {
-            // Future months: all days are "no plan" (blue)
             status = "noplan";
           }
         }
@@ -168,7 +243,6 @@ export default function FourMChangeTrackingSheet() {
       return changeDateStr === selectedMonth;
     });
 
-    // Create a map of saved details by date and time for quick lookup
     const savedDetailsMap = new Map();
     savedDetails.forEach(detail => {
       const key = `${detail.date}_${detail.time}`;
@@ -179,7 +253,6 @@ export default function FourMChangeTrackingSheet() {
       const key = `${change.date}_${change.time}`;
       const savedDetail = savedDetailsMap.get(key);
 
-      // If we have saved details, use them; otherwise use defaults from the form
       if (savedDetail) {
         return {
           id: savedDetail.id,
@@ -211,7 +284,6 @@ export default function FourMChangeTrackingSheet() {
           remarks: savedDetail.remarks || change.action_details?.remarks || '',
         };
       } else {
-        // No saved details, use defaults from the form
         return {
           record_id: change.record_id || '',
           date: change.date || '',
@@ -244,6 +316,7 @@ export default function FourMChangeTrackingSheet() {
     });
 
     setChangeDetailRows(detailRows);
+    setAllChangeDetailRows(detailRows);
   };
 
   const handleDetailInput = (
@@ -292,14 +365,12 @@ export default function FourMChangeTrackingSheet() {
         ? "bg-red-500"
         : "bg-blue-100";
 
-  // New component/function for truncated text
   const TruncatedTextCell: React.FC<{ text: string; maxWidth?: string }> = ({ text, maxWidth }) => {
-    // We use line-clamp utility for truncation and title for the tooltip
     return (
       <div 
         className="w-full text-left overflow-hidden" 
-        style={{ maxWidth: maxWidth || '100%', height: '40px', lineHeight: '20px' }} // Fixed height for 2 lines of text
-        title={text} // Native tooltip on hover
+        style={{ maxWidth: maxWidth || '100%', height: '40px', lineHeight: '20px' }}
+        title={text}
       >
         <div className="line-clamp-2">
           {text || '-'}
@@ -389,7 +460,88 @@ export default function FourMChangeTrackingSheet() {
           <div className="w-full text-center font-bold text-lg p-2 border-t-2 border-b-2 border-indigo-300 bg-indigo-50 rounded-t-lg">
             4M Change Detail
           </div>
-          <div className="flex justify-end my-3">
+          
+          {/* Filters Section */}
+          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 my-4">
+            <div className="flex flex-wrap items-end gap-4">
+              <div className="flex-1 min-w-[150px]">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Filter by Date
+                </label>
+                <input
+                  type="date"
+                  value={filterDate}
+                  onChange={e => setFilterDate(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 transition"
+                />
+              </div>
+              
+              <div className="flex-1 min-w-[150px]">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Filter by Shopfloor
+                </label>
+                <select
+                  value={filterShopfloor}
+                  onChange={e => setFilterShopfloor(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 transition"
+                >
+                  <option value="">All Shopfloors</option>
+                  {shopfloors.map(sf => (
+                    <option key={sf.id} value={sf.id}>{sf.name}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="flex-1 min-w-[150px]">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Filter by Line
+                </label>
+                <select
+                  value={filterLine}
+                  onChange={e => setFilterLine(e.target.value)}
+                  disabled={!filterShopfloor}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 transition disabled:bg-gray-100"
+                >
+                  <option value="">All Lines</option>
+                  {lines.map(line => (
+                    <option key={line.id} value={line.id}>{line.name}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="flex-1 min-w-[150px]">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Filter by Station
+                </label>
+                <select
+                  value={filterStation}
+                  onChange={e => setFilterStation(e.target.value)}
+                  disabled={!filterLine}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 transition disabled:bg-gray-100"
+                >
+                  <option value="">All Stations</option>
+                  {stations.map(station => (
+                    <option key={station.id} value={station.id}>{station.name}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="flex gap-2">
+                <button
+                  onClick={clearFilters}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            </div>
+            
+            <div className="mt-3 text-sm text-gray-600">
+              Showing {changeDetailRows.length} of {allChangeDetailRows.length} records
+            </div>
+          </div>
+
+          <div className="flex justify-end mb-3">
             <button
               className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-2 rounded-lg shadow hover:from-green-600 hover:to-green-700 font-semibold transition"
               onClick={submitChangeDetails}
@@ -442,7 +594,7 @@ export default function FourMChangeTrackingSheet() {
                 {changeDetailRows.length === 0 ? (
                   <tr>
                     <td colSpan={26} className="text-center text-gray-500 py-4">
-                      No change details available for selected month
+                      No change details available for the selected filters
                     </td>
                   </tr>
                 ) : (
