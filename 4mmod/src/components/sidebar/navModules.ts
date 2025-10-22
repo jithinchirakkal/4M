@@ -165,5 +165,14 @@ export const navModules: NavModule[] = [
     icon: Database,
     description: 'Change Intimation Note',
     status: 'development'
+  },
+  { 
+    id: '4m-method', 
+    title: 'Methods', 
+    fullName: 'Method Module', 
+    color: 'from-cyan-500 to-cyan-600',
+    icon: Settings,
+    description: 'Manage categories, actions, and activities',
+    status: 'development'
   }
 ];
