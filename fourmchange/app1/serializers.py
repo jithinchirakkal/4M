@@ -1,10 +1,54 @@
 from rest_framework import serializers
 from .models import FourMChange
 
+from rest_framework import serializers
+from .models import (
+    Shopfloor, Line, Station,
+    FourMCategories, FourMAction, FourMChange
+)
+
+class ShopfloorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Shopfloor
+        fields = '__all__'
+
+
+class LineSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Line
+        fields = '__all__'
+
+
+class StationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Station
+        fields = '__all__'
+
+
+class FourMActionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FourMAction
+        fields = '__all__'
+
+
+class FourMCategoriesSerializer(serializers.ModelSerializer):
+    actions = FourMActionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = FourMCategories
+        fields = '__all__'
+
+
 class FourMChangeSerializer(serializers.ModelSerializer):
+    category_details = FourMCategoriesSerializer(source='category', read_only=True)
+    action_details = FourMActionSerializer(source='action', read_only=True)
+    shopfloor_name = serializers.CharField(source='shopfloor.name', read_only=True)
+    line_name = serializers.CharField(source='line.name', read_only=True)
+    station_name = serializers.CharField(source='station.name', read_only=True)
     class Meta:
         model = FourMChange
         fields = '__all__'
+
 
 
 

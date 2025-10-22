@@ -1302,7 +1302,8 @@ const DashboardView = () => {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name}\n${((percent || 0) * 100).toFixed(1)}%`}
+                  // label={({ name, percent }) => `${name}\n${((percent || 0) * 100).toFixed(1)}%`}
+                  label={({ name, percent }) => `${name}\n${(Number(percent ?? 0) * 100).toFixed(1)}%`}
                   outerRadius={110}
                   innerRadius={60}
                   paddingAngle={5}

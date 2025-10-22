@@ -1,34 +1,97 @@
 from django.db import models
-from django.db.models import Max
+from django.utils import timezone
 
-# Create your models here.
-from django.db import models
+class Shopfloor(models.Model):
+    name = models.CharField(max_length=100, unique=True)
 
-class FourMChange(models.Model):
+    def __str__(self):
+        return self.name
+
+
+class Line(models.Model):
+    shopfloor = models.ForeignKey(Shopfloor, on_delete=models.CASCADE, related_name='lines')
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        unique_together = ('shopfloor', 'name')
+
+    def __str__(self):
+        return f"{self.shopfloor.name} - {self.name}"
+
+
+class Station(models.Model):
+    line = models.ForeignKey(Line, on_delete=models.CASCADE, related_name='stations')
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        unique_together = ('line', 'name')
+
+    def __str__(self):
+        return f"{self.line.name} - {self.name}"
+
+
+# ----------------------------- 4M Change Form ----------------------------- #
+class FourMCategories(models.Model):
+
     CATEGORY_CHOICES = [
         ('Planned', 'Planned'),
         ('Unplanned', 'Unplanned'),
         ('Abnormal', 'Abnormal'),
     ]
+    category_type = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    description = models.TextField(help_text="Definition")
+
+    def __str__(self):
+        return f"{self.category_type} - {self.description[:40]}"
+
+
+class FourMAction(models.Model):
+    category = models.ForeignKey(FourMCategories, on_delete=models.CASCADE, related_name='actions')
+    action_taken = models.TextField()
+    set_up_approval = models.BooleanField(default=False)
+    retroactive_inspection = models.BooleanField(default=False)
+    suspected_lot_check = models.BooleanField(default=False)
+    remarks = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.category.description[:30]} → {self.action_taken[:30]}"
+
+
+class FourMChange(models.Model):
     FOUR_M_CHOICES = [
         ('Man', 'Man'),
         ('Machine/Tool', 'Machine/Tool'),
         ('Material', 'Material'),
         ('Method', 'Method'),
-    ]
-
+    ]                
+    shopfloor = models.ForeignKey(Shopfloor, on_delete=models.CASCADE, null=True, blank=True)
+    line = models.ForeignKey(Line, on_delete=models.CASCADE, null=True, blank=True)
+    station = models.ForeignKey(Station, on_delete=models.CASCADE, null=True, blank=True)
     four_m = models.CharField(max_length=20, choices=FOUR_M_CHOICES)
-    changed_description = models.TextField()
-    action_taken = models.TextField()
-    date = models.DateField(blank=True,null=True)
-    change_category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
-    set_up_approval = models.BooleanField()
-    retroactive_inspection = models.BooleanField()
-    suspected_lot_check = models.BooleanField()
-    remarks = models.TextField(blank=True, null=True)
+    category = models.ForeignKey(FourMCategories, on_delete=models.CASCADE, null=True, blank=True)
+    action = models.ForeignKey(FourMAction, on_delete=models.SET_NULL, null=True, blank=True)
+    date = models.DateField(default=timezone.now)
+    time = models.TimeField(default=timezone.now)
+    record_id = models.CharField(max_length=30, unique=True, editable=False)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def save(self, *args, **kwargs):
+        if not self.record_id:
+            today_str = timezone.now().strftime("%Y%m%d")
+            last_record = FourMChange.objects.filter(record_id__startswith=f"REC-{today_str}").order_by('-id').first()
+            seq = 1
+            if last_record:
+                try:
+                    seq = int(last_record.record_id.split('-')[-1]) + 1
+                except:
+                    seq = 1
+            self.record_id = f"REC-{today_str}-{seq:03d}"
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.four_m} - {self.changed_description[:30]}..."
+        return f"{self.record_id} - {self.four_m} - {self.category.category_type}"
+
+
     
 
 

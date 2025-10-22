@@ -16,7 +16,11 @@ Including another URLconf
 """
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import FourMChangeViewSet, MaterialMovementCardViewSet
+from .views import MaterialMovementCardViewSet
+from .views import (
+    ShopfloorViewSet, LineViewSet, StationViewSet,
+    FourMCategoriesViewSet, FourMActionViewSet, FourMChangeViewSet
+)
 
 from .views import FourMCategoryViewSet, FourMTrackingViewSet, FourMChangeDetailViewSet
 from .views import ManMachineMatrixViewSet,ControlPlanViewSet,RCRViewSet
@@ -27,10 +31,15 @@ from .views import ProcessFlowViewSet, ProcessViewSet, RevisionViewSet
 
 
 router = DefaultRouter()
-# router.register(r'4m-changes', FourMChangeViewSet)
-router.register(r'4m-changes', FourMChangeViewSet, basename='4m-change')
-router.register(r'material-movement-cards', MaterialMovementCardViewSet)
+router.register(r'shopfloors', ShopfloorViewSet)
+router.register(r'lines', LineViewSet)
+router.register(r'stations', StationViewSet)
+router.register(r'4m-categories', FourMCategoriesViewSet)
+router.register(r'actions', FourMActionViewSet)
 router.register(r'4m-changes', FourMChangeViewSet)
+
+router.register(r'material-movement-cards', MaterialMovementCardViewSet)
+
 router.register(r'categories', FourMCategoryViewSet, basename='category')
 router.register(r'trackings', FourMTrackingViewSet, basename='tracking')
 router.register(r'change-details', FourMChangeDetailViewSet, basename='change-detail')
