@@ -8,7 +8,13 @@ import {
   Globe,
   Clock,
   AlertTriangle,
-  Database
+  Database,
+  FileCheck,
+  ClipboardList,
+  FileCog,
+  CheckCircle,
+  Search,
+  Bell
 } from 'lucide-react';
 
 interface NavModule {
@@ -28,25 +34,25 @@ export const navModules: NavModule[] = [
     fullName: 'System Overview', 
     color: 'from-slate-500 to-slate-600',
     icon: LayoutDashboard,
-    description: 'Main system overview and analytics',
+    description: 'Central hub for system analytics and overview',
     status: 'active'
   },
   { 
     id: 'cm', 
-    title: 'CM', 
+    title: 'Change Management', 
     fullName: 'Change Management Sheet', 
     color: 'from-blue-500 to-blue-600',
     icon: FileText,
-    description: 'Manage change requests and approvals',
+    description: 'Manage and track change requests and approvals',
     status: 'active'
   },
   { 
     id: 'mmc', 
-    title: 'MMC', 
+    title: 'Material Movement', 
     fullName: 'Material Management Control', 
     color: 'from-green-500 to-green-600',
     icon: Package,
-    description: 'Control material specifications and changes',
+    description: 'Control and monitor material specifications and movements',
     status: 'active'
   },
   { 
@@ -55,16 +61,16 @@ export const navModules: NavModule[] = [
     fullName: '4M Change Tracking System', 
     color: 'from-purple-500 to-purple-600',
     icon: Activity,
-    description: 'Track all 4M changes in real-time',
+    description: 'Real-time tracking of 4M (Man, Machine, Material, Method) changes',
     status: 'beta'
   },
   { 
     id: 'cpf', 
-    title: 'CPF', 
+    title: 'Control Plans', 
     fullName: 'Control Plan Framework Sheet', 
     color: 'from-indigo-500 to-indigo-600',
     icon: Shield,
-    description: 'Framework for quality control plans',
+    description: 'Framework for creating and managing quality control plans',
     status: 'active'
   },
   { 
@@ -73,25 +79,25 @@ export const navModules: NavModule[] = [
     fullName: 'Manufacturing Control System', 
     color: 'from-pink-500 to-pink-600',
     icon: Settings,
-    description: 'Control manufacturing processes',
+    description: 'Oversee and control manufacturing processes',
     status: 'development'
   },
   { 
     id: 'pf', 
-    title: 'PF', 
+    title: 'Process Flow', 
     fullName: 'Process Flow Diagram Sheet', 
     color: 'from-teal-500 to-teal-600',
     icon: Globe,
-    description: 'Visualize and manage process flows',
+    description: 'Visualize and optimize process flow diagrams',
     status: 'active'
   },
   { 
     id: 'rcr', 
-    title: 'RCR', 
+    title: 'Retroactive Check', 
     fullName: 'Retroactive Check Record Sheet', 
     color: 'from-orange-500 to-orange-600',
     icon: Clock,
-    description: 'Historical change verification',
+    description: 'Verify and record historical changes',
     status: 'active'
   },
   { 
@@ -100,61 +106,61 @@ export const navModules: NavModule[] = [
     fullName: 'Incident Investigation Control', 
     color: 'from-red-500 to-red-600',
     icon: AlertTriangle,
-    description: 'Investigate and manage incidents',
+    description: 'Investigate and manage incident reports',
     status: 'beta'
   },
   { 
     id: 'mmm', 
-    title: 'MMM', 
+    title: 'Machine Matrix', 
     fullName: 'Manufacturing Management Module', 
     color: 'from-cyan-500 to-cyan-600',
     icon: Database,
-    description: 'Comprehensive manufacturing management',
-    status: 'development'
-  },
-    { 
-    id: 'cdb', 
-    title: 'CDB', 
-    fullName: 'Change Display Board', 
-    color: 'from-cyan-500 to-cyan-600',
-    icon: Database,
-    description: '',
+    description: 'Manage man-machine matrix for manufacturing',
     status: 'development'
   },
   { 
+    id: 'cdb', 
+    title: 'Change Display', 
+    fullName: 'Change Display Board', 
+    color: 'from-cyan-500 to-cyan-600',
+    icon: FileCheck,
+    description: 'Display and monitor change statuses',
+    status: 'active'
+  },
+  { 
     id: '4m', 
-    title: '4m', 
-    fullName: 'FourMChangeResponsibility', 
+    title: '4M-Responsibility', 
+    fullName: '4M Change Responsibility', 
     color: 'from-cyan-500 to-cyan-600',
-    icon: Database,
-    description: 'Comprehensive manufacturing management',
+    icon: ClipboardList,
+    description: 'Assign and track 4M change responsibilities',
     status: 'development'
   },
-    { 
+  { 
     id: '4MP', 
-    title: '4M-PROCEDURE', 
-    fullName: 'FourMChangeProcedure', 
+    title: '4M-Procedure', 
+    fullName: '4M Change Procedure', 
     color: 'from-cyan-500 to-cyan-600',
-    icon: Database,
-    description: 'Comprehensive manufacturing management',
-    status: 'development'
+    icon: FileCog,
+    description: 'Define and manage 4M change procedures',
+    status: 'beta'
   },
-      { 
+  { 
     id: 'valid', 
     title: '4M-Validation', 
-    fullName: 'FourMChangeProcedure', 
+    fullName: '4M Change Validation', 
     color: 'from-cyan-500 to-cyan-600',
-    icon: Database,
-    description: 'Comprehensive manufacturing management',
-    status: 'development'
+    icon: CheckCircle,
+    description: 'Validate 4M change implementations',
+    status: 'active'
   },
-        { 
+  { 
     id: 'sps', 
-    title: 'suspected', 
-    fullName: 'FourMChangeProcedure', 
+    title: 'Suspected Lot', 
+    fullName: 'Suspected Lot Traceability Record', 
     color: 'from-cyan-500 to-cyan-600',
-    icon: Database,
-    description: 'Comprehensive manufacturing management',
+    icon: Search,
+    description: 'Track and manage suspected lot records',
     status: 'development'
   },
   { 
@@ -162,9 +168,9 @@ export const navModules: NavModule[] = [
     title: 'Change Intimation Note', 
     fullName: 'Change Intimation Note', 
     color: 'from-cyan-500 to-cyan-600',
-    icon: Database,
-    description: 'Change Intimation Note',
-    status: 'development'
+    icon: Bell,
+    description: 'Notify stakeholders of changes via intimation notes',
+    status: 'active'
   },
   { 
     id: '4m-method', 

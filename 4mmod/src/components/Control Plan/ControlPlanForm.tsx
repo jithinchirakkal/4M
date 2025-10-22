@@ -2199,7 +2199,7 @@ const ControlPlanForm: React.FC = () => {
     return (
       <div className="bg-[#f6faff] min-h-screen p-6">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-2xl shadow-xl mb-6">
+        <div className="bg-gradient-to-r from-blue-600 via-blue-600 to-blue-600 text-white rounded-2xl shadow-xl mb-6">
           <div className="p-6">
             <div className="flex justify-between items-center">
               <div>
