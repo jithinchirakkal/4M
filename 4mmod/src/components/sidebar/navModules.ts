@@ -120,5 +120,41 @@ export const navModules: NavModule[] = [
     icon: Database,
     description: '',
     status: 'development'
+  },
+  { 
+    id: '4m', 
+    title: '4m', 
+    fullName: 'FourMChangeResponsibility', 
+    color: 'from-cyan-500 to-cyan-600',
+    icon: Database,
+    description: 'Comprehensive manufacturing management',
+    status: 'development'
+  },
+    { 
+    id: '4MP', 
+    title: '4M-PROCEDURE', 
+    fullName: 'FourMChangeProcedure', 
+    color: 'from-cyan-500 to-cyan-600',
+    icon: Database,
+    description: 'Comprehensive manufacturing management',
+    status: 'development'
+  },
+      { 
+    id: 'valid', 
+    title: '4M-Validation', 
+    fullName: 'FourMChangeProcedure', 
+    color: 'from-cyan-500 to-cyan-600',
+    icon: Database,
+    description: 'Comprehensive manufacturing management',
+    status: 'development'
+  },
+        { 
+    id: 'sps', 
+    title: 'suspected', 
+    fullName: 'FourMChangeProcedure', 
+    color: 'from-cyan-500 to-cyan-600',
+    icon: Database,
+    description: 'Comprehensive manufacturing management',
+    status: 'development'
   }
 ];

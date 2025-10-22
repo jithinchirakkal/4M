@@ -14,6 +14,10 @@ import ChangeManagementView from './components/cm/ChangeManagementView';
 import ChangeDisplayBoard from './components/ChangeDisplayBoard/ChangeDisplayBoard';
 import FlowDiagram from './components/ProcessFlowDiagram/4MFlow';
 
+import FourMChangeResponsibility from './components/FourMChangeResponsibility/FourMChangeResponsibility';
+import FourMChangeProcedure from './components/FourMChangeProcedure/FourMChangeProcedure';
+import ChangeValidationForm from './components/ChangeValidationForm/ChangeValidationForm';
+import Suspected from './components/suspected/suspected';
 
 const Home = () => {
     const [selectedModule, setSelectedModule] = useState('dashboard');
@@ -51,6 +55,10 @@ const Home = () => {
                     {selectedModule === 'cm' && <ChangeManagementView />}
                     {selectedModule === 'cdb' && <ChangeDisplayBoard />}
                     {selectedModule === '4m-flow' && <FlowDiagram />}
+                    {selectedModule === '4m' && <FourMChangeResponsibility />}
+                    {selectedModule === '4MP' && < FourMChangeProcedure />}
+                    {selectedModule === 'valid' && <ChangeValidationForm />}
+                    {selectedModule === 'sps' && <Suspected />}
                 </main>
             </div>
         </div>
