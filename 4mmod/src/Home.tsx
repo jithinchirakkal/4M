@@ -43,7 +43,8 @@ const Home = () => {
                     {selectedModule === '4m-cts' && <FourMChangeTrackSheet />}
                     {selectedModule === 'cpf' && <ControlPlanForm />}
                     {selectedModule === 'mcs' && <MachineCheckSheet />}
-                    {selectedModule === 'pf' && <ProcessFlowDiagram />}
+                    {/* {selectedModule === 'pf' && <ProcessFlowDiagram />} */}
+                    {selectedModule === 'pf' && <ProcessFlowDiagram onNavigate={setSelectedModule} />}
                     {selectedModule === 'rcr' && <RetroactiveCheckRecord />}
                     {selectedModule === 'iic-sar' && <InspectionForm />}
                     {selectedModule === 'mmm' && <ManMachineMatrix />}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, FileText, User, Building2, Hash } from 'lucide-react';
-
+import { Link } from 'react-router-dom';
 // Types
 interface Process {
   sNo: number;
@@ -39,9 +39,15 @@ interface FormData {
   approvedBy: string;
 }
 
+// Added prop type for onNavigate
+interface ProcessFlowDiagramProps {
+    onNavigate: (moduleId: string) => void;
+}
+
 const API = 'http://localhost:8000/api';
 
-export default function ProcessFlowDiagram() {
+// export default function ProcessFlowDiagram() {
+export default function ProcessFlowDiagram({ onNavigate }: ProcessFlowDiagramProps) {
   const [step, setStep] = useState<0 | 1>(0);
   const [loading, setLoading] = useState(false);
 
@@ -400,23 +406,43 @@ export default function ProcessFlowDiagram() {
                 <h1 className="text-3xl font-bold">Process Flow Diagram</h1>
                 <p className="text-blue-100 text-sm mt-1">Manufacturing process documentation and workflow management</p>
               </div>
-              {step === 0 ? (
-                <button
-                  className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-2.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all flex items-center space-x-2"
-                  onClick={() => setStep(1)}
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add New Flow</span>
-                </button>
-              ) : (
-                <button
-                  onClick={() => setStep(0)}
-                  className="bg-white/20 hover:bg-white/30 text-white px-5 py-2.5 rounded-xl font-semibold transition-all"
-                  disabled={loading}
-                >
-                  ← Back to List
-                </button>
-              )}
+              
+              <div className='flex gap-3'>
+                {step === 0 ? (
+                  <button
+                    className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-2.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all flex items-center space-x-2"
+                    onClick={() => setStep(1)}
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add New Flow</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setStep(0)}
+                    className="bg-white/20 hover:bg-white/30 text-white px-5 py-2.5 rounded-xl font-semibold transition-all"
+                    disabled={loading}
+                  >
+                    ← Back to List
+                  </button>
+                )}
+                <div>
+                <div>
+                    <button
+                        // This is the correct line: it tells the parent Home component to switch the view.
+                        onClick={() => onNavigate('4m-flow')}
+                        className="bg-gradient-to-r from-blue-600 to-blue-600 text-white px-6 py-2.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all flex items-center space-x-2"
+                    >
+                        <span>View 4M Flow Diagram</span>
+                    </button>
+                </div>
+                  {/* <Link
+                    to="/4mFlow" // 👈 The target path
+                    className="bg-gradient-to-r from-blue-600 to-blue-600 text-white px-6 py-2.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all flex items-center space-x-2"
+                  >
+                    <span>Process Flow</span>
+                  </Link> */}
+                </div>
+              </div>
             </div>
           </div>
         </div>
