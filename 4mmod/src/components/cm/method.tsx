@@ -253,7 +253,7 @@ export default function FourMMethodPage() {
               className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-2 rounded-lg shadow hover:from-green-600 hover:to-green-700 font-semibold transition"
             >
               {showForm ? <X size={20} /> : <Plus size={20} />}
-              {showForm ? "Cancel" : "Add New Method"}
+              {showForm ? "Cancel" : "Add New "}
             </button>
           </div>
         </div>
@@ -262,7 +262,7 @@ export default function FourMMethodPage() {
         {showForm && (
           <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">
-              {editingId ? "Edit Method" : "Add New Method"}
+              {editingId ? "Edit Method" : "Add New "}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
