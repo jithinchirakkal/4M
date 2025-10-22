@@ -1,13 +1,73 @@
-from django.shortcuts import render
 
+from django.shortcuts import render
 from rest_framework import viewsets
-from .models import FourMChange
-from .serializers import FourMChangeSerializer
+from .models import (
+    Shopfloor, Line, Station,
+    FourMCategories, FourMAction, FourMChange
+)
+from .serializers import (
+    ShopfloorSerializer, LineSerializer, StationSerializer,
+    FourMCategoriesSerializer, FourMActionSerializer, FourMChangeSerializer
+)
+
+class ShopfloorViewSet(viewsets.ModelViewSet):
+    queryset = Shopfloor.objects.all()
+    serializer_class = ShopfloorSerializer
+
+
+class LineViewSet(viewsets.ModelViewSet):
+    queryset = Line.objects.all()
+    serializer_class = LineSerializer
+
+    def get_queryset(self):
+        queryset = Line.objects.all()
+        shopfloor_id = self.request.query_params.get('shopfloor', None)
+        if shopfloor_id:
+            queryset = queryset.filter(shopfloor_id=shopfloor_id)
+        return queryset
+
+
+class StationViewSet(viewsets.ModelViewSet):
+    queryset = Station.objects.all()
+    serializer_class = StationSerializer
+
+    def get_queryset(self):
+        queryset = Station.objects.all()
+        line_id = self.request.query_params.get('line', None)
+        if line_id:
+            queryset = queryset.filter(line_id=line_id)
+        return queryset
+
+
+class FourMCategoriesViewSet(viewsets.ModelViewSet):
+    queryset = FourMCategories.objects.all()
+    serializer_class = FourMCategoriesSerializer
+
+    def get_queryset(self):
+        queryset = FourMCategories.objects.all()
+        category_type = self.request.query_params.get('category_type', None)
+        if category_type:
+            queryset = queryset.filter(category_type=category_type)
+        return queryset
+
+
+class FourMActionViewSet(viewsets.ModelViewSet):
+    queryset = FourMAction.objects.all()
+    serializer_class = FourMActionSerializer
+
+    def get_queryset(self):
+        queryset = FourMAction.objects.all()
+        category_id = self.request.query_params.get('category', None)
+        if category_id:
+            queryset = queryset.filter(category_id=category_id)
+        return queryset
+
 
 class FourMChangeViewSet(viewsets.ModelViewSet):
-    queryset = FourMChange.objects.all()
+    queryset = FourMChange.objects.all().order_by('-created_at')
     serializer_class = FourMChangeSerializer
-
+    
+    
 
 from rest_framework import viewsets
 from .models import MaterialMovementCard
