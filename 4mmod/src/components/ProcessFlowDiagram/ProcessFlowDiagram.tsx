@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, FileText, User, Building2, Hash } from 'lucide-react';
+import { Plus, Trash2, FileText, User, Building2, Hash, ChevronDown, ChevronUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
+import Flowdiagram from './4MFlow';
 // Types
 interface Process {
   sNo: number;
@@ -50,6 +52,7 @@ const API = 'http://localhost:8000/api';
 export default function ProcessFlowDiagram({ onNavigate }: ProcessFlowDiagramProps) {
   const [step, setStep] = useState<0 | 1>(0);
   const [loading, setLoading] = useState(false);
+  const [isFlowdiagramCollapsed, setIsFlowdiagramCollapsed] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
     partName: '',
@@ -426,7 +429,7 @@ export default function ProcessFlowDiagram({ onNavigate }: ProcessFlowDiagramPro
                   </button>
                 )}
                 <div>
-                <div>
+                {/* <div>
                     <button
                         // This is the correct line: it tells the parent Home component to switch the view.
                         onClick={() => onNavigate('4m-flow')}
@@ -434,18 +437,43 @@ export default function ProcessFlowDiagram({ onNavigate }: ProcessFlowDiagramPro
                     >
                         <span>View 4M Flow Diagram</span>
                     </button>
-                </div>
-                  {/* <Link
-                    to="/4mFlow" // 👈 The target path
-                    className="bg-gradient-to-r from-blue-600 to-blue-600 text-white px-6 py-2.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all flex items-center space-x-2"
-                  >
-                    <span>Process Flow</span>
-                  </Link> */}
+                </div> */}
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* <div>
+          <Flowdiagram/>
+        </div> */}
+        {/* 2. Flowdiagram Toggle and Component */}
+        <div className="bg-white rounded-2xl shadow-lg mb-6 overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-700 to-indigo-700 text-white p-3 cursor-pointer" onClick={() => setIsFlowdiagramCollapsed(!isFlowdiagramCollapsed)}>
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-semibold flex items-center">
+                <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
+                4M Flow Diagram (Process Flow Visualization)
+              </h2>
+              <button
+                className="text-white hover:text-gray-200 p-1 rounded transition-all"
+                title={isFlowdiagramCollapsed ? "Expand" : "Collapse"}
+              >
+                {isFlowdiagramCollapsed ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
+              </button>
+            </div>
+          </div>
+          
+          <div 
+            // className={`transition-all duration-300 ease-in-out ${isFlowdiagramCollapsed ? 'max-h-0 opacity-0 p-0' : 'max-h-screen opacity-100 p-4'}`}
+            // style={{ overflow: 'hidden' }}
+            className={`transition-all duration-500 ease-in-out overflow-hidden ${isFlowdiagramCollapsed ? 'max-h-0 opacity-0 p-0' : 'max-h-[5000px] opacity-100 p-4'}`}
+          >
+            {/* 3. Render Flowdiagram, potentially based on the collapsed state (if Flowdiagram itself needs props) */}
+            <Flowdiagram />
+          </div>
+        </div>
+        {/* End Flowdiagram section */}
 
         {/* List View */}
         {step === 0 && (
