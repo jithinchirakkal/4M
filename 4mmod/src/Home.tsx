@@ -11,6 +11,10 @@ import InspectionForm from './components/InspectionForm/inspection';
 import ManMachineMatrix from './components/ManMachineMatrix/ManMachineMatrix';
 import DashboardView from './components/Dashboard/DashboardView';
 import ChangeManagementView from './components/cm/ChangeManagementView';
+import FourMChangeResponsibility from './components/FourMChangeResponsibility/FourMChangeResponsibility';
+import FourMChangeProcedure from './components/FourMChangeProcedure/FourMChangeProcedure';
+import ChangeValidationForm from './components/ChangeValidationForm/ChangeValidationForm';
+import Suspected from './components/suspected/suspected';
 
 const Home = () => {
     const [selectedModule, setSelectedModule] = useState('dashboard');
@@ -45,6 +49,10 @@ const Home = () => {
                     {selectedModule === 'iic-sar' && <InspectionForm />}
                     {selectedModule === 'mmm' && <ManMachineMatrix />}
                     {selectedModule === 'cm' && <ChangeManagementView />}
+                    {selectedModule === '4m' && <FourMChangeResponsibility />}
+                    {selectedModule === '4MP' && < FourMChangeProcedure />}
+                    {selectedModule === 'valid' && <ChangeValidationForm />}
+                    {selectedModule === 'sps' && <Suspected />}
                 </main>
             </div>
         </div>
