@@ -11,6 +11,7 @@ import InspectionForm from './components/InspectionForm/inspection';
 import ManMachineMatrix from './components/ManMachineMatrix/ManMachineMatrix';
 import DashboardView from './components/Dashboard/DashboardView';
 import ChangeManagementView from './components/cm/ChangeManagementView';
+import FourMMethodPage from './components/cm/method';
 
 const Home = () => {
     const [selectedModule, setSelectedModule] = useState('dashboard');
@@ -45,6 +46,7 @@ const Home = () => {
                     {selectedModule === 'iic-sar' && <InspectionForm />}
                     {selectedModule === 'mmm' && <ManMachineMatrix />}
                     {selectedModule === 'cm' && <ChangeManagementView />}
+                    {selectedModule === '4m-method' && <FourMMethodPage />}
                 </main>
             </div>
         </div>
