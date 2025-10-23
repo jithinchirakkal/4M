@@ -984,14 +984,18 @@ const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
 // Define types for better TypeScript support
 interface ChangeItem {
   four_m: string;
-  change_category: string;
   date?: string;
-  created?: string;
-  changed_description?: string;
-  action_taken?: string;
-  set_up_approval: boolean;
-  retroactive_inspection: boolean;
-  suspected_lot_check: boolean;
+  created_at?: string;
+  category_details?: {
+    category_type: string;
+    description: string;
+  };
+  action_details?: {
+    action_taken: string;
+    set_up_approval: boolean;
+    retroactive_inspection: boolean;
+    suspected_lot_check: boolean;
+  };
 }
 
 interface MonthData {
@@ -1037,10 +1041,11 @@ const DashboardView = () => {
   };
 
   const prepareCategoryChartData = () => {
-    const counts = changeList.reduce((acc: Record<string, number>, item) => {
-      acc[item.change_category] = (acc[item.change_category] || 0) + 1;
-      return acc;
-    }, {});
+  const counts = changeList.reduce((acc: Record<string, number>, item) => {
+    const categoryType = item.category_details?.category_type || 'Unknown';
+    acc[categoryType] = (acc[categoryType] || 0) + 1;
+    return acc;
+  }, {});
     
     return Object.entries(counts).map(([category, count], index) => ({
       name: category,
@@ -1049,17 +1054,129 @@ const DashboardView = () => {
     }));
   };
 
+  // Prepare 4M Chart Data for Quarterly (Jul-Sep)
+const prepare4MQuarterlyData = () => {
+  const quarterlyChanges = changeList.filter(item => {
+    const dateStr = item.date || item.created_at;
+    if (!dateStr) return false;
+    
+    const itemDate = new Date(dateStr);
+    const month = itemDate.getMonth(); // 0-11 (0=Jan, 6=Jul, 8=Sep)
+    const year = itemDate.getFullYear();
+    const currentYear = new Date().getFullYear();
+    
+    // Check if it's July (6), August (7), or September (8) of current year
+    return year === currentYear && month >= 6 && month <= 8;
+  });
+
+  const counts = quarterlyChanges.reduce((acc: Record<string, number>, item) => {
+    acc[item.four_m] = (acc[item.four_m] || 0) + 1;
+    return acc;
+  }, {});
+  
+  return [
+    { name: 'Man', count: counts['Man'] || 0, color: '#3B82F6' },
+    { name: 'Machine', count: counts['Machine/Tool'] || 0, color: '#10B981' },
+    { name: 'Material', count: counts['Material'] || 0, color: '#8B5CF6' },
+    { name: 'Method', count: counts['Method'] || 0, color: '#F59E0B' },
+  ];
+};
+
+// Prepare 4M Chart Data for Current Month (October)
+const prepare4MCurrentMonthData = () => {
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth(); // 9 for October
+  const currentYear = currentDate.getFullYear();
+
+  const monthlyChanges = changeList.filter(item => {
+    const dateStr = item.date || item.created_at;
+    if (!dateStr) return false;
+    
+    const itemDate = new Date(dateStr);
+    return itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear;
+  });
+
+  const counts = monthlyChanges.reduce((acc: Record<string, number>, item) => {
+    acc[item.four_m] = (acc[item.four_m] || 0) + 1;
+    return acc;
+  }, {});
+  
+  return [
+    { name: 'Man', count: counts['Man'] || 0, color: '#3B82F6' },
+    { name: 'Machine', count: counts['Machine/Tool'] || 0, color: '#10B981' },
+    { name: 'Material', count: counts['Material'] || 0, color: '#8B5CF6' },
+    { name: 'Method', count: counts['Method'] || 0, color: '#F59E0B' },
+  ];
+};
+
+// Prepare Category Chart Data for Quarterly (Jul-Sep)
+const prepareCategoryQuarterlyData = () => {
+  const quarterlyChanges = changeList.filter(item => {
+    const dateStr = item.date || item.created_at;
+    if (!dateStr) return false;
+    
+    const itemDate = new Date(dateStr);
+    const month = itemDate.getMonth();
+    const year = itemDate.getFullYear();
+    const currentYear = new Date().getFullYear();
+    
+    return year === currentYear && month >= 6 && month <= 8;
+  });
+
+  const counts = quarterlyChanges.reduce((acc: Record<string, number>, item) => {
+    const categoryType = item.category_details?.category_type || 'Unknown';
+    acc[categoryType] = (acc[categoryType] || 0) + 1;
+    return acc;
+  }, {});
+    
+  return Object.entries(counts).map(([category, count], index) => ({
+    name: category,
+    value: count as number,
+    color: COLORS[index % COLORS.length],
+  }));
+};
+
+// Prepare Category Chart Data for Current Month (October)
+const prepareCategoryCurrentMonthData = () => {
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+
+  const monthlyChanges = changeList.filter(item => {
+    const dateStr = item.date || item.created_at;
+    if (!dateStr) return false;
+    
+    const itemDate = new Date(dateStr);
+    return itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear;
+  });
+
+  const counts = monthlyChanges.reduce((acc: Record<string, number>, item) => {
+    const categoryType = item.category_details?.category_type || 'Unknown';
+    acc[categoryType] = (acc[categoryType] || 0) + 1;
+    return acc;
+  }, {});
+    
+  return Object.entries(counts).map(([category, count], index) => ({
+    name: category,
+    value: count as number,
+    color: COLORS[index % COLORS.length],
+  }));
+};
+
   // Calculate statistics
-  const totalChanges = changeList.length;
-  const setUpApprovals = changeList.filter(item => item.set_up_approval).length;
-  const retroactiveInspections = changeList.filter(item => item.retroactive_inspection).length;
-  const suspectedLotChecks = changeList.filter(item => item.suspected_lot_check).length;
-  const pendingApprovals = changeList.filter(item => 
-    !item.set_up_approval && !item.retroactive_inspection && !item.suspected_lot_check
-  ).length;
-  const plannedChanges = changeList.filter(item => item.change_category === 'Planned').length;
-  const unplannedChanges = changeList.filter(item => item.change_category === 'Unplanned').length;
-  const abnormalChanges = changeList.filter(item => item.change_category === 'Abnormal').length;
+// Calculate statistics
+const totalChanges = changeList.length;
+const setUpApprovals = changeList.filter(item => item.action_details?.set_up_approval).length;
+const retroactiveInspections = changeList.filter(item => item.action_details?.retroactive_inspection).length;
+const suspectedLotChecks = changeList.filter(item => item.action_details?.suspected_lot_check).length;
+const pendingApprovals = changeList.filter(item => 
+  !item.action_details?.set_up_approval && 
+  !item.action_details?.retroactive_inspection && 
+  !item.action_details?.suspected_lot_check
+).length;
+  const plannedChanges = changeList.filter(item => item.category_details?.category_type === 'Planned').length;
+  const unplannedChanges = changeList.filter(item => item.category_details?.category_type === 'Unplanned').length;
+  const abnormalChanges = changeList.filter(item => item.category_details?.category_type === 'Abnormal').length;
 
   const stats = [
     {
@@ -1116,25 +1233,26 @@ const DashboardView = () => {
   ];
 
   // Get recent changes (latest 3)
-  const recentChanges = changeList
-    .sort((a, b) => new Date(b.date || b.created || '').getTime() - new Date(a.date || a.created || '').getTime())
-    .slice(0, 3)
-    .map(item => ({
-      type: item.four_m?.toUpperCase() || 'UNKNOWN',
-      title: item.changed_description?.substring(0, 40) + (item.changed_description?.length && item.changed_description.length > 40 ? '...' : ''),
-      action: item.action_taken?.substring(0, 30) + (item.action_taken?.length && item.action_taken.length > 30 ? '...' : ''),
-      category: item.change_category,
-      date: item.date ? new Date(item.date).toLocaleDateString() : 'No date',
-      setUpApproval: item.set_up_approval,
-      retroactiveInspection: item.retroactive_inspection,
-      suspectedLotCheck: item.suspected_lot_check,
-      color: item.four_m === 'Man' ? 'bg-blue-600' : 
-             item.four_m === 'Machine/Tool' ? 'bg-green-500' :
-             item.four_m === 'Material' ? 'bg-purple-500' : 'bg-orange-500',
-      priorityColor: item.change_category === 'Abnormal' ? 'bg-red-100 text-red-600' :
-                     item.change_category === 'Unplanned' ? 'bg-orange-100 text-orange-600' :
-                     'bg-green-100 text-green-600',
-    }));
+  // Get recent changes (latest 3)
+const recentChanges = changeList
+  .sort((a, b) => new Date(b.date || b.created_at || '').getTime() - new Date(a.date || a.created_at || '').getTime())
+  .slice(0, 3)
+  .map(item => ({
+    type: item.four_m?.toUpperCase() || 'UNKNOWN',
+    title: item.category_details?.description?.substring(0, 40) + (item.category_details?.description?.length && item.category_details.description.length > 40 ? '...' : '') || 'No description',
+    action: item.action_details?.action_taken?.substring(0, 30) + (item.action_details?.action_taken?.length && item.action_details.action_taken.length > 30 ? '...' : '') || 'No action',
+    category: item.category_details?.category_type || 'Unknown',
+          date: item.date ? new Date(item.date).toLocaleDateString() : 'No date',
+    setUpApproval: item.action_details?.set_up_approval || false,
+    retroactiveInspection: item.action_details?.retroactive_inspection || false,
+    suspectedLotCheck: item.action_details?.suspected_lot_check || false,
+    color: item.four_m === 'Man' ? 'bg-blue-600' : 
+           item.four_m === 'Machine/Tool' ? 'bg-green-500' :
+           item.four_m === 'Material' ? 'bg-purple-500' : 'bg-orange-500',
+    priorityColor: item.category_details?.category_type === 'Abnormal' ? 'bg-red-100 text-red-600' :
+                   item.category_details?.category_type === 'Unplanned' ? 'bg-orange-100 text-orange-600' :
+                   'bg-green-100 text-green-600',
+  }));
 
   if (loading) {
     return (
@@ -1158,7 +1276,7 @@ const DashboardView = () => {
         // 1. Group changes by month and count them
         // FIX: Use the MonthlyCountAccumulator type for the accumulator
         const monthlyCounts = changeList.reduce((acc: MonthlyCountAccumulator, item) => {
-            const dateStr = item.date || item.created;
+            const dateStr = item.date || item.created_at;
             if (!dateStr) return acc;
 
             // Use YYYY-MM as the key to ensure correct order
@@ -1265,8 +1383,8 @@ const DashboardView = () => {
           )}
 
       {/* Enhanced Charts Section */}
-      {changeList.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      {/* {changeList.length > 0 ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8"> */}
         {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8"> */}
           {/* New Quarterly Monitoring Chart Section */}
           {/* {monthlyTrendData.length > 0 && (
@@ -1285,7 +1403,7 @@ const DashboardView = () => {
           )} */}
           
           {/* Enhanced 4M Distribution Bar Chart */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 transition-transform duration-200 hover:shadow-2xl hover:-translate-y-1">
+          {/* <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 transition-transform duration-200 hover:shadow-2xl hover:-translate-y-1">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
@@ -1367,10 +1485,10 @@ const DashboardView = () => {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </div>
+          </div> */}
 
           {/* Enhanced Category Distribution Pie Chart */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 transition-transform duration-200 hover:shadow-2xl hover:-translate-y-1">
+          {/* <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 transition-transform duration-200 hover:shadow-2xl hover:-translate-y-1">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
@@ -1431,10 +1549,10 @@ const DashboardView = () => {
                   }}
                 />
               </RechartsPieChart>
-            </ResponsiveContainer>
+            </ResponsiveContainer> */}
             
             {/* Custom Legend */}
-            <div className="flex justify-center mt-4">
+            {/* <div className="flex justify-center mt-4">
               <div className="flex flex-wrap gap-4">
                 {prepareCategoryChartData().map((entry, index) => (
                   <div key={index} className="flex items-center gap-2">
@@ -1449,7 +1567,305 @@ const DashboardView = () => {
             </div>
           </div>
         </div>
-      ) : (
+      ) : ( */}
+
+
+      {/* Enhanced Charts Section */}
+{changeList.length > 0 ? (
+  <div className="space-y-6 mb-8">
+    {/* 4M Distribution Charts - Quarterly and Monthly */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Quarterly 4M Distribution (Jul-Sep) */}
+      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 transition-transform duration-200 hover:shadow-2xl hover:-translate-y-1">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-bold text-lg text-gray-900">4M Changes - Quarterly</h3>
+              <p className="text-sm text-gray-500">Jul-Sep 2025</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+            <span>Q3</span>
+          </div>
+        </div>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart 
+            data={prepare4MQuarterlyData()} 
+            margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
+          >
+            <defs>
+              <linearGradient id="barGradient1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                <stop offset="100%" stopColor="#1D4ED8" stopOpacity={0.8}/>
+              </linearGradient>
+              <linearGradient id="barGradient2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#10B981" stopOpacity={0.8}/>
+                <stop offset="100%" stopColor="#059669" stopOpacity={0.8}/>
+              </linearGradient>
+              <linearGradient id="barGradient3" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.8}/>
+                <stop offset="100%" stopColor="#7C3AED" stopOpacity={0.8}/>
+              </linearGradient>
+              <linearGradient id="barGradient4" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.8}/>
+                <stop offset="100%" stopColor="#D97706" stopOpacity={0.8}/>
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={true} vertical={false} />
+            <XAxis 
+              dataKey="name" 
+              tick={{ fontSize: 12, fill: '#6B7280', fontWeight: 500 }}
+              axisLine={{ stroke: '#E5E7EB' }}
+              tickLine={{ stroke: '#E5E7EB' }}
+              angle={-30}
+              textAnchor="end"
+              height={60}
+            />
+            <YAxis 
+              tick={{ fontSize: 12, fill: '#6B7280' }}
+              axisLine={{ stroke: '#E5E7EB' }}
+              tickLine={{ stroke: '#E5E7EB' }}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#ffffff',
+                border: 'none',
+                borderRadius: '12px',
+                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                fontSize: '14px',
+              }}
+              cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }}
+            />
+            <Bar dataKey="count" name="Changes" radius={[8, 8, 0, 0]}>
+              {prepare4MQuarterlyData().map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={`url(#barGradient${index + 1})`} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Quarterly Category Distribution (Jul-Sep) */}
+      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 transition-transform duration-200 hover:shadow-2xl hover:-translate-y-1">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 2v10l7 7" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-bold text-lg text-gray-900">Category - Quarterly</h3>
+              <p className="text-sm text-gray-500">Jul-Sep 2025</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span>Q3</span>
+          </div>
+        </div>
+        <ResponsiveContainer width="100%" height={300}>
+          <RechartsPieChart>
+            <defs>
+              <filter id="shadowQuarterly" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="4" stdDeviation="8" floodColor="rgba(0, 0, 0, 0.1)"/>
+              </filter>
+            </defs>
+            <Pie
+              data={prepareCategoryQuarterlyData()}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              label={({ name, percent }) => `${name}\n${(Number(percent ?? 0) * 100).toFixed(1)}%`}
+              outerRadius={90}
+              innerRadius={50}
+              paddingAngle={5}
+              fill="#8884d8"
+              dataKey="value"
+              style={{ filter: 'url(#shadowQuarterly)' }}
+            >
+              {prepareCategoryQuarterlyData().map((entry, index) => (
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={entry.color}
+                  stroke="#ffffff"
+                  strokeWidth={3}
+                />
+              ))}
+            </Pie>
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#ffffff',
+                border: 'none',
+                borderRadius: '12px',
+                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                fontSize: '14px',
+              }}
+            />
+          </RechartsPieChart>
+        </ResponsiveContainer>
+        <div className="flex justify-center mt-4">
+          <div className="flex flex-wrap gap-4">
+            {prepareCategoryQuarterlyData().map((entry, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }}></div>
+                <span className="text-sm font-medium text-gray-700">{entry.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      
+    </div>
+
+    {/* Category Distribution Charts - Quarterly and Monthly */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      {/* Current Month 4M Distribution (October) */}
+      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 transition-transform duration-200 hover:shadow-2xl hover:-translate-y-1">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-bold text-lg text-gray-900">4M Changes - This Month</h3>
+              <p className="text-sm text-gray-500">October 2025</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span>Live Data</span>
+          </div>
+        </div>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart 
+            data={prepare4MCurrentMonthData()} 
+            margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={true} vertical={false} />
+            <XAxis 
+              dataKey="name" 
+              tick={{ fontSize: 12, fill: '#6B7280', fontWeight: 500 }}
+              axisLine={{ stroke: '#E5E7EB' }}
+              tickLine={{ stroke: '#E5E7EB' }}
+              angle={-30}
+              textAnchor="end"
+              height={60}
+            />
+            <YAxis 
+              tick={{ fontSize: 12, fill: '#6B7280' }}
+              axisLine={{ stroke: '#E5E7EB' }}
+              tickLine={{ stroke: '#E5E7EB' }}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#ffffff',
+                border: 'none',
+                borderRadius: '12px',
+                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                fontSize: '14px',
+              }}
+              cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }}
+            />
+            <Bar dataKey="count" name="Changes" radius={[8, 8, 0, 0]}>
+              {prepare4MCurrentMonthData().map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={`url(#barGradient${index + 1})`} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+      
+
+      {/* Current Month Category Distribution (October) */}
+      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 transition-transform duration-200 hover:shadow-2xl hover:-translate-y-1">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 2v10l7 7" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-bold text-lg text-gray-900">Category - This Month</h3>
+              <p className="text-sm text-gray-500">October 2025</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span>Updated now</span>
+          </div>
+        </div>
+        <ResponsiveContainer width="100%" height={300}>
+          <RechartsPieChart>
+            <defs>
+              <filter id="shadowMonthly" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="4" stdDeviation="8" floodColor="rgba(0, 0, 0, 0.1)"/>
+              </filter>
+            </defs>
+            <Pie
+              data={prepareCategoryCurrentMonthData()}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              label={({ name, percent }) => `${name}\n${(Number(percent ?? 0) * 100).toFixed(1)}%`}
+              outerRadius={90}
+              innerRadius={50}
+              paddingAngle={5}
+              fill="#8884d8"
+              dataKey="value"
+              style={{ filter: 'url(#shadowMonthly)' }}
+            >
+              {prepareCategoryCurrentMonthData().map((entry, index) => (
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={entry.color}
+                  stroke="#ffffff"
+                  strokeWidth={3}
+                />
+              ))}
+            </Pie>
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#ffffff',
+                border: 'none',
+                borderRadius: '12px',
+                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                fontSize: '14px',
+              }}
+            />
+          </RechartsPieChart>
+        </ResponsiveContainer>
+        <div className="flex justify-center mt-4">
+          <div className="flex flex-wrap gap-4">
+            {prepareCategoryCurrentMonthData().map((entry, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }}></div>
+                <span className="text-sm font-medium text-gray-700">{entry.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+) : (
         // No data state with better design
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Enhanced No Data Bar Chart */}
