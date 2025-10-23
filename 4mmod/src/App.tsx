@@ -1,48 +1,63 @@
 import React, { useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar/Nav";
+import Navbar from "./components/Navbar/Nav"; // Assuming Nav is your updated Navbar
 import Footer from "./components/Navbar/Footer";
 import Home from "./Home";
 
-import logo from './assets/logo.png';  // Import your logo
-import logos from './assets/app.png';  // Import your logo
- // Import your logo
+import logo from './assets/logo.png'; 
+// import logos from './assets/app.png'; 
+import logos from './assets/Images/logo.png'; 
+// NOTE: Make sure the Navbar component file is renamed to Navbar.tsx or
+// update the import path if it's still named NavModule.tsx
 
-// {/* <Navbar 
-//   username="John Doe" 
-//   email="john@example.com" 
-//   version="1.0.0"
-//   logo={logo}
-//   logoAlt="4M System Logo"
-//   companyName="4M System"
-// /> */}
 function App() {
-  return (
-    <BrowserRouter>
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        <Navbar 
-          logo1={logos}
-          username="John Doe" 
-          email="john@example.com" 
-          version="1.0.0" 
-        />
-        
-        <div className="flex-1 pt-16">
-          <Routes>
-            <Route path="/" element={<Home />} />
-          </Routes>
-        </div>
-        
-        {/* Footer with logo */}
-        <Footer 
-          logo={logo}
-          logoAlt="NL Technologies Logo"
-        />
-      </div>
-    </BrowserRouter>
-  );
-}
+    // 1. Lift state up to App.tsx
+    const [selectedModule, setSelectedModule] = useState('dashboard');
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
+    // Function to handle the Home button click
+    const handleHomeClick = () => {
+        setSelectedModule('dashboard');
+    };
+
+    return (
+        <BrowserRouter>
+            <div className="min-h-screen bg-gray-50 flex flex-col">
+                
+                {/* 2. Pass the required props to Navbar */}
+                <Navbar 
+                    logo1={logos}
+                    username="John Doe" 
+                    email="john@example.com" 
+                    version="1.0.0" 
+                    onHomeClick={handleHomeClick} // <-- FIXES TS2741 ERROR
+                />
+                
+                {/* 3. Pass state and setters to Home component */}
+                <div className="flex-1 pt-16">
+                    <Routes>
+                        <Route 
+                            path="/" 
+                            element={
+                                <Home 
+                                    selectedModule={selectedModule}
+                                    setSelectedModule={setSelectedModule}
+                                    sidebarCollapsed={sidebarCollapsed}
+                                    setSidebarCollapsed={setSidebarCollapsed}
+                                />
+                            } 
+                        />
+                    </Routes>
+                </div>
+                
+                {/* <Footer 
+                    logo={logo}
+                    logoAlt="NL Technologies Logo"
+                /> */}
+            </div>
+        </BrowserRouter>
+    );
+}
 
 export default App;
 

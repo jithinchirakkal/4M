@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
+import { Bell, FileText, Save, Sparkles } from 'lucide-react';
 import FormInput from './FormInput';
 import FormRadioGroup from './FormRadioGroup';
 import FormSection from './FormSection';
 
-// --- INTERFACES ---
 interface PartA {
   partName: string; model: string; partNo: string; customer: 'Inhouse' | 'External';
   issueDate: string; originator: string; man: boolean; machine: boolean;
@@ -18,19 +18,16 @@ interface PartB {
 interface Termination {
   terminationDate: string; commentsIfAny: string; qaSignTermination: string;
 }
-// Defines the structure of a single submitted note (including an ID)
 interface ChangeNoteFormState {
   id: number;
   partA: PartA; partB: PartB; termination: Termination;
 }
-// Defines the structure of the active form state (without an ID yet)
 type ActiveFormState = Omit<ChangeNoteFormState, 'id'>;
 
-// --- MOCK/INITIAL DATA ---
 const initialFormState: ActiveFormState = {
   partA: {
     partName: 'BUMPER ASSY, FR', model: 'MS-A2024', partNo: '71711M64R00',
-    customer: 'Inhouse', issueDate: new Date().toISOString().split('T')[0], // Current date
+    customer: 'Inhouse', issueDate: new Date().toISOString().split('T')[0],
     originator: 'Rajesh Sharma', man: true, machine: false, material: true,
     method: false, tool: false, others: 'N/A',
     detailsOfChangingPoints: 'Switching from Grade X to Grade Y Polymer due to supply chain disruption.',
@@ -47,7 +44,6 @@ const initialFormState: ActiveFormState = {
   },
 };
 
-// --- MOCK SUBMITTED LIST DATA for initial load demo
 const mockSubmittedData: ChangeNoteFormState[] = [
   {
     id: 1,
@@ -63,16 +59,10 @@ const mockSubmittedData: ChangeNoteFormState[] = [
   },
 ];
 
-
-// === MAIN COMPONENT ===
 const ChangeInformationNote: React.FC = () => {
-  // Current form data state (ActiveFormState without ID)
   const [formData, setFormData] = useState<ActiveFormState>({...initialFormState});
-
-  // Submitted list state (Array of ChangeNoteFormState with IDs)
   const [submittedNotes, setSubmittedNotes] = useState<ChangeNoteFormState[]>(mockSubmittedData);
 
-  // General input handler for PartA, PartB, Termination sections
   const handleInputChange = (section: keyof ActiveFormState, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -84,7 +74,6 @@ const ChangeInformationNote: React.FC = () => {
     }));
   };
 
-  // Checkbox handler specifically for 4M flags in PartA
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     setFormData((prev) => ({
@@ -92,11 +81,10 @@ const ChangeInformationNote: React.FC = () => {
       partA: {
         ...prev.partA,
         [name]: checked,
-      } as PartA, // Type assertion ensures TypeScript knows the PartA properties are being updated
+      } as PartA,
     }));
   };
-  
-  // Radio handler specifically for YES/NO options in PartB
+
   const handleRadioChange = (name: keyof PartB, value: 'YES' | 'NO') => {
     setFormData((prev) => ({
       ...prev,
@@ -110,70 +98,69 @@ const ChangeInformationNote: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 1. Basic Validation: Ensure QA Acceptance is set before submission
     if (formData.partB.changeAcceptance === '') {
       alert('Please confirm Change Acceptance (YES/NO) before submitting the note.');
       return;
     }
-    
-    // 2. Determine the next unique ID
+
     const nextId = submittedNotes.length > 0 ? Math.max(...submittedNotes.map(n => n.id)) + 1 : 1;
-    
-    // 3. Create the new submitted note
+
     const newNote: ChangeNoteFormState = {
         id: nextId,
         ...formData
     };
 
-    // 4. Add to the submitted list (at the front) and reset the form
     setSubmittedNotes((prev) => [newNote, ...prev]);
     setFormData({...initialFormState});
 
     console.log('New Note Submitted:', newNote);
-    // You would typically send this 'newNote' object to your backend API here.
     alert(`Note ${newNote.id} submitted successfully! The form has been reset.`);
   };
 
-  // --- RENDERING ---
   return (
-    <div className="bg-gray-50 min-h-screen p-6">
-      <header className="text-center mb-6">
-        <h1 className="text-3xl font-extrabold text-blue-700 tracking-tight">
+    // <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50/30 to-blue-50/20 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50/30 to-blue-50/20 p-6">
+      <header className="text-center mb-8 relative">
+        {/* <div className="inline-flex items-center justify-center gap-3 mb-4">
+          <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/40 animate-pulse">
+            <Bell className="text-white" size={28} />
+          </div>
+        </div> */}
+        <h1 className="text-5xl font-extrabold bg-gradient-to-r from-cyan-600 via-blue-700 to-cyan-600 bg-clip-text text-transparent tracking-tight mb-2">
           4M CHANGE INFORMATION NOTE
         </h1>
-        <p className="text-md text-gray-500 font-medium mt-1">
+        {/* <p className="text-lg text-slate-600 font-medium mt-2 max-w-3xl mx-auto">
           Record 4M change details in record sheet as per 4M change work instructions.
-        </p>
+        </p> */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-br from-cyan-200/20 to-blue-200/20 rounded-full blur-3xl -z-10" />
       </header>
 
       <form onSubmit={handleSubmit} className="max-w-full mx-auto space-y-8">
-        
-        {/* === PART - A: INITIAL CHANGE INFORMATION === */}
+
         <FormSection title="PART - A: CHANGE INITIATION">
           <FormInput label="PART NAME" name="partName" value={formData.partA.partName} onChange={(e) => handleInputChange('partA', e)} />
           <FormInput label="MODEL" name="model" value={formData.partA.model} onChange={(e) => handleInputChange('partA', e)} />
           <FormInput label="PART NO" name="partNo" value={formData.partA.partNo} onChange={(e) => handleInputChange('partA', e)} />
-          <div className="flex flex-col p-2 border border-gray-200 bg-white/70">
-            <label className="text-xs font-semibold text-gray-600 mb-1 uppercase">CUSTOMER</label>
-            <p className="text-sm font-bold pt-1 text-green-700">{formData.partA.customer}</p>
+          <div className="flex flex-col p-3 border border-slate-300/60 bg-gradient-to-br from-emerald-50 to-green-50 backdrop-blur-sm rounded-lg shadow-sm">
+            <label className="text-xs font-bold text-slate-700 mb-1 uppercase tracking-wide">CUSTOMER</label>
+            <p className="text-sm font-bold pt-1 text-emerald-700">{formData.partA.customer}</p>
           </div>
-          
+
           <FormInput label="ISSUE DATE" name="issueDate" type="date" value={formData.partA.issueDate} onChange={(e) => handleInputChange('partA', e)} />
           <FormInput label="ORIGINATOR" name="originator" value={formData.partA.originator} onChange={(e) => handleInputChange('partA', e)} />
 
-          {/* 4M Checklist */}
-          <div className="col-span-4 p-2 border border-gray-200 bg-white/70">
-            <label className="text-xs font-semibold text-gray-600 mb-1 uppercase block">CHANGING POINT (Select all that apply)</label>
-            <div className="flex flex-wrap gap-x-6 gap-y-2 mt-2">
+          <div className="col-span-4 p-4 border border-slate-300/60 bg-gradient-to-br from-blue-50 to-cyan-50 backdrop-blur-sm rounded-lg shadow-sm">
+            <label className="text-xs font-bold text-slate-700 mb-3 uppercase block tracking-wide">CHANGING POINT (Select all that apply)</label>
+            <div className="flex flex-wrap gap-x-8 gap-y-3 mt-2">
               {['MAN', 'MACHINE', 'MATERIAL', 'METHOD', 'TOOL'].map((key) => (
-                <label key={key} className="flex items-center space-x-2">
+                <label key={key} className="flex items-center space-x-2 group cursor-pointer">
                   <input
                     type="checkbox" name={key.toLowerCase()}
                     checked={formData.partA[key.toLowerCase() as keyof PartA] as boolean}
                     onChange={handleCheckboxChange}
-                    className="form-checkbox h-5 w-5 text-blue-600 rounded"
+                    className="form-checkbox h-6 w-6 text-cyan-600 rounded border-2 border-slate-400 transition-all duration-200 cursor-pointer"
                   />
-                  <span className="font-medium">{key}</span>
+                  <span className="font-semibold text-slate-700 group-hover:text-cyan-600 transition-colors duration-200">{key}</span>
                 </label>
               ))}
               <div className="flex-1 min-w-[200px]">
@@ -181,27 +168,25 @@ const ChangeInformationNote: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           <FormInput label="DETAILS OF CHANGING POINTS (Detailed Description)" name="detailsOfChangingPoints" value={formData.partA.detailsOfChangingPoints} onChange={(e) => handleInputChange('partA', e)} isTextArea colSpan="col-span-4" />
 
-          <div className="col-span-4 p-2 pt-4 flex justify-end items-center">
+          <div className="col-span-4 p-3 pt-4 flex justify-end items-center">
             <FormInput label="ORIGINATOR SIGN" name="originatorSign" value={formData.partA.originatorSign} onChange={(e) => handleInputChange('partA', e)} colSpan="lg:col-span-1 md:col-span-2 col-span-4" />
           </div>
         </FormSection>
 
-        {/* === PART - B: QUALITY FEEDBACK & APPROVAL === */}
         <FormSection title="PART - B: QUALITY FEEDBACK & APPROVAL">
-          
-          <div className="col-span-4 p-2 border border-gray-200 bg-white/70 flex items-center space-x-4">
-            <label className="text-sm font-semibold text-gray-700 uppercase">IS SUPPLIER RELATED CHANGE?</label>
+
+          <div className="col-span-4 p-4 border border-slate-300/60 bg-gradient-to-br from-amber-50 to-orange-50 backdrop-blur-sm rounded-lg shadow-sm flex items-center space-x-4">
+            <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">IS SUPPLIER RELATED CHANGE?</label>
             <input
               type="checkbox" checked={formData.partB.isSupplierRelated}
               onChange={() => setFormData(prev => ({ ...prev, partB: { ...prev.partB, isSupplierRelated: !prev.partB.isSupplierRelated } }))}
-              className="form-checkbox h-5 w-5 text-red-600 rounded"
+              className="form-checkbox h-6 w-6 text-red-600 rounded border-2 border-slate-400 cursor-pointer"
             />
           </div>
 
-          {/* Supplier Info (Conditional Display) */}
           {formData.partB.isSupplierRelated && (
             <>
               <FormInput label="CHILD PART NAME" name="childPartName" value={formData.partB.childPartName} onChange={(e) => handleInputChange('partB', e)} />
@@ -210,7 +195,6 @@ const ChangeInformationNote: React.FC = () => {
             </>
           )}
 
-          {/* Acceptance and Intimation */}
           <FormRadioGroup
             label="CHANGE ACCEPTANCE" name="changeAcceptance"
             value={formData.partB.changeAcceptance}
@@ -224,69 +208,74 @@ const ChangeInformationNote: React.FC = () => {
 
           <FormInput label="REMARKS IF ANY BY QA:" name="remarksIfAnyByQA" value={formData.partB.remarksIfAnyByQA} onChange={(e) => handleInputChange('partB', e)} isTextArea colSpan="col-span-4" />
 
-          <div className="col-span-4 p-2 pt-4 flex justify-end items-center">
+          <div className="col-span-4 p-3 pt-4 flex justify-end items-center">
             <FormInput label="QA SIGN (APPROVAL)" name="qaSignPartB" value={formData.partB.qaSignPartB} onChange={(e) => handleInputChange('partB', e)} colSpan="lg:col-span-1 md:col-span-2 col-span-4" />
           </div>
 
         </FormSection>
 
-        {/* === CHANGE TERMINATION === */}
         <FormSection title="CHANGE TERMINATION (Implemented & Confirmed)">
           <FormInput label="TERMINATION DATE" name="terminationDate" type="date" value={formData.termination.terminationDate} onChange={(e) => handleInputChange('termination', e)} />
           <FormInput label="COMMENTS IF ANY" name="commentsIfAny" value={formData.termination.commentsIfAny} onChange={(e) => handleInputChange('termination', e)} isTextArea colSpan="col-span-3" />
-          
-          <div className="col-span-4 p-2 pt-4 flex justify-end items-center">
+
+          <div className="col-span-4 p-3 pt-4 flex justify-end items-center">
             <FormInput label="QA SIGN (TERMINATION)" name="qaSignTermination" value={formData.termination.qaSignTermination} onChange={(e) => handleInputChange('termination', e)} colSpan="lg:col-span-1 md:col-span-2 col-span-4" />
           </div>
         </FormSection>
 
-        {/* === SUBMIT BUTTON === */}
         <div className="flex justify-center pb-10">
           <button
             type="submit"
-            className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-12 rounded-full shadow-xl transition duration-300 transform hover:scale-105 disabled:opacity-50"
+            className="group relative bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-500 hover:from-emerald-600 hover:via-green-700 hover:to-emerald-600 text-white font-bold py-4 px-12 rounded-2xl shadow-2xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
             disabled={formData.partB.changeAcceptance === ''}
           >
-            Submit Note & Request Quality Approval
+            <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <span className="relative flex items-center gap-3">
+              <Save size={20} />
+              Submit Note & Request Quality Approval
+              <Sparkles size={20} className="group-hover:rotate-12 transition-transform duration-300" />
+            </span>
           </button>
         </div>
       </form>
 
-      {/* -------------------------------------------------------------------------- */}
-      {/* 🚀 SUBMITTED NOTES LIST (DEMO) */}
-      {/* -------------------------------------------------------------------------- */}
-      <div className="max-w-full mx-auto mt-12 pt-8 border-t border-gray-300">
-        <h2 className="text-2xl font-extrabold text-gray-800 mb-6 border-l-4 border-blue-600 pl-3">
-          Submitted 4M Change Notes ({submittedNotes.length})
-        </h2>
+      <div className="max-w-full mx-auto mt-12 pt-8 border-t-2 border-slate-300">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 bg-gradient-to-br from-slate-700 to-slate-900 rounded-xl flex items-center justify-center shadow-lg">
+            <FileText className="text-white" size={20} />
+          </div>
+          <h2 className="text-3xl font-extrabold text-slate-800">
+            Submitted 4M Change Notes ({submittedNotes.length})
+          </h2>
+        </div>
 
         {submittedNotes.length === 0 ? (
-          <p className="text-gray-500 italic p-4 bg-white rounded-lg shadow-md">No notes submitted yet. Fill out the form above and submit!</p>
+          <p className="text-slate-500 italic p-6 bg-white rounded-2xl shadow-md border border-slate-200">No notes submitted yet. Fill out the form above and submit!</p>
         ) : (
           <div className="space-y-4">
             {submittedNotes.map((note) => (
-              <div 
-                key={note.id} 
-                className={`p-4 rounded-xl shadow-lg transition duration-300 
-                  ${note.partB.changeAcceptance === 'YES' ? 'bg-green-50 border-l-4 border-green-500' : 
-                   note.partB.changeAcceptance === 'NO' ? 'bg-red-50 border-l-4 border-red-500' : 'bg-white border-l-4 border-yellow-500'}`
+              <div
+                key={note.id}
+                className={`p-6 rounded-2xl shadow-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1
+                  ${note.partB.changeAcceptance === 'YES' ? 'bg-gradient-to-r from-emerald-50 to-green-50 border-l-4 border-emerald-500' :
+                   note.partB.changeAcceptance === 'NO' ? 'bg-gradient-to-r from-rose-50 to-red-50 border-l-4 border-rose-500' : 'bg-gradient-to-r from-amber-50 to-yellow-50 border-l-4 border-amber-500'}`
                 }
               >
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-lg font-bold text-blue-800">Note ID: {note.id}</span>
-                  <span className={`px-3 py-1 text-sm font-semibold rounded-full 
-                    ${note.partB.changeAcceptance === 'YES' ? 'bg-green-200 text-green-800' : 
-                      note.partB.changeAcceptance === 'NO' ? 'bg-red-200 text-red-800' : 'bg-yellow-200 text-yellow-800'}`
+                <div className="flex justify-between items-start mb-3">
+                  <span className="text-lg font-bold text-slate-800">Note ID: {note.id}</span>
+                  <span className={`px-4 py-1.5 text-sm font-bold rounded-full shadow-md
+                    ${note.partB.changeAcceptance === 'YES' ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white' :
+                      note.partB.changeAcceptance === 'NO' ? 'bg-gradient-to-r from-rose-500 to-red-500 text-white' : 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white'}`
                   }>
                     QA STATUS: {note.partB.changeAcceptance || 'PENDING'}
                   </span>
                 </div>
-                <p className="text-sm">
-                  <span className="font-semibold">Part:</span> {note.partA.partName} ({note.partA.partNo})
-                  <span className="ml-4 font-semibold">Originator:</span> {note.partA.originator}
+                <p className="text-sm mb-2">
+                  <span className="font-bold text-slate-700">Part:</span> {note.partA.partName} ({note.partA.partNo})
+                  <span className="ml-4 font-bold text-slate-700">Originator:</span> {note.partA.originator}
                 </p>
-                <p className="text-sm text-gray-600 mt-1 truncate">
-                  <span className="font-semibold">Details:</span> {note.partA.detailsOfChangingPoints}
+                <p className="text-sm text-slate-600 truncate bg-white/50 p-2 rounded-lg">
+                  <span className="font-bold">Details:</span> {note.partA.detailsOfChangingPoints}
                 </p>
               </div>
             ))}
