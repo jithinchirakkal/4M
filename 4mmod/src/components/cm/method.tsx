@@ -224,8 +224,8 @@ export default function FourMMethodPage() {
     : categories;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen p-6 ">
+      <div className="max-w-full mx-auto">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-2xl shadow-xl mb-6 p-6">
           <h1 className="text-3xl font-bold">4M Method Configuration</h1>

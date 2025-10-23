@@ -82,32 +82,38 @@ const FourMChangeProcedure = () => {
   ];
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto bg-white shadow-lg">
+    <div className="w-full min-h-screen py-2">
+      <div className="max-w-full mx-auto border border-gray-800 ">
         {/* Header */}
-        <div className="grid grid-cols-12 border-b-2 border-gray-800">
-          <div className="col-span-1 border-r border-gray-300 p-4 bg-green-50 flex items-center justify-center">
-            <div className="text-2xl font-bold text-green-600">
-                <img
-                    src={logo}
-                    alt='LOGO'
-                    className='w-auto h-10'
-                />
+        <div className="grid grid-cols-12 border-b-2 border-gray-80">
+            {/* Change col-span-1 to col-span-2 for the logo div */}
+            <div className="col-span-2 pl-2 flex items-center justify-center">
+                <div className="text-2xl font-bold">
+                    <img
+                        src={logo}
+                        alt='LOGO'
+                        className='w-auto h-16'
+                    />
+                </div>
             </div>
-          </div>
-          <div className="col-span-8 p-4 flex items-center justify-center">
-            <h1 className="text-3xl font-bold">4M CHANGE PROCEDURE</h1>
-          </div>
-          <div className="col-span-3 border-l border-gray-300 text-xs">
-            <div className="grid grid-cols-2 h-full">
-              <div className="p-2 border-b border-gray-300"><strong>DocNo.</strong></div>
-              <div className="p-2 border-b border-gray-300">MS/4M/PR/05</div>
-              <div className="p-2 border-b border-gray-300"><strong>Rev.No</strong></div>
-              <div className="p-2 border-b border-gray-300">01</div>
-              <div className="p-2"><strong>Date</strong></div>
-              <div className="p-2">28.02.20</div>
+            
+            {/* Adjust the main title's column span */}
+            {/* The total columns used are now: 2 (logo) + 7 (title) + 3 (info) = 12 */}
+            <div className="col-span-7 p-4 flex items-center justify-center">
+                <h1 className="text-3xl font-bold">4M CHANGE PROCEDURE</h1>
             </div>
-          </div>
+            
+            {/* This section remains col-span-3 */}
+            <div className="col-span-3 border-l border-gray-300 text-xs">
+                <div className="grid grid-cols-2 h-full">
+                    <div className="p-2 border-b border-gray-300"><strong>DocNo.</strong></div>
+                    <div className="p-2 border-b border-gray-300">MS/4M/PR/05</div>
+                    <div className="p-2 border-b border-gray-300"><strong>Rev.No</strong></div>
+                    <div className="p-2 border-b border-gray-300">01</div>
+                    <div className="p-2"><strong>Date</strong></div>
+                    <div className="p-2">28.02.20</div>
+                </div>
+            </div>
         </div>
 
         {/* Column Headers */}
@@ -194,7 +200,7 @@ const FourMChangeProcedure = () => {
               <div className="relative z-10 text-center text-sm px-4">
                 Is customer<br/>information
               </div>
-              <div className="absolute right-8 top-1/2 transform -translate-y-1/2 text-xs font-semibold">no</div>
+              <div className="absolute right-8 top-1/2 transform -translate-y-1/2 text-xs font-semibold">no(Go to step 5)</div>
               <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-xs font-semibold">yes</div>
             </div>
           </div>

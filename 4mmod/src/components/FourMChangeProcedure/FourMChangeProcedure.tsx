@@ -779,7 +779,7 @@ const FourMChangeProcedure: React.FC = () => {
   };
 
   return (
-    <div className="max-w-full py-8 px-2 ">
+    <div className="max-w-full p-6 ">
       <div className="max-w-full mx-auto">
         {/* Header Section */}
         <div className="mb-8 text-center">

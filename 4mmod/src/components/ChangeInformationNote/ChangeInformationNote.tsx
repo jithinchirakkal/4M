@@ -136,7 +136,7 @@ const ChangeInformationNote: React.FC = () => {
 
   // --- RENDERING ---
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 min-h-screen p-6">
       <header className="text-center mb-6">
         <h1 className="text-3xl font-extrabold text-blue-700 tracking-tight">
           4M CHANGE INFORMATION NOTE
@@ -146,7 +146,7 @@ const ChangeInformationNote: React.FC = () => {
         </p>
       </header>
 
-      <form onSubmit={handleSubmit} className="max-w-6xl mx-auto space-y-8">
+      <form onSubmit={handleSubmit} className="max-w-full mx-auto space-y-8">
         
         {/* === PART - A: INITIAL CHANGE INFORMATION === */}
         <FormSection title="PART - A: CHANGE INITIATION">
@@ -255,7 +255,7 @@ const ChangeInformationNote: React.FC = () => {
       {/* -------------------------------------------------------------------------- */}
       {/* 🚀 SUBMITTED NOTES LIST (DEMO) */}
       {/* -------------------------------------------------------------------------- */}
-      <div className="max-w-6xl mx-auto mt-12 pt-8 border-t border-gray-300">
+      <div className="max-w-full mx-auto mt-12 pt-8 border-t border-gray-300">
         <h2 className="text-2xl font-extrabold text-gray-800 mb-6 border-l-4 border-blue-600 pl-3">
           Submitted 4M Change Notes ({submittedNotes.length})
         </h2>

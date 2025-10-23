@@ -429,7 +429,7 @@ const FourMChangeResponsibility: React.FC = () => {
   };
 
   return (
-    <div className="max-h-screen bg-gray-50 py-8 px-4 sm:px-6 ">
+    <div className="max-h-screen bg-gray-50 p-6 ">
       <div className="max-w-full mx-auto">
         <div className="mb-8 text-center">
           <div className="flex justify-center items-center mb-4">
