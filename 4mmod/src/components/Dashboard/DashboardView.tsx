@@ -1055,18 +1055,65 @@ const DashboardView = () => {
   };
 
   // Prepare 4M Chart Data for Quarterly (Jul-Sep)
+// const prepare4MQuarterlyData = () => {
+//   const quarterlyChanges = changeList.filter(item => {
+//     const dateStr = item.date || item.created_at;
+//     if (!dateStr) return false;
+    
+//     const itemDate = new Date(dateStr);
+//     const month = itemDate.getMonth(); // 0-11 (0=Jan, 6=Jul, 8=Sep)
+//     const year = itemDate.getFullYear();
+//     const currentYear = new Date().getFullYear();
+    
+//     // Check if it's July (6), August (7), or September (8) of current year
+//     return year === currentYear && month >= 6 && month <= 8;
+//   });
+
+//   const counts = quarterlyChanges.reduce((acc: Record<string, number>, item) => {
+//     acc[item.four_m] = (acc[item.four_m] || 0) + 1;
+//     return acc;
+//   }, {});
+  
+//   return [
+//     { name: 'Man', count: counts['Man'] || 0, color: '#3B82F6' },
+//     { name: 'Machine', count: counts['Machine/Tool'] || 0, color: '#10B981' },
+//     { name: 'Material', count: counts['Material'] || 0, color: '#8B5CF6' },
+//     { name: 'Method', count: counts['Method'] || 0, color: '#F59E0B' },
+//   ];
+// };
+
 const prepare4MQuarterlyData = () => {
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth(); // 0-11
+  const currentYear = currentDate.getFullYear();
+
   const quarterlyChanges = changeList.filter(item => {
     const dateStr = item.date || item.created_at;
     if (!dateStr) return false;
     
     const itemDate = new Date(dateStr);
-    const month = itemDate.getMonth(); // 0-11 (0=Jan, 6=Jul, 8=Sep)
-    const year = itemDate.getFullYear();
-    const currentYear = new Date().getFullYear();
+    const itemMonth = itemDate.getMonth();
+    const itemYear = itemDate.getFullYear();
     
-    // Check if it's July (6), August (7), or September (8) of current year
-    return year === currentYear && month >= 6 && month <= 8;
+    // Calculate 2 months ago
+    let startMonth = currentMonth - 2;
+    let startYear = currentYear;
+    
+    // Handle year boundary (e.g., if current month is January or February)
+    if (startMonth < 0) {
+      startMonth = 12 + startMonth; // Convert negative to positive month in previous year
+      startYear = currentYear - 1;
+    }
+    
+    // Check if item date is within the last 3 months
+    if (itemYear === currentYear) {
+      return itemMonth >= startMonth && itemMonth <= currentMonth;
+    } else if (itemYear === startYear && startYear < currentYear) {
+      // Handle case where start month is in previous year
+      return itemMonth >= startMonth;
+    }
+    
+    return false;
   });
 
   const counts = quarterlyChanges.reduce((acc: Record<string, number>, item) => {
@@ -1081,6 +1128,7 @@ const prepare4MQuarterlyData = () => {
     { name: 'Method', count: counts['Method'] || 0, color: '#F59E0B' },
   ];
 };
+
 
 // Prepare 4M Chart Data for Current Month (October)
 const prepare4MCurrentMonthData = () => {
@@ -1110,17 +1158,63 @@ const prepare4MCurrentMonthData = () => {
 };
 
 // Prepare Category Chart Data for Quarterly (Jul-Sep)
+// const prepareCategoryQuarterlyData = () => {
+//   const quarterlyChanges = changeList.filter(item => {
+//     const dateStr = item.date || item.created_at;
+//     if (!dateStr) return false;
+    
+//     const itemDate = new Date(dateStr);
+//     const month = itemDate.getMonth();
+//     const year = itemDate.getFullYear();
+//     const currentYear = new Date().getFullYear();
+    
+//     return year === currentYear && month >= 6 && month <= 8;
+//   });
+
+//   const counts = quarterlyChanges.reduce((acc: Record<string, number>, item) => {
+//     const categoryType = item.category_details?.category_type || 'Unknown';
+//     acc[categoryType] = (acc[categoryType] || 0) + 1;
+//     return acc;
+//   }, {});
+    
+//   return Object.entries(counts).map(([category, count], index) => ({
+//     name: category,
+//     value: count as number,
+//     color: COLORS[index % COLORS.length],
+//   }));
+// };
+
+// Prepare Category Chart Data for Quarterly (Current month + 2 previous months)
 const prepareCategoryQuarterlyData = () => {
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+
   const quarterlyChanges = changeList.filter(item => {
     const dateStr = item.date || item.created_at;
     if (!dateStr) return false;
     
     const itemDate = new Date(dateStr);
-    const month = itemDate.getMonth();
-    const year = itemDate.getFullYear();
-    const currentYear = new Date().getFullYear();
+    const itemMonth = itemDate.getMonth();
+    const itemYear = itemDate.getFullYear();
     
-    return year === currentYear && month >= 6 && month <= 8;
+    // Calculate 2 months ago
+    let startMonth = currentMonth - 2;
+    let startYear = currentYear;
+    
+    if (startMonth < 0) {
+      startMonth = 12 + startMonth;
+      startYear = currentYear - 1;
+    }
+    
+    // Check if item date is within the last 3 months
+    if (itemYear === currentYear) {
+      return itemMonth >= startMonth && itemMonth <= currentMonth;
+    } else if (itemYear === startYear && startYear < currentYear) {
+      return itemMonth >= startMonth;
+    }
+    
+    return false;
   });
 
   const counts = quarterlyChanges.reduce((acc: Record<string, number>, item) => {
@@ -1135,6 +1229,26 @@ const prepareCategoryQuarterlyData = () => {
     color: COLORS[index % COLORS.length],
   }));
 };
+
+// Helper function to get quarter label (for display)
+const getQuarterLabel = () => {
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  
+  let startMonth = currentMonth - 2;
+  if (startMonth < 0) {
+    startMonth = 12 + startMonth;
+  }
+  
+  const endMonthName = monthNames[currentMonth];
+  const startMonthName = monthNames[startMonth];
+  
+  return `${startMonthName}-${endMonthName} ${currentDate.getFullYear()}`;
+};
+
+
 
 // Prepare Category Chart Data for Current Month (October)
 const prepareCategoryCurrentMonthData = () => {
@@ -1586,7 +1700,7 @@ const recentChanges = changeList
             </div>
             <div>
               <h3 className="font-bold text-lg text-gray-900">4M Changes - Quarterly</h3>
-              <p className="text-sm text-gray-500">Jul-Sep 2025</p>
+              <p className="text-sm text-gray-500">{getQuarterLabel()}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -1663,7 +1777,7 @@ const recentChanges = changeList
             </div>
             <div>
               <h3 className="font-bold text-lg text-gray-900">Category - Quarterly</h3>
-              <p className="text-sm text-gray-500">Jul-Sep 2025</p>
+              <p className="text-sm text-gray-500">{getQuarterLabel()}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-500">
