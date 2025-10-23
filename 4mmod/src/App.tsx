@@ -1,21 +1,18 @@
+// src/App.tsx
+
 import React, { useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar/Nav"; // Assuming Nav is your updated Navbar
+import Navbar from "./components/Navbar/Nav"; 
 import Footer from "./components/Navbar/Footer";
 import Home from "./Home";
 
-import logo from './assets/logo.png'; 
-// import logos from './assets/app.png'; 
+// ... (logo imports)
 import logos from './assets/Images/logo.png'; 
-// NOTE: Make sure the Navbar component file is renamed to Navbar.tsx or
-// update the import path if it's still named NavModule.tsx
 
 function App() {
-    // 1. Lift state up to App.tsx
     const [selectedModule, setSelectedModule] = useState('dashboard');
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-    // Function to handle the Home button click
     const handleHomeClick = () => {
         setSelectedModule('dashboard');
     };
@@ -24,16 +21,21 @@ function App() {
         <BrowserRouter>
             <div className="min-h-screen bg-gray-50 flex flex-col">
                 
-                {/* 2. Pass the required props to Navbar */}
-                <Navbar 
-                    logo1={logos}
-                    username="John Doe" 
-                    email="john@example.com" 
-                    version="1.0.0" 
-                    onHomeClick={handleHomeClick} // <-- FIXES TS2741 ERROR
-                />
+                {/* 1. Navbar - FIXED and HIGH Z-INDEX */}
+                {/* The Navbar needs to be fixed to the top and have a high Z-index (e.g., z-50) */}
+                <div className="fixed top-0 left-0 right-0 z-50 shadow-md">
+                    <Navbar 
+                        logo1={logos}
+                        username="John Doe" 
+                        email="john@example.com" 
+                        version="1.0.0" 
+                        onHomeClick={handleHomeClick}
+                    />
+                </div>
                 
-                {/* 3. Pass state and setters to Home component */}
+                {/* 2. Main Layout - Adjusted to push content down by Navbar height (e.g., pt-16) */}
+                {/* The pt-16 is moved inside the main content area to clear the fixed navbar. 
+                   The Home component will manage the layout of the sidebar and its content. */}
                 <div className="flex-1 pt-16">
                     <Routes>
                         <Route 
@@ -50,10 +52,8 @@ function App() {
                     </Routes>
                 </div>
                 
-                {/* <Footer 
-                    logo={logo}
-                    logoAlt="NL Technologies Logo"
-                /> */}
+                {/* Footer (assuming it's not fixed) */}
+                {/* <Footer logo={logo} logoAlt="NL Technologies Logo" /> */}
             </div>
         </BrowserRouter>
     );

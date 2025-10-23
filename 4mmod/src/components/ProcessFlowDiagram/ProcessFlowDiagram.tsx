@@ -399,7 +399,7 @@ export default function ProcessFlowDiagram({ onNavigate }: ProcessFlowDiagramPro
   );
 
   return (
-    <div className="bg-[#f6faff] min-h-screen">
+    <div className=" min-h-screen">
       <div className="p-6">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-2xl shadow-xl mb-6">

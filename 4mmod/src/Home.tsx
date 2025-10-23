@@ -21,6 +21,7 @@ import Suspected from './components/suspected/suspected';
 import ChangeInformationNote from './components/ChangeInformationNote/ChangeInformationNote';
 import FourMMethodPage from './components/cm/method';
 
+
 // Define the Props interface for Home
 interface HomeProps {
     selectedModule: string;
@@ -37,15 +38,15 @@ const Home: React.FC<HomeProps> = ({
     sidebarCollapsed,
     setSidebarCollapsed,
 }) => {
-    // State initialization is removed, now using props
-    
-    // Determine the width class based on collapse status (using w-72 from new design)
-    const contentMarginClass = sidebarCollapsed ? 'md:ml-20' : 'md:ml-72';
+    // Determine the width class based on collapse status 
+    const contentMarginClass = sidebarCollapsed ? 'md:ml-24' : 'md:ml-80';
 
     return (
         <div className="flex min-h-screen">
+            
             {/* Navigation Sidebar */}
-            <Sidebar // Renamed from NavModule
+            {/* The Sidebar component's internal positioning needs the z-index and top: 0 */}
+            <Sidebar 
                 modules={navModules}
                 selectedModule={selectedModule}
                 setSelectedModule={setSelectedModule}
@@ -53,15 +54,19 @@ const Home: React.FC<HomeProps> = ({
                 setSidebarCollapsed={setSidebarCollapsed}
             />
 
-            {/* Main Content Area - Add pb-16 to account for fixed footer */}
+            {/* Main Content Area: Use a high top margin (e.g., pt-20) to clear the FIXED Navbar for the section next to the sidebar. */}
             <div className={`
                 flex-1 transition-all duration-300 
                 ${contentMarginClass}
-                min-h-screen pb-16
+                min-h-screen
             `}>
-                <main className="p-8">
+                {/* Apply pt-16 (or pt-20 for margin) to push the content down past the fixed Navbar.
+                    This margin only applies to the main content area *next to* the fixed sidebar.
+                */}
+                <main className="p-8 bg-slate-400/80 min-h-screen"> 
                     {/* Content based on selectedModule */}
                     {selectedModule === 'dashboard' && <DashboardView />}
+                    {/* ... (all other module routes) ... */}
                     {selectedModule === 'mmc' && <MaterialMovementCard />}
                     {selectedModule === '4m-cts' && <FourMChangeTrackSheet />}
                     {selectedModule === 'cpf' && <ControlPlanForm />}

@@ -264,16 +264,22 @@ const Navbar: React.FC<NavbarProps> = ({
             )}
             
             {/* Company Name next to the logo */}
-            <div className="text-xl font-bold text-white hidden sm:block">
+            {/* <div className="text-xl font-bold text-white hidden sm:block">
                 {companyName}
-            </div>
+            </div> */}
         </div>
 
         {/* Center: Main Title/Placeholder (Kept the title but reduced font size) */}
-        <div className="flex-1 flex justify-center min-w-0">
+        {/* <div className="flex-1 flex justify-center min-w-0">
             <div className="text-base font-semibold text-slate-300 hidden sm:block">
                 4M Change Management System
             </div>
+        </div> */}
+        <div className="absolute left-1/2 transform -translate-x-1/2 cursor-pointer group">
+           <h1 className="text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent transition-all duration-300 group-hover:scale-105">
+             4M CHANGE MANAGEMENT SYSTEM
+           </h1>
+         <div className="h-0.5 bg-gradient-to-r from-transparent via-blue-600 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
         </div>
 
         {/* Right: Home Button and User Avatar (Removed Search and Bell) */}

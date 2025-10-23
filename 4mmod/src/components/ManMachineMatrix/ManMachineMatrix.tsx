@@ -720,7 +720,7 @@ const ManMachineMatrix: React.FC = () => {
         </div>
 
         {viewMode === 'view' ? (
-          <div className="bg-white shadow-xl rounded-lg overflow-hidden mb-6">
+          <div className="bg-white shadow-xl rounded-2xl overflow-hidden mb-6">
             <div className="bg-gradient-to-r from-blue-600 to-blue-700  px-6 py-4 text-white flex justify-between items-center">
               <h2 className="text-xl font-semibold">Operator Skills Matrix</h2>
               <button
@@ -861,7 +861,7 @@ const ManMachineMatrix: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="bg-white shadow-xl rounded-lg overflow-hidden">
+          <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white flex justify-between items-center">
               <h2 className="text-xl font-semibold">
                 {editingId ? 'Edit Operator Matrix' : 'Add New Operator Matrix'}

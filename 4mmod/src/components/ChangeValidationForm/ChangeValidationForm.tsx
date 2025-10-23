@@ -220,7 +220,7 @@ const ChangeValidationForm: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 ">
+    <div className="min-h-screen px-4 sm:px-6 ">
       <div className="max-w-full mx-auto">
         <div className="mb-8 text-center">
           <div className="flex justify-center items-center mb-4">
@@ -240,7 +240,7 @@ const ChangeValidationForm: React.FC = () => {
         </div>
 
         {viewMode ? (
-          <div className="bg-white shadow-xl rounded-lg overflow-hidden mb-6">
+          <div className="bg-white shadow-xl rounded-2xl overflow-hidden mb-6">
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white flex justify-between items-center">
               <h2 className="text-xl font-semibold">Saved Validation Reports</h2>
               <button
@@ -290,7 +290,7 @@ const ChangeValidationForm: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="bg-white shadow-xl rounded-lg overflow-hidden">
+          <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white flex justify-between items-center">
               <h2 className="text-xl font-semibold">
                 VALIDATION/VERIFICATION REPORT AFTER UNEXPECTED 4M CHANGE

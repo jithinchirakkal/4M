@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
-import manimg from '../../assets/Images/man.jpg'
-import machineimg from '../../assets/Images/machine.jpg'
+// import manimg from '../../assets/Images/man.jpg'
+import manimg from '../../assets/Images/man1.png'
+// import machineimg from '../../assets/Images/machine.jpg'
+import machineimg from '../../assets/Images/machine1.png'
 import materialimg from '../../assets/Images/material.jpg'
-import methodimg from '../../assets/Images/method.jpg'
+// import materialimg from '../../assets/Images/material1.jpg'
+// import methodimg from '../../assets/Images/method.jpg'
+import methodimg from '../../assets/Images/method1.png'
 import GraphicalMonitoring4MChart from '../GraphicalMonitoring4MChart/GraphicalMonitoring4MChart';
 
 // Define TypeScript interfaces for data structures
@@ -91,7 +95,8 @@ const FourMCard: React.FC<{ title: keyof FourMData; status: FourMStatus; image: 
   const noChangeStatusRing = !isChange ? 'ring-green-300' : 'ring-gray-100';
 
   return (
-    <div className="flex flex-col bg-white rounded-xl shadow-xl overflow-hidden transform transition duration-300 hover:scale-[1.02] hover:shadow-2xl">
+    // <div className="flex flex-col bg-white rounded-xl shadow-xl overflow-hidden transform transition duration-300 hover:scale-[1.02] hover:shadow-2xl">
+    <div className="flex flex-col overflow-hidden transform transition duration-300 hover:scale-[1.02] hover:shadow-2xl">
       <div className="bg-gradient-to-r from-blue-600 to-blue-400 text-white font-extrabold p-3 text-center text-xl tracking-wider uppercase">
         {title}
       </div>
@@ -261,7 +266,7 @@ const ChangeDisplayBoard = () => {
 
 
   return (
-    <div className="flex flex-col min-h-screen w-full bg-gray-50 p-6">
+    <div className="flex flex-col min-h-screen w-full p-6">
       {/* Main Container with Shadow and Rounded Corners */}
       <div className="bg-white rounded-2xl shadow-2xl p-6 space-y-8">
         

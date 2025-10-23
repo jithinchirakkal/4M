@@ -2197,7 +2197,7 @@ const ControlPlanForm: React.FC = () => {
   // LIST VIEW - COMPACT AND REDUCED HEIGHT
   if (currentView === 'list') {
     return (
-      <div className="bg-[#f6faff] min-h-screen p-6">
+      <div className="min-h-screen p-6">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 via-blue-600 to-blue-600 text-white rounded-2xl shadow-xl mb-6">
           <div className="p-6">

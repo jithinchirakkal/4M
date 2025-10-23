@@ -119,15 +119,15 @@ const ChangeInformationNote: React.FC = () => {
 
   return (
     // <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50/30 to-blue-50/20 p-6">
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50/30 to-blue-50/20 p-6">
+    <div className="min-h-screen p-6">
       <header className="text-center mb-8 relative">
         {/* <div className="inline-flex items-center justify-center gap-3 mb-4">
           <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/40 animate-pulse">
             <Bell className="text-white" size={28} />
           </div>
         </div> */}
-        <h1 className="text-5xl font-extrabold bg-gradient-to-r from-cyan-600 via-blue-700 to-cyan-600 bg-clip-text text-transparent tracking-tight mb-2">
-          4M CHANGE INFORMATION NOTE
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 via-blue-700 to-cyan-600 bg-clip-text text-transparent tracking-tight mb-2">
+          4M Change Information Note
         </h1>
         {/* <p className="text-lg text-slate-600 font-medium mt-2 max-w-3xl mx-auto">
           Record 4M change details in record sheet as per 4M change work instructions.

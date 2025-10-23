@@ -810,7 +810,7 @@ const FourMChangeProcedure: React.FC = () => {
         </div>
 
         {/* Process Information */}
-        <div className="bg-white shadow-xl rounded-lg overflow-hidden mb-6">
+        <div className="bg-white shadow-xl rounded-2xl overflow-hidden mb-6">
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white">
             <h2 className="text-xl font-semibold">Process Information</h2>
           </div>
@@ -838,7 +838,7 @@ const FourMChangeProcedure: React.FC = () => {
 
         {/* Action Buttons and Records Table */}
         {showForm ? (
-          <div className="bg-white shadow-xl rounded-lg overflow-hidden mb-6">
+          <div className="bg-white shadow-xl rounded-2xl overflow-hidden mb-6">
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white flex justify-between items-center">
               <h2 className="text-xl font-semibold">
                 {editingIndex === -1 ? 'Add New Record' : 'Edit Record'}
@@ -972,7 +972,7 @@ const FourMChangeProcedure: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="bg-white shadow-xl rounded-lg overflow-hidden">
+          <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white flex justify-between items-center">
               <h2 className="text-xl font-semibold">Master List of Formats and Records</h2>
               <div className="flex gap-3">
@@ -1055,7 +1055,7 @@ const FourMChangeProcedure: React.FC = () => {
         )}
 
         {/* Footer */}
-        <div className="bg-white shadow-xl rounded-lg overflow-hidden mt-6">
+        <div className="bg-white shadow-xl rounded-2xl overflow-hidden mt-6">
           <div className="p-6 bg-gray-50">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
               <div>
