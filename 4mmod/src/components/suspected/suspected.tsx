@@ -152,7 +152,7 @@ const Suspected: React.FC = () => {
         <DetailItem label="Qty Dispatched" value={record.qty} unit="pcs" icon="Truck" color="text-green-600" />
         <DetailItem label="Invoice / City" value={`${record.invoice} / ${record.city}`} icon="MapPin" />
         <DetailItem label="Dispatch Date" value={record.dispatchDate} icon="Calendar" />
-        <DetailItem label="Remarks" value={record.remarks} icon="FileText" />
+        {/* <DetailItem label="Remarks" value={record.remarks} icon="FileText" /> */}
     </div>
   );
 
@@ -207,7 +207,8 @@ const Suspected: React.FC = () => {
                           {[
                             "S.No.", "Date", "Part Name/Model", "Change Type", 
                             "Suspected Qty", "Dispatch Date", "Qty Affected", 
-                            "City", "Invoice", "Remarks"
+                            "City", "Invoice",
+                            // "Remarks" 
                           ].map((heading, idx) => (
                             <th key={idx} className="p-3 border-r border-blue-500 last:border-r-0 text-left whitespace-nowrap min-w-[120px]">
                               {heading}
@@ -230,7 +231,7 @@ const Suspected: React.FC = () => {
                             <td className="p-3 font-bold text-green-700">{r.qty} pcs</td>
                             <td className="p-3">{r.city}</td>
                             <td className="p-3 font-mono text-xs">{r.invoice}</td>
-                            <td className="p-3 text-gray-600 max-w-xs truncate">{r.remarks}</td>
+                            {/* <td className="p-3 text-gray-600 max-w-xs truncate">{r.remarks}</td> */}
                           </tr>
                         ))}
                       </tbody>

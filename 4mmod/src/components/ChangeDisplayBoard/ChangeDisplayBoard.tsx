@@ -3,10 +3,10 @@ import { useState, useEffect } from 'react';
 import manimg from '../../assets/Images/man1.png'
 // import machineimg from '../../assets/Images/machine.jpg'
 import machineimg from '../../assets/Images/machine1.png'
-import materialimg from '../../assets/Images/material.jpg'
+import materialimg from '../../assets/Images/meterial22.png'
 // import materialimg from '../../assets/Images/material1.jpg'
 // import methodimg from '../../assets/Images/method.jpg'
-import methodimg from '../../assets/Images/method1.png'
+import methodimg from '../../assets/Images/method2.png'
 import GraphicalMonitoring4MChart from '../GraphicalMonitoring4MChart/GraphicalMonitoring4MChart';
 
 // Define TypeScript interfaces for data structures
