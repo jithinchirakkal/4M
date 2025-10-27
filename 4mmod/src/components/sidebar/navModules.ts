@@ -58,7 +58,7 @@ export const navModules: NavModule[] = [
 	},
 	{
 		id: "4m-cts",
-		title: "4M-CTS",
+		title: "4M Trakking Sheet",
 		fullName: "4M Change Tracking System",
 		color: "from-purple-500 to-purple-600",
 		icon: Activity,
@@ -78,7 +78,7 @@ export const navModules: NavModule[] = [
 	},
 	{
 		id: "mcs",
-		title: "MCS",
+		title: "Machine Check Sheet",
 		fullName: "Manufacturing Control System",
 		color: "from-pink-500 to-pink-600",
 		icon: Settings,
@@ -105,7 +105,7 @@ export const navModules: NavModule[] = [
 	},
 	{
 		id: "iic-sar",
-		title: "IIC-SAR",
+		title: "In-Process Inspection / Setting Approval",
 		fullName: "Incident Investigation Control",
 		color: "from-red-500 to-red-600",
 		icon: AlertTriangle,
