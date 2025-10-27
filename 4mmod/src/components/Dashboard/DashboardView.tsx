@@ -742,7 +742,7 @@ const DashboardView = () => {
         )}
 
         {/* Recent Changes List */}
-        <div className="lg:col-span-2">
+          <div className="lg:col-span-2 bg-white rounded-2xl shadow-xl p-8 border border-gray-100/50 transition-all duration-300 transform hover:shadow-2xl hover:ring-2 hover:ring-blue-500/20">
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-extrabold text-2xl text-gray-900">Recent Change Activity ⚡</h2>
             <button className="bg-white text-gray-700 ring-1 ring-gray-300 hover:ring-blue-500 hover:text-blue-600 px-4 py-2 rounded-xl font-semibold flex items-center gap-1 transition-all duration-300">

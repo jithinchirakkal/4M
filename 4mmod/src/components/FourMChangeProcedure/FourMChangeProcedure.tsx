@@ -552,6 +552,7 @@
 
 
 
+import { FileText } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
 // Define the record interface
@@ -1025,6 +1026,7 @@ const FourMChangeProcedure: React.FC = () => {
                               rel="noopener noreferrer"
                               className="inline-flex items-center px-2 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
                             >
+                              <FileText className="w-4 h-4 mr-2" />
                               {record.file.name}
                             </a>
                           )}
@@ -1055,7 +1057,7 @@ const FourMChangeProcedure: React.FC = () => {
         )}
 
         {/* Footer */}
-        <div className="bg-white shadow-xl rounded-2xl overflow-hidden mt-6">
+        {/* <div className="bg-white shadow-xl rounded-2xl overflow-hidden mt-6">
           <div className="p-6 bg-gray-50">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
               <div>
@@ -1069,7 +1071,7 @@ const FourMChangeProcedure: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
