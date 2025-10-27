@@ -6,7 +6,9 @@ import {
   ChevronRight,
   LucideIcon
 } from 'lucide-react';
-import logo from '../../assets/Images/logo.png';
+// import logo from '../../assets/Images/logo.png';
+// import logo from '../../assets/Images/logobr.png';
+import logo from '../../assets/Images/logo1.png';
 
 // Re-using your original prop and module interfaces for type compatibility
 interface NavModule {
@@ -40,51 +42,52 @@ const Sidebar: React.FC<NavModuleProps> = ({
   const collapsed = sidebarCollapsed;
   const setCollapsed = setSidebarCollapsed;
 
-  /* ───────────────────────── Sidebar inner content (Deep Ocean Theme - High Contrast) ───────────────────────── */
+  /* ───────────────────────── Sidebar inner content (Crisp White & Sky Blue Theme) ───────────────────────── */
   const sidebarContent = (
-    // Base: Deep dark blue background with subtle gradient for depth
-    <div className="h-full flex flex-col bg-gradient-to-b from-slate-900 via-gray-900 to-slate-900 text-white shadow-2xl shadow-black/80">
+    // Base: Bright white background with subtle shadow for lift
+    <div className="h-full flex flex-col bg-white text-gray-900 shadow-2xl shadow-gray-300/80 border-r border-gray-200">
       
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="p-4 border-b border-blue-700/50 bg-slate-800/80 flex-shrink-0">
+      {/* Light header with a subtle blue bottom border */}
+      <div className="p-4 border-b border-blue-200 bg-gray-50 flex-shrink-0">
         <div className="flex items-center justify-between">
           {!collapsed && (
             <div className="flex items-center gap-4">
-              {/* Logo: Vibrant Blue Neon Glow Effect */}
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center 
-                          shadow-xl shadow-blue-500/50 border border-blue-300/30">
-                {/* <span className="text-white font-extrabold text-xl font-mono tracking-widest italic">4M</span> */}
+              {/* Logo: Vibrant Blue Neon Glow Effect (Kept vibrant for contrast) */}
+              <div className="w-16 h-16 rounded-xl flex items-center justify-center 
+                          shadow-xl ">
                 <img
                   src={logo}
                 />
               </div>
               <div>
-                <h2 className="text-xl font-extrabold text-white tracking-wide">4M System</h2>
-                <p className="text-xs text-blue-400 font-medium">Change Management</p>
+                <h2 className="text-xl font-extrabold text-gray-900 tracking-wide">4M System</h2>
+                <p className="text-xs text-blue-600 font-medium">Change Management</p>
               </div>
             </div>
           )}
 
-          {/* Toggle (desktop): Sleek Neomorphic Button */}
+          {/* Toggle (desktop): Sleek, Light Neomorphic Button */}
           <button
             onClick={() => setCollapsed(!collapsed)}
             className={`
-              hidden md:flex p-2 rounded-xl transition-all duration-300 text-slate-400 
-              bg-slate-700/50 hover:bg-slate-600 shadow-lg shadow-black/50 hover:shadow-blue-500/30
+              hidden md:flex p-2 rounded-xl transition-all duration-300 text-gray-400 
+              bg-white hover:bg-blue-50 shadow-lg shadow-gray-200 hover:shadow-blue-200
+              border border-gray-200 hover:border-blue-400/50
               ${collapsed ? 'ml-auto' : ''}
             `}
             aria-label="Toggle sidebar"
           >
             {collapsed ? (
-              <ChevronRight size={20} className="hover:text-blue-400" />
+              <ChevronRight size={20} className="hover:text-blue-600" />
             ) : (
-              <ChevronLeft size={20} className="hover:text-blue-400" />
+              <ChevronLeft size={20} className="hover:text-blue-600" />
             )}
           </button>
 
           {/* Close (mobile) */}
           <button
-            className="block md:hidden p-2 rounded-full bg-slate-700/80 text-white"
+            className="block md:hidden p-2 rounded-full bg-gray-200 text-gray-700"
             onClick={() => setMobileOpen(false)}
             aria-label="Close sidebar"
           >
@@ -93,7 +96,7 @@ const Sidebar: React.FC<NavModuleProps> = ({
         </div>
       </div>
 
-      {/* ── Scrollable nav list (Invisible Scroll) ─────────────────────────────── */}
+      {/* ── Scrollable nav list ─────────────────────────────── */}
       <div className="flex-1 overflow-y-auto scrollbar-hide">
         <div className="p-4 space-y-2">
           {modules.map((module) => {
@@ -114,24 +117,24 @@ const Sidebar: React.FC<NavModuleProps> = ({
                   w-full flex items-center gap-4 px-4 py-3 rounded-2xl
                   transition-all duration-300 group relative z-10
                   
-                  // Base state: Subtle shadow on dark background
-                  bg-slate-800/80 hover:bg-slate-700/80 shadow-md shadow-black/50 
-                  border border-transparent 
+                  // Base state: White background, subtle shadow
+                  bg-white hover:bg-blue-50 shadow-md shadow-gray-100 
+                  border border-gray-200 
                   
                   // Active/Hover state: Stronger Blue/Cyan ring and lift
                   ${isActive 
-                    ? 'ring-2 ring-blue-500/80 shadow-blue-500/40 transform scale-[1.01] border-blue-500/30'
-                    : 'hover:ring-1 hover:ring-slate-700/80 hover:shadow-black/70'
+                    ? 'ring-2 ring-blue-500/80 shadow-blue-200/60 transform scale-[1.01] border-blue-300'
+                    : 'hover:ring-1 hover:ring-blue-100 hover:shadow-gray-300/70'
                   }
 
                   ${collapsed ? 'justify-center w-14 h-14 p-0' : ''}
                 `}
               >
-                {/* Visual Glow Effect for Active/Hover (Blue Wash) */}
+                {/* Visual Glow Effect for Active/Hover (Light Blue Wash) */}
                 <div
                   className={`
                     absolute inset-0 rounded-2xl transition-opacity duration-300
-                    bg-gradient-to-r from-blue-500/10 to-cyan-500/10
+                    bg-gradient-to-r from-blue-100/30 to-cyan-100/30
                     ${isActive ? 'opacity-100' : isHovered ? 'opacity-50' : 'opacity-0'}
                   `}
                 />
@@ -142,8 +145,10 @@ const Sidebar: React.FC<NavModuleProps> = ({
                     relative p-2 rounded-xl flex-shrink-0 z-20
                     transition-all duration-300 ease-out
                     ${isActive
-                      ? 'bg-gradient-to-br from-blue-500 to-cyan-400 shadow-lg shadow-cyan-500/60 ring-2 ring-white/50'
-                      : 'bg-slate-700/80 group-hover:bg-slate-600/80 shadow-md shadow-black/70'
+                      // Active: Vibrant Gradient Background, White Icon
+                      ? 'bg-gradient-to-br from-blue-600 to-cyan-500 shadow-lg shadow-blue-400/60 ring-2 ring-white/70'
+                      // Inactive: Light Background, Gray Icon
+                      : 'bg-gray-100/80 group-hover:bg-blue-50/80 shadow-md shadow-gray-200/70'
                     }
                   `}
                 >
@@ -151,7 +156,7 @@ const Sidebar: React.FC<NavModuleProps> = ({
                     size={20}
                     className={`
                       transition-all duration-300
-                      ${isActive ? 'text-white' : 'text-slate-300 group-hover:text-blue-300'}
+                      ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-blue-600'}
                       ${isHovered ? 'scale-110' : 'scale-100'}
                     `}
                   />
@@ -164,7 +169,7 @@ const Sidebar: React.FC<NavModuleProps> = ({
                       <span
                         className={`
                           font-extrabold text-sm truncate transition-colors duration-200
-                          ${isActive ? 'text-white' : 'text-slate-200 group-hover:text-white'}
+                          ${isActive ? 'text-blue-700' : 'text-gray-800 group-hover:text-blue-700'}
                         `}
                       >
                         {module.title}
@@ -176,8 +181,8 @@ const Sidebar: React.FC<NavModuleProps> = ({
                           className={`
                             text-[10px] px-2 py-0.5 rounded-full font-bold uppercase transition-all duration-200
                             ${module.status === 'beta'
-                              ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                              : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                              ? 'bg-blue-500/10 text-blue-600 border border-blue-500/30'
+                              : 'bg-amber-500/10 text-amber-600 border border-amber-500/30'
                             }
                             ${isHovered ? 'scale-105' : 'scale-100'}
                           `}
@@ -188,7 +193,7 @@ const Sidebar: React.FC<NavModuleProps> = ({
                     </div>
                     <p className={`
                       text-xs mt-0.5 truncate transition-colors duration-200
-                      ${isActive ? 'text-blue-300' : 'text-slate-500 group-hover:text-slate-400'}
+                      ${isActive ? 'text-blue-400' : 'text-gray-400 group-hover:text-gray-500'}
                     `}>
                       {module.description}
                     </p>
@@ -197,11 +202,11 @@ const Sidebar: React.FC<NavModuleProps> = ({
 
                 {/* Active Indicator Bar (Vibrant vertical line) */}
                 {isActive && !collapsed && (
-                  <div className="absolute left-0 inset-y-2 w-1 bg-gradient-to-b from-blue-500 to-cyan-400 rounded-r-full shadow-lg shadow-blue-500/50" />
+                  <div className="absolute left-0 inset-y-2 w-1 bg-gradient-to-b from-blue-600 to-cyan-500 rounded-r-full shadow-lg shadow-blue-400/50" />
                 )}
                 {/* Collapsed Active Dot */}
                 {isActive && collapsed && (
-                   <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-500 rounded-full shadow-lg shadow-blue-500/50 ring-1 ring-white/50" />
+                   <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-600 rounded-full shadow-lg shadow-blue-400/50 ring-1 ring-white/50" />
                 )}
               </button>
             );
@@ -210,13 +215,14 @@ const Sidebar: React.FC<NavModuleProps> = ({
       </div>
 
       {/* ── Footer ──────────────────────────────────────────────────────────── */}
-      <div className="p-4 border-t border-blue-700/50 bg-slate-800/80 flex-shrink-0">
-          {!collapsed && (
-            <div className="text-xs text-slate-500 text-center">
-                <p className="font-semibold text-slate-400">NL Technologies Pvt. Ltd.</p>
-                <p className="mt-1">© 2025 All rights reserved</p>
-            </div>
-          )}
+      <div className="p-4 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+        {/* Light Footer Text */}
+        {!collapsed && (
+          <div className="text-gray-500 text-center">
+              <p className="font-semibold text-lg text-gray-600">NL Technologies Pvt. Ltd.</p>
+              <p className="text-xs mt-1">© 2025 All rights reserved</p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -227,44 +233,37 @@ const Sidebar: React.FC<NavModuleProps> = ({
       {/* ── Mobile hamburger (Highly Visible) ─────────────────────────────────── */}
       <div className="md:hidden fixed top-4 left-4 z-50">
         <button
-          className="p-3 rounded-xl bg-blue-700 border border-blue-600 shadow-xl shadow-black/50 hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105"
+          className="p-3 rounded-xl bg-blue-600 border border-blue-700 shadow-xl shadow-blue-300/50 hover:shadow-blue-400/50 transition-all duration-300 hover:scale-105"
           aria-label="Open sidebar"
           onClick={() => setMobileOpen(true)}
         >
-          <Menu size={24} className="text-white" />
+          {/* Menu icon is now dark for light theme */}
+          <Menu size={24} className="text-white" /> 
         </button>
       </div>
 
       {/* ── Desktop sidebar (Offset from top) ──────────────────────────────────── */}
       <div
-        // className={`
-        //   fixed left-0 top-16 bottom-0 
-        //   ${collapsed ? 'w-24' : 'w-80'}
-        //   hidden md:block
-        //   transition-all duration-300 ease-in-out
-        //   z-30 
-        // `}
-        // style={{ height: 'calc(100vh - 4rem)' }}
         className={`
-            fixed left-0 top-0 bottom-0 
-            ${collapsed ? 'w-24' : 'w-80'}
-            hidden md:block
-            transition-all duration-300 ease-in-out
-            z-50
+          fixed left-0 top-0 bottom-0 
+          ${collapsed ? 'w-24' : 'w-80'}
+          hidden md:block
+          transition-all duration-300 ease-in-out
+          z-50
         `}
       >
         {sidebarContent}
       </div>
 
-      {/* ── Mobile drawer (Dark Theme) ────────────────────────────────────── */}
+      {/* ── Mobile drawer (Light Theme) ────────────────────────────────────── */}
       {mobileOpen && (
         <div
           className="fixed inset-0 z-50 md:hidden transition-all"
           style={{ top: '4rem' }} 
           onClick={() => setMobileOpen(false)}
         >
-          {/* Backdrop: Dark and blurred for separation */}
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+          {/* Backdrop: Light and subtle for light theme */}
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" /> 
           
           {/* Drawer Content */}
           <div
@@ -283,7 +282,6 @@ const Sidebar: React.FC<NavModuleProps> = ({
 };
 
 export default Sidebar;
-
 
 // import React, { useState } from 'react';
 // import {

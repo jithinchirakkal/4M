@@ -239,10 +239,10 @@ const Navbar: React.FC<NavbarProps> = ({
     <>
       {/* Fixed Header - Dark Theme */}
       <nav
-        className={`fixed top-0 left-0 right-0 px-6 lg:px-8 py-3 flex justify-between items-center z-50 transition-all duration-300 border-b ${
+        className={`fixed top-0 left-0 right-0 px-6 lg:px-8 py-6 flex justify-between items-center z-50 transition-all duration-300 border-b ${
           scrolled
-            ? 'bg-slate-900/95 backdrop-blur-md shadow-2xl border-slate-700'
-            : 'bg-slate-900/90 backdrop-blur-sm border-slate-800'
+            ? 'bg-gray-50/95 backdrop-blur-md shadow-2xl border-gray-200'
+            : 'bg-gray-50/90 backdrop-blur-sm border-gray-200'
         }`}
       >
         

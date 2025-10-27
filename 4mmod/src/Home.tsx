@@ -63,7 +63,7 @@ const Home: React.FC<HomeProps> = ({
                 {/* Apply pt-16 (or pt-20 for margin) to push the content down past the fixed Navbar.
                     This margin only applies to the main content area *next to* the fixed sidebar.
                 */}
-                <main className="p-8 bg-slate-400/80 min-h-screen"> 
+                <main className="p-8 bg-gray-200 min-h-screen"> 
                     {/* Content based on selectedModule */}
                     {selectedModule === 'dashboard' && <DashboardView />}
                     {/* ... (all other module routes) ... */}

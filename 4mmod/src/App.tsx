@@ -19,7 +19,7 @@ function App() {
 
     return (
         <BrowserRouter>
-            <div className="min-h-screen bg-gray-50 flex flex-col">
+            <div className="min-h-screen bg-white flex flex-col">
                 
                 {/* 1. Navbar - FIXED and HIGH Z-INDEX */}
                 {/* The Navbar needs to be fixed to the top and have a high Z-index (e.g., z-50) */}
