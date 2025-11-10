@@ -380,7 +380,7 @@ export default function FourMChangeTrackingSheet() {
   };
 
   return (
-    <div className="max-w-full min-h-screen">
+    <div className="max-w-full min-h-screen p-6">
       <div className="max-w-full">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-xl shadow-xl mb-6">

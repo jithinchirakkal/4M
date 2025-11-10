@@ -289,7 +289,7 @@ const Navbar: React.FC<NavbarProps> = ({
           <button 
             onClick={onHomeClick} // Use the new prop
             title="Go to Dashboard"
-            className="p-2 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-cyan-400 transition-colors"
+            className="p-2 rounded-lg text-slate-400 hover:bg-gray-200 hover:text-cyan-400 transition-colors"
           >
             <HomeIcon className="h-7 w-7" />
           </button>
