@@ -342,8 +342,38 @@ export default function ChangeManagementView() {
 
         {/* Date and Time Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <InputSelect name="date" label="Date of Change" value={form.date} onChange={handleChange} options={[]} type="date" icon={Calendar} required />
-          <InputSelect name="time" label="Time of Change" value={form.time} onChange={handleChange} options={[]} type="time" icon={Clock} required />
+          {/* <InputSelect name="date" label="Date of Change" value={form.date} onChange={handleChange} options={[]} type="date" icon={Calendar} required /> */}
+          {/* <InputSelect name="time" label="Time of Change" value={form.time} onChange={handleChange} options={[]} type="time" icon={Clock} required /> */}
+        
+       {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> */}
+          <div>
+            <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2">
+              <Calendar className="w-4 h-4" /> Date of Change *
+            </label>
+            <input
+              type="date"
+              name="date"
+              value={form.date}
+              onChange={handleChange}
+              className="w-full rounded-xl border border-gray-200 p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2">
+              <Clock className="w-4 h-4" /> Time of Change *
+            </label>
+            <input
+              type="time"
+              name="time"
+              value={form.time}
+              onChange={handleChange}
+              className="w-full rounded-xl border border-gray-200 p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              required
+            />
+          </div>
+        {/* </div>         */}
         </div>
 
         {/* Action Buttons */}
