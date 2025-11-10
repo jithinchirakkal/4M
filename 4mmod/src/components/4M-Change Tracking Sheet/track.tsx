@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 type TrackingStatus = "noplan" | "nochange" | "change";
 
@@ -70,7 +69,43 @@ const categories = [
 
 const dayColumns = Array.from({ length: 31 }, (_, i) => i + 1);
 
+// Mapping of 4M type from API to the Category name in the sheet
+const fourMToCategoryMap: { [key: string]: string } = {
+  'Man': 'MAN',
+  'Machine/Tool': 'MACHINE',
+  'Material': 'MATERIAL',
+  'Method': 'METHOD'
+};
+
+/**
+ * Component to display text with truncation and a fixed height for table cells.
+ */
+const TruncatedTextCell: React.FC<{ text: string; maxWidth?: string }> = ({ text, maxWidth }) => {
+  return (
+    <div 
+      className="w-full text-left overflow-hidden" 
+      style={{ maxWidth: maxWidth || '100%', height: '40px', lineHeight: '20px' }}
+      title={text}
+    >
+      <div className="line-clamp-2">
+        {text || '-'}
+      </div>
+    </div>
+  );
+};
+
+
 export default function FourMChangeTrackingSheet() {
+  // --- Refs and States for New Functionality ---
+  const detailsTableRef = useRef<HTMLDivElement>(null); // Added
+  const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null); // Added
+  const [tooltip, setTooltip] = useState<{ // Added
+    x: number;
+    y: number;
+    content: React.ReactNode;
+  } | null>(null);
+  // --------------------------------------------
+
   const [month, setMonth] = useState<string>(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -155,14 +190,19 @@ export default function FourMChangeTrackingSheet() {
           change => change.record_id === row.record_id
         );
         if (!originalChange) return true;
+        
+        const getSFName = (id: string) => shopfloors.find(s => s.id === parseInt(id))?.name;
+        const getLineName = (id: string) => lines.find(l => l.id === parseInt(id))?.name;
+        const getStationName = (id: string) => stations.find(s => s.id === parseInt(id))?.name;
 
-        if (filterShopfloor && originalChange.shopfloor_name !== shopfloors.find(s => s.id === parseInt(filterShopfloor))?.name) {
+
+        if (filterShopfloor && originalChange.shopfloor_name !== getSFName(filterShopfloor)) {
           return false;
         }
-        if (filterLine && originalChange.line_name !== lines.find(l => l.id === parseInt(filterLine))?.name) {
+        if (filterLine && originalChange.line_name !== getLineName(filterLine)) {
           return false;
         }
-        if (filterStation && originalChange.station_name !== stations.find(s => s.id === parseInt(filterStation))?.name) {
+        if (filterStation && originalChange.station_name !== getStationName(filterStation)) {
           return false;
         }
         return true;
@@ -184,13 +224,6 @@ export default function FourMChangeTrackingSheet() {
     const today = new Date();
     const currentDay = today.getDate();
     const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
-
-    const fourMToCategoryMap: { [key: string]: string } = {
-      'Man': 'MAN',
-      'Machine/Tool': 'MACHINE',
-      'Material': 'MATERIAL',
-      'Method': 'METHOD'
-    };
 
     categories.forEach((category) => {
       const categoryRow: TrackingCell[] = [];
@@ -330,6 +363,10 @@ export default function FourMChangeTrackingSheet() {
   };
 
   const submitChangeDetails = async () => {
+    setMessage(null);
+    let successCount = 0;
+    let errorCount = 0;
+
     for (let i = 0; i < changeDetailRows.length; i++) {
       const row = changeDetailRows[i];
       if (row.date && row.time) {
@@ -349,13 +386,22 @@ export default function FourMChangeTrackingSheet() {
             const data = await res.json();
             changeDetailRows[i].id = data.id;
           }
+          successCount++;
         } catch (err: any) {
-          alert(`Error for row ${i + 1}: ${err.message}`);
+          console.error(`Error submitting data for record ${row.record_id}:`, err);
+          errorCount++;
         }
       }
     }
     setChangeDetailRows([...changeDetailRows]);
-    alert("Change details submitted!");
+    
+    // Custom Message Box instead of alert()
+    if (errorCount > 0) {
+      setMessage({ text: `Submission completed with ${errorCount} errors. Check console for details.`, type: 'error' });
+    } else {
+      setMessage({ text: "Change details submitted successfully!", type: 'success' });
+    }
+    setTimeout(() => setMessage(null), 5000);
   };
 
   const getStatusBg = (status: TrackingStatus) =>
@@ -365,22 +411,89 @@ export default function FourMChangeTrackingSheet() {
         ? "bg-red-500"
         : "bg-blue-100";
 
-  const TruncatedTextCell: React.FC<{ text: string; maxWidth?: string }> = ({ text, maxWidth }) => {
-    return (
-      <div 
-        className="w-full text-left overflow-hidden" 
-        style={{ maxWidth: maxWidth || '100%', height: '40px', lineHeight: '20px' }}
-        title={text}
-      >
-        <div className="line-clamp-2">
-          {text || '-'}
-        </div>
+
+  // --- TOOLTIP LOGIC ---
+  
+  const getChangesForCell = (categoryName: string, day: number): FourMChangeRecord[] => {
+    const [year, monthStr] = month.split('-');
+    const dateString = `${year}-${monthStr}-${String(day).padStart(2, '0')}`;
+
+    return fourMChanges.filter(change => {
+      // Check if the date matches (only YYYY-MM-DD portion)
+      const changeDate = change.date.split('T')[0] || change.date;
+      if (changeDate !== dateString) return false;
+
+      // Check if the category matches
+      const changeCategory = fourMToCategoryMap[change.four_m] || change.four_m.toUpperCase();
+      return categoryName === changeCategory;
+    });
+  };
+  
+  const handleMouseEnter = (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    categoryName: string,
+    day: number
+  ) => {
+    const changes = getChangesForCell(categoryName, day);
+    if (changes.length === 0) return;
+
+    const content = (
+      <div className="p-3 bg-white border border-gray-300 rounded-lg shadow-xl text-xs max-w-xs ring-2 ring-red-200">
+        <h4 className="font-bold text-sm mb-1 text-red-600">
+          {categoryName} Changes on {month.split('-')[1]}/{day}
+        </h4>
+        <ul className="list-disc list-inside space-y-1">
+          {changes.slice(0, 3).map((change, index) => (
+            <li key={index} className="text-gray-700">
+              <span className="font-medium">{change.four_m}</span> at {change.time}: "{change.category_details?.description.substring(0, 30) || 'N/A'}..."
+            </li>
+          ))}
+        </ul>
+        {changes.length > 3 && <p className="text-gray-500 mt-1 italic">...{changes.length - 3} more changes</p>}
+        <p className="text-red-500 mt-2 font-semibold text-center">Click the red dot to drill down to details ↓</p>
       </div>
     );
+
+    setTooltip({
+      x: e.clientX + 10, // Offset to the right
+      y: e.clientY + 10, // Offset down
+      content,
+    });
   };
 
+  const handleMouseLeave = () => {
+    setTooltip(null);
+  };
+  
+  // --- CLICK/SCROLL LOGIC ---
+  
+  const handleClickCell = (day: number) => {
+    // 1. Calculate the date string (YYYY-MM-DD)
+    const [year, monthStr] = month.split('-');
+    const dateString = `${year}-${monthStr}-${String(day).padStart(2, '0')}`;
+
+    // 2. Set the filter
+    setFilterDate(dateString);
+    
+    // Clear location filters to ensure all relevant records are shown
+    setFilterShopfloor(''); 
+    setFilterLine('');
+    setFilterStation('');
+
+    // 3. Scroll to the details table
+    // Use a small delay to ensure React has updated the UI before scrolling
+    setTimeout(() => {
+      detailsTableRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 100); 
+    setTooltip(null); // Hide tooltip after click
+  };
+
+
   return (
-    <div className="max-w-full min-h-screen p-6">
+    <div className="max-w-full min-h-screen p-6 relative">
       <div className="max-w-full">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-xl shadow-xl mb-6">
@@ -392,6 +505,13 @@ export default function FourMChangeTrackingSheet() {
             </div>
           </div>
         </div>
+        
+        {/* Message Box */}
+        {message && (
+          <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-2xl transition-opacity duration-300 ${message.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+            <p className="font-semibold">{message.text}</p>
+          </div>
+        )}
 
         {/* Tracking Matrix */}
         <div className="overflow-x-auto rounded-lg shadow-inner bg-white">
@@ -430,7 +550,11 @@ export default function FourMChangeTrackingSheet() {
                         <div
                           className={`w-5 h-5 rounded-full border-2 mx-auto transition-all duration-150
                             ${getStatusBg(cell.status)}
-                            ${cell.status === "change" ? "border-red-400" : cell.status === "nochange" ? "border-green-400" : "border-blue-200"}`}
+                            ${cell.status === "change" ? "border-red-400 cursor-pointer" : cell.status === "nochange" ? "border-green-400" : "border-blue-200"}`}
+                          // Handlers added here for Tooltip and Drill-Down
+                          onClick={cell.hasChange ? () => handleClickCell(cell.day) : undefined}
+                          onMouseEnter={cell.hasChange ? (e) => handleMouseEnter(e, category.name, cell.day) : undefined}
+                          onMouseLeave={cell.hasChange ? handleMouseLeave : undefined}
                         ></div>
                       </td>
                     ))}
@@ -442,7 +566,7 @@ export default function FourMChangeTrackingSheet() {
                     </div>)}
                     {index === 2 && (<div className="flex items-center gap-2 text-xs md:text-sm">
                         <span className="inline-block w-4 h-4 rounded-full border border-red-600 bg-red-500"></span>
-                        <span className="text-gray-600">Change</span>
+                        <span className="text-gray-600">Change (Click for details)</span>
                     </div>)}
                     {index === 3 && (<div className="flex items-center gap-2 text-xs md:text-sm">
                         <span className="inline-block w-4 h-4 rounded-full border border-blue-400 bg-blue-100"></span>
@@ -455,8 +579,8 @@ export default function FourMChangeTrackingSheet() {
           </table>
         </div>
 
-        {/* 4M Change Detail */}
-        <div className="mt-10 mb-2">
+        {/* 4M Change Detail (Ref added for scrolling target) */}
+        <div className="mt-10 mb-2" ref={detailsTableRef}>
           <div className="w-full text-center font-bold text-lg p-2 border-t-2 border-b-2 border-indigo-300 bg-indigo-50 rounded-t-lg">
             4M Change Detail
           </div>
@@ -662,11 +786,7 @@ export default function FourMChangeTrackingSheet() {
                       </td>
                       
                       {/* Remaining Input fields: wrapped for vertical centering */}
-                      {(['part_name_no', 'control_no', 'lot_no_batch_no', 'tracking_no_serial',
-                        'retro_qty', 'retro_wh_no', 'retro_assy', 'retro_moog', 'retro_cust', 'retro_ott_pn',
-                        'containment_assy', 'containment_ship', 'containment_lot_invoice',
-                        'sl_op', 'sl_production', 'sl_plant_impl',
-                        'material_details_1', 'material_details_2'] as const).map(field => (
+                      {(['part_name_no', 'control_no', 'lot_no_batch_no', 'tracking_no_serial'] as const).map(field => (
                           <td key={field} className="border border-gray-200 p-1">
                             <div className="flex items-center justify-center h-full">
                               <input
@@ -679,7 +799,63 @@ export default function FourMChangeTrackingSheet() {
                           </td>
                         ))}
                       
-                      {/* Remarks: Fixed height, truncation, and tooltip */}
+                      {/* Retroactive Inputs */}
+                      {(['retro_qty', 'retro_wh_no', 'retro_assy', 'retro_moog', 'retro_cust', 'retro_ott_pn'] as const).map(field => (
+                          <td key={field} className="border border-gray-200 p-1">
+                            <div className="flex items-center justify-center h-full">
+                              <input
+                                type="text"
+                                value={row[field]}
+                                onChange={e => handleDetailInput(rowIdx, field, e.target.value)}
+                                className="w-full px-1 py-0.5 rounded border border-gray-300 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-200 bg-white transition"
+                              />
+                            </div>
+                          </td>
+                        ))}
+
+                      {/* Containment Inputs */}
+                      {(['containment_assy', 'containment_ship', 'containment_lot_invoice'] as const).map(field => (
+                          <td key={field} className="border border-gray-200 p-1">
+                            <div className="flex items-center justify-center h-full">
+                              <input
+                                type="text"
+                                value={row[field]}
+                                onChange={e => handleDetailInput(rowIdx, field, e.target.value)}
+                                className="w-full px-1 py-0.5 rounded border border-gray-300 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-200 bg-white transition"
+                              />
+                            </div>
+                          </td>
+                        ))}
+                      
+                      {/* SL Inputs */}
+                      {(['sl_op', 'sl_production', 'sl_plant_impl'] as const).map(field => (
+                          <td key={field} className="border border-gray-200 p-1">
+                            <div className="flex items-center justify-center h-full">
+                              <input
+                                type="text"
+                                value={row[field]}
+                                onChange={e => handleDetailInput(rowIdx, field, e.target.value)}
+                                className="w-full px-1 py-0.5 rounded border border-gray-300 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-200 bg-white transition"
+                              />
+                            </div>
+                          </td>
+                        ))}
+                      
+                      {/* Material Details Inputs */}
+                      {(['material_details_1', 'material_details_2'] as const).map(field => (
+                          <td key={field} className="border border-gray-200 p-1">
+                            <div className="flex items-center justify-center h-full">
+                              <input
+                                type="text"
+                                value={row[field]}
+                                onChange={e => handleDetailInput(rowIdx, field, e.target.value)}
+                                className="w-full px-1 py-0.5 rounded border border-gray-300 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-200 bg-white transition"
+                              />
+                            </div>
+                          </td>
+                        ))}
+                      
+                      {/* Remarks (Truncated) */}
                       <td className="border border-gray-200 p-2 align-top">
                         <TruncatedTextCell text={row.remarks} maxWidth="150px" />
                       </td>
@@ -691,6 +867,19 @@ export default function FourMChangeTrackingSheet() {
           </div>
         </div>
       </div>
+      
+      {/* Tooltip Overlay (Fixed position) */}
+      {tooltip && (
+        <div
+          className="fixed z-50 transition-opacity duration-150"
+          style={{
+            top: tooltip.y,
+            left: tooltip.x,
+          }}
+        >
+          {tooltip.content}
+        </div>
+      )}
     </div>
   );
 }
