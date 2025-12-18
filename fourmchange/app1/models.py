@@ -51,6 +51,12 @@ class FourMAction(models.Model):
     set_up_approval = models.BooleanField(default=False)
     retroactive_inspection = models.BooleanField(default=False)
     suspected_lot_check = models.BooleanField(default=False)
+    change_record = models.BooleanField(default=False)
+    identification_psn_batch_no = models.BooleanField(default=False)
+    ojt = models.BooleanField(default=False)
+    containment_action = models.BooleanField(default=False)
+    approving_authority = models.TextField(blank=True, null=True)
+    customer_approval = models.BooleanField(default=False)
     remarks = models.TextField(blank=True, null=True)
 
     def __str__(self):

@@ -301,7 +301,108 @@ export default function ChangeManagementView() {
         </div>
 
         {/* Auto-filled fields (read-only display) */}
+
         {selectedAction && (
+  <div className="bg-blue-50/70 rounded-xl p-6 space-y-4 border border-blue-200 shadow-inner">
+    <h4 className="font-extrabold text-xl text-blue-900 mb-4 flex items-center gap-2">
+      <CheckSquare className="w-5 h-5" />
+      Required Post-Change Actions
+    </h4>
+
+    {/* Status fields */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <div className="p-3 rounded-lg border bg-white shadow-sm">
+        <label className="text-sm font-bold text-gray-700 mb-1 block flex items-center gap-2">
+          <GitCommit className="w-4 h-4 text-blue-500" />
+          Change Record:
+        </label>
+        {renderStatusTag(selectedAction.change_record)}
+      </div>
+
+      <div className="p-3 rounded-lg border bg-white shadow-sm">
+        <label className="text-sm font-bold text-gray-700 mb-1 block flex items-center gap-2">
+          <FileText className="w-4 h-4 text-indigo-500" />
+          Identification PSN / Batch No.:
+        </label>
+        {renderStatusTag(selectedAction.identification_psn_batch_no)}
+      </div>
+
+      <div className="p-3 rounded-lg border bg-white shadow-sm">
+        <label className="text-sm font-bold text-gray-700 mb-1 block flex items-center gap-2">
+          <Users className="w-4 h-4 text-teal-500" />
+          OJT:
+        </label>
+        {renderStatusTag(selectedAction.ojt)}
+      </div>
+
+      <div className="p-3 rounded-lg border bg-white shadow-sm">
+        <label className="text-sm font-bold text-gray-700 mb-1 block flex items-center gap-2">
+          <Zap className="w-4 h-4 text-orange-500" />
+          Set-Up Approval:
+        </label>
+        {renderStatusTag(selectedAction.set_up_approval)}
+      </div>
+
+      <div className="p-3 rounded-lg border bg-white shadow-sm">
+        <label className="text-sm font-bold text-gray-700 mb-1 block flex items-center gap-2">
+          <ListChecks className="w-4 h-4 text-purple-500" />
+          Retroactive Inspection:
+        </label>
+        {renderStatusTag(selectedAction.retroactive_inspection)}
+      </div>
+
+      <div className="p-3 rounded-lg border bg-white shadow-sm">
+        <label className="text-sm font-bold text-gray-700 mb-1 block flex items-center gap-2">
+          <Flag className="w-4 h-4 text-red-500" />
+          Containment Action:
+        </label>
+        {renderStatusTag(selectedAction.containment_action)}
+      </div>
+
+      <div className="p-3 rounded-lg border bg-white shadow-sm">
+        <label className="text-sm font-bold text-gray-700 mb-1 block flex items-center gap-2">
+          <CheckSquare className="w-4 h-4 text-green-600" />
+          Customer Approval:
+        </label>
+        {renderStatusTag(selectedAction.customer_approval)}
+      </div>
+
+      {/* Approving Authority (TEXT FIELD) */}
+      <div className="p-3 rounded-lg border bg-white shadow-sm md:col-span-2">
+        <label className="text-sm font-bold text-gray-700 mb-1 block flex items-center gap-2">
+          <ClipboardCheck className="w-4 h-4 text-gray-600" />
+          Approving Authority:
+        </label>
+        <p className="text-gray-900 font-medium">
+          {selectedAction.approving_authority || '—'}
+        </p>
+      </div>
+
+    </div>
+
+    {/* Action details */}
+    {(selectedAction.action_taken || selectedAction.remarks) && (
+      <div className="pt-2">
+        <label className="text-sm font-bold text-gray-700 mb-2 block">
+          Action Details:
+        </label>
+
+        <p className="text-gray-900 bg-white p-3 rounded-xl border font-medium shadow-inner">
+          {selectedAction.action_taken}
+        </p>
+
+        {selectedAction.remarks && (
+          <p className="text-gray-700 bg-white p-3 rounded-xl border mt-2 text-sm italic">
+            {selectedAction.remarks}
+          </p>
+        )}
+      </div>
+    )}
+  </div>
+)}
+
+        {/* {selectedAction && (
           <div className="bg-blue-50/70 rounded-xl p-6 space-y-4 border border-blue-200 shadow-inner">
             <h4 className="font-extrabold text-xl text-blue-900 mb-4 flex items-center gap-2">
                 <CheckSquare className='w-5 h-5'/> Required Post-Change Actions
@@ -338,7 +439,7 @@ export default function ChangeManagementView() {
               </div>
             )}
           </div>
-        )}
+        )} */}
 
         {/* Date and Time Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
