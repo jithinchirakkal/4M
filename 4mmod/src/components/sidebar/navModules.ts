@@ -184,6 +184,15 @@ export const navModules: NavModule[] = [
 		description: "Manage categories, actions, and activities",
 		status: "active",
 	},
+		{
+		id: "ojt",
+		title: "OJT",
+		fullName: "OJT Sheet",
+		color: "from-gray-500 to-gray-600", // CHANGED: Unique color
+		icon: Settings,
+		description: "On Job Training",
+		status: "active",
+	},
 	{
 	id: "ptcf",
 	title: "Perishable Tool",

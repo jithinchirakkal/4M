@@ -20,6 +20,7 @@ import ChangeValidationForm from './components/ChangeValidationForm/ChangeValida
 import Suspected from './components/suspected/suspected';
 import ChangeInformationNote from './components/ChangeInformationNote/ChangeInformationNote';
 import FourMMethodPage from './components/cm/method';
+import Ojtform from './components/Level2OjtTable/Level2OjtTable';
 import PerishableToolSheet from './components/PerishableToolChangeFrequencyCheckSheet/PerishableToolChangeFrequencyCheckSheet';
 
 
@@ -85,6 +86,8 @@ const Home: React.FC<HomeProps> = ({
                     {selectedModule === 'sps' && <Suspected />}
                     {selectedModule === 'CIN' && <ChangeInformationNote />}
                     {selectedModule === '4m-method' && <FourMMethodPage />}
+                    {selectedModule === 'ojt' && <Ojtform />}
+                    
                     {selectedModule === 'ptcf' && <PerishableToolSheet />}
                 </main>
             </div>
