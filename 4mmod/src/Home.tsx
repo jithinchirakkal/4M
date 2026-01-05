@@ -20,6 +20,7 @@ import ChangeValidationForm from './components/ChangeValidationForm/ChangeValida
 import Suspected from './components/suspected/suspected';
 import ChangeInformationNote from './components/ChangeInformationNote/ChangeInformationNote';
 import FourMMethodPage from './components/cm/method';
+import PerishableToolSheet from './components/PerishableToolChangeFrequencyCheckSheet/PerishableToolChangeFrequencyCheckSheet';
 
 
 // Define the Props interface for Home
@@ -84,6 +85,7 @@ const Home: React.FC<HomeProps> = ({
                     {selectedModule === 'sps' && <Suspected />}
                     {selectedModule === 'CIN' && <ChangeInformationNote />}
                     {selectedModule === '4m-method' && <FourMMethodPage />}
+                    {selectedModule === 'ptcf' && <PerishableToolSheet />}
                 </main>
             </div>
         </div>

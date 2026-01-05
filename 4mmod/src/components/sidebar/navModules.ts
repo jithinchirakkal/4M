@@ -184,4 +184,13 @@ export const navModules: NavModule[] = [
 		description: "Manage categories, actions, and activities",
 		status: "active",
 	},
+	{
+	id: "ptcf",
+	title: "Perishable Tool",
+	fullName: "Perishable Tool Change Frequency Check Sheet",
+	color: "from-rose-500 to-rose-600",
+	icon: Settings, 
+	description: "Track and manage perishable tool change frequency and maintenance",
+	status: "active",
+    }   
 ];
