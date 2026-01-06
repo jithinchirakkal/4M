@@ -193,8 +193,9 @@ export const navModules: NavModule[] = [
 		description: "On Job Training",
 		status: "active",
 	},
+	
+		
 	{
-<<<<<<< HEAD
 	id: "pccs",
 	title: "Product Characteristics",
 	fullName: "Product Characteristics Check Sheet",
@@ -211,8 +212,9 @@ export const navModules: NavModule[] = [
 	icon: Settings, 
 	description: "Track and manage perishable tool change frequency and maintenance",
 	status: "active",
-    }   
-=======
+    }  
+	,
+	{
 		id: "process-characteritics",
 		title: "process-characteritics",
 		fullName: "process-characteritics",
@@ -221,5 +223,4 @@ export const navModules: NavModule[] = [
 		description: "process-characteritics",
 		status: "active",
 	},
->>>>>>> Anagha_dev1
 ];
