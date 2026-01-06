@@ -22,7 +22,7 @@ import ChangeInformationNote from './components/ChangeInformationNote/ChangeInfo
 import FourMMethodPage from './components/cm/method';
 import Ojtform from './components/Level2OjtTable/Level2OjtTable';
 import PerishableToolSheet from './components/PerishableToolChangeFrequencyCheckSheet/PerishableToolChangeFrequencyCheckSheet';
-import ProductCharacteristicsSheet from './components/ProductCharacteristicCheckSheet/ProductCharacteristicCheckSheet';
+import ProductCharacteristicsSheet from './components/ProductCharacteristicCheckSheet/ProductCharacteristicCheckSheet';import ProcessCheckSheet from './components/ProductCharcteristics/ProductCharacteristics'
 
 // Define the Props interface for Home
 interface HomeProps {
@@ -87,6 +87,7 @@ const Home: React.FC<HomeProps> = ({
                     {selectedModule === 'CIN' && <ChangeInformationNote />}
                     {selectedModule === '4m-method' && <FourMMethodPage />}
                     {selectedModule === 'ojt' && <Ojtform />}
+                    {selectedModule === 'process-characteritics' && <ProcessCheckSheet/>}
                     
                     {selectedModule === 'ptcf' && <PerishableToolSheet />}
                     {selectedModule === 'pccs' && <ProductCharacteristicsSheet />}
