@@ -754,7 +754,7 @@ export default function PerishableToolSheet() {
   };
 
   return (
-    <div className="max-w-full min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="max-w-full min-h-screen">
       <div className="max-w-full">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700 text-white rounded-2xl shadow-xl mb-6">

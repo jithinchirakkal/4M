@@ -94,7 +94,7 @@ export default function ChangeManagementView() {
   // Fetch descriptions when category type changes
   useEffect(() => {
     if (selectedCategoryType) {
-      fetch(`http://127.0.0.1:8000/api/4m-categories/?category_type=${selectedCategoryType}`)
+      fetch(`http://127.0.0.1:8000/api/4m-categories/?category_type=${selectedCategoryType}&four_m=${selectedCategory}`)
         .then(res => res.json())
         .then(data => setDescriptions(data))
         .catch(() => setDescriptions([]));
@@ -147,9 +147,15 @@ export default function ChangeManagementView() {
   // Handle category card click
   const handleCategory = (cat: string) => {
     setSelectedCategory(cat);
+    setSelectedCategoryType("");        // ✅ RESET
+    setDescriptions([]);                // ✅ RESET
+    setActions([]);                     // ✅ RESET
+    setSelectedAction(null); 
     setForm((prev) => ({
       ...prev,
       four_m: cat,
+      category: "",
+      action: "",
     }));
   };
 

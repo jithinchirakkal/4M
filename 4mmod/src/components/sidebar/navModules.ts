@@ -194,6 +194,15 @@ export const navModules: NavModule[] = [
 		status: "active",
 	},
 	{
+	id: "pccs",
+	title: "Product Characteristics",
+	fullName: "Product Characteristics Check Sheet",
+	color: "from-fuchsia-500 to-pink-600",
+	icon: CheckCircle,
+	description: "Monitor and verify product quality characteristics during assembly",
+	status: "active",
+    }, 
+	{
 	id: "ptcf",
 	title: "Perishable Tool",
 	fullName: "Perishable Tool Change Frequency Check Sheet",

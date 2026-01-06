@@ -1,8 +1,840 @@
+// import React, { useState, useEffect } from "react";
+// import { Pencil, Trash2, Plus, X, Save } from "lucide-react";
+
+// interface FourMCategory {
+//   id?: number;
+//   four_m: string; 
+//   category_type: string;
+//   description: string;
+// }
+
+// interface FourMAction {
+//   id?: number;
+//   category: number;
+//   action_taken: string;
+
+//   change_record: boolean;
+//   identification_psn_batch_no: boolean;
+//   ojt: boolean;
+//   containment_action: boolean;
+//   approving_authority: string | null;
+//   customer_approval: boolean;
+
+//   set_up_approval: boolean;
+//   retroactive_inspection: boolean;
+//   suspected_lot_check: boolean;
+
+//   remarks: string;
+// }
+
+// interface CombinedData extends FourMCategory {
+//   actions: FourMAction[];
+// }
+
+// export default function FourMMethodPage() {
+//   const [categories, setCategories] = useState<CombinedData[]>([]);
+//   const [selectedCategory, setSelectedCategory] = useState<string>("");
+//   const [showForm, setShowForm] = useState(false);
+//   const [editingId, setEditingId] = useState<number | null>(null);
+
+//   // Form state
+//   const [formData, setFormData] = useState({
+//     four_m: "",
+//     category_type: "",
+//     description: "",
+//     action_taken: "",
+
+//     change_record: false,
+//     identification_psn_batch_no: false,
+//     ojt: false,
+//     containment_action: false,
+
+//     set_up_approval: false,
+//     retroactive_inspection: false,
+//     suspected_lot_check: false,
+
+//     approving_authority: "",
+//     customer_approval: false,
+//     // set_up_approval: false,
+//     // retroactive_inspection: false,
+//     // suspected_lot_check: false,
+//     remarks: "",
+//   });
+
+//   useEffect(() => {
+//     fetchData();
+//   }, []);
+
+//   const fetchData = async () => {
+//     try {
+//       const [categoriesRes, actionsRes] = await Promise.all([
+//         fetch("http://127.0.0.1:8000/api/4m-categories/"),
+//         fetch("http://127.0.0.1:8000/api/actions/"),
+//       ]);
+
+//       const categoriesData = await categoriesRes.json();
+//       const actionsData = await actionsRes.json();
+
+//       // Combine categories with their actions
+//       const combined = categoriesData.map((cat: FourMCategory) => ({
+//         ...cat,
+//         actions: actionsData.filter((action: FourMAction) => action.category === cat.id),
+//       }));
+
+//       // ✅ ADD SORTING HERE
+//       combined.sort((a: CombinedData, b: CombinedData) => {
+//         // First sort by 4M type
+//         if (a.four_m !== b.four_m) {
+//           return a.four_m.localeCompare(b.four_m);
+//         }
+//         // Then sort by category type
+//         if (a.category_type !== b.category_type) {
+//           const order: { [key: string]: number } = { 'Planned': 1, 'Unplanned': 2, 'Abnormal': 3 };
+//           return order[a.category_type] - order[b.category_type];
+//         }
+//         // Finally sort by ID (creation order)
+//         return (a.id || 0) - (b.id || 0);
+//       });
+//       setCategories(combined);
+//     } catch (error) {
+//       console.error("Error fetching data:", error);
+//       alert("Failed to fetch data");
+//     }
+//   };
+
+//   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+//     const { name, value, type } = e.target;
+//     if (type === "checkbox") {
+//       const checked = (e.target as HTMLInputElement).checked;
+//       setFormData({ ...formData, [name]: checked });
+//     } else {
+//       setFormData({ ...formData, [name]: value });
+//     }
+//   };
+
+//   const handleSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+
+//     if (!formData.four_m || !formData.category_type || !formData.description || !formData.action_taken) {
+//       alert("Please fill in all required fields");
+//       return;
+//     }
+
+//     try {
+//       let categoryId: number;
+
+//       if (editingId) {
+//         // Update existing action
+//         const existingCategory = categories.find(cat => 
+//           cat.actions.some(action => action.id === editingId)
+//         );
+        
+//         if (existingCategory) {
+//           categoryId = existingCategory.id!;
+          
+//           // Update category if needed
+//           await fetch(`http://127.0.0.1:8000/api/4m-categories/${categoryId}/`, {
+//             method: "PUT",
+//             headers: { "Content-Type": "application/json" },
+//             body: JSON.stringify({
+//               four_m: formData.four_m, 
+//               category_type: formData.category_type,
+//               description: formData.description,
+//             }),
+//           });
+
+//           // Update action
+//           await fetch(`http://127.0.0.1:8000/api/actions/${editingId}/`, {
+//             method: "PUT",
+//             headers: { "Content-Type": "application/json" },
+//             body: JSON.stringify({
+//               category: categoryId,
+//               action_taken: formData.action_taken,
+
+//               change_record: formData.change_record,
+//     identification_psn_batch_no: formData.identification_psn_batch_no,
+//     ojt: formData.ojt,
+//     containment_action: formData.containment_action,
+
+//     set_up_approval: formData.set_up_approval,
+//     retroactive_inspection: formData.retroactive_inspection,
+//     suspected_lot_check: formData.suspected_lot_check,
+
+//     customer_approval: formData.customer_approval,
+//     approving_authority: formData.approving_authority || null,
+//               // set_up_approval: formData.set_up_approval,
+//               // retroactive_inspection: formData.retroactive_inspection,
+//               // suspected_lot_check: formData.suspected_lot_check,
+//               remarks: formData.remarks,
+//             }),
+//           });
+//         }
+//       } else {
+//         // Check if category already exists
+//         const existingCategory = categories.find(
+//           (cat) =>
+//             cat.category_type === formData.category_type &&
+//             cat.description === formData.description
+//         );
+
+//         if (existingCategory) {
+//           categoryId = existingCategory.id!;
+//         } else {
+//           // Create new category
+//           const categoryRes = await fetch("http://127.0.0.1:8000/api/4m-categories/", {
+//             method: "POST",
+//             headers: { "Content-Type": "application/json" },
+//             body: JSON.stringify({
+//               four_m: formData.four_m, 
+//               category_type: formData.category_type,
+//               description: formData.description,
+//             }),
+//           });
+//           const categoryData = await categoryRes.json();
+//           categoryId = categoryData.id;
+//         }
+
+//         // Create new action
+//         await fetch("http://127.0.0.1:8000/api/actions/", {
+//           method: "POST",
+//           headers: { "Content-Type": "application/json" },
+//           body: JSON.stringify({
+//             category: categoryId,
+//             action_taken: formData.action_taken,
+
+//             change_record: formData.change_record,
+//   identification_psn_batch_no: formData.identification_psn_batch_no,
+//   ojt: formData.ojt,
+//   containment_action: formData.containment_action,
+
+//   set_up_approval: formData.set_up_approval,
+//   retroactive_inspection: formData.retroactive_inspection,
+//   suspected_lot_check: formData.suspected_lot_check,
+
+//   approving_authority: formData.approving_authority || null,
+//   customer_approval: formData.customer_approval,
+//             // set_up_approval: formData.set_up_approval,
+//             // retroactive_inspection: formData.retroactive_inspection,
+//             // suspected_lot_check: formData.suspected_lot_check,
+//             remarks: formData.remarks,
+//           }),
+//         });
+//       }
+
+//       alert(editingId ? "Updated successfully!" : "Added successfully!");
+//       resetForm();
+//       fetchData();
+//     } catch (error) {
+//       console.error("Error saving data:", error);
+//       alert("Failed to save data");
+//     }
+//   };
+
+//   const handleEdit = (category: CombinedData, action: FourMAction) => {
+//     setFormData({
+//       four_m: category.four_m, 
+//       category_type: category.category_type,
+//       description: category.description,
+//       action_taken: action.action_taken,
+      
+//       change_record: action.change_record,
+//   identification_psn_batch_no: action.identification_psn_batch_no,
+//   ojt: action.ojt,
+//   containment_action: action.containment_action,
+
+//   set_up_approval: action.set_up_approval,
+//   retroactive_inspection: action.retroactive_inspection,
+//   suspected_lot_check: action.suspected_lot_check,
+
+//   approving_authority: action.approving_authority || "",
+//   customer_approval: action.customer_approval,
+//       // set_up_approval: action.set_up_approval,
+//       // retroactive_inspection: action.retroactive_inspection,
+//       // suspected_lot_check: action.suspected_lot_check,
+//       remarks: action.remarks || "",
+//     });
+//     setEditingId(action.id!);
+//     setShowForm(true);
+//   };
+
+//   const handleDelete = async (actionId: number, categoryId: number) => {
+//     if (!window.confirm("Are you sure you want to delete this action?")) return;
+
+//     try {
+//       await fetch(`http://127.0.0.1:8000/api/actions/${actionId}/`, {
+//         method: "DELETE",
+//       });
+
+//       // Check if category has no more actions, then delete category
+//       const category = categories.find(cat => cat.id === categoryId);
+//       if (category && category.actions.length === 1) {
+//         await fetch(`http://127.0.0.1:8000/api/4m-categories/${categoryId}/`, {
+//           method: "DELETE",
+//         });
+//       }
+
+//       alert("Deleted successfully!");
+//       fetchData();
+//     } catch (error) {
+//       console.error("Error deleting data:", error);
+//       alert("Failed to delete data");
+//     }
+//   };
+
+//   const resetForm = () => {
+//     setFormData({
+//       four_m: "",  
+//       category_type: "",
+//       description: "",
+//       action_taken: "",
+
+//       change_record: false,
+//   identification_psn_batch_no: false,
+//   ojt: false,
+//   containment_action: false,
+
+//   set_up_approval: false,
+//   retroactive_inspection: false,
+//   suspected_lot_check: false,
+
+//   approving_authority: "",
+//   customer_approval: false,
+//       // set_up_approval: false,
+//       // retroactive_inspection: false,
+//       // suspected_lot_check: false,
+//       remarks: "",
+//     });
+//     setEditingId(null);
+//     setShowForm(false);
+//   };
+
+//   const filteredCategories = selectedCategory
+//     ? categories.filter((cat) => cat.category_type === selectedCategory)
+//     : categories;
+
+//   return (
+//     <div className="min-h-screen p-6 ">
+//       <div className="max-w-full mx-auto">
+//         {/* Header */}
+//         <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-2xl shadow-xl mb-6 p-6">
+//           <h1 className="text-3xl font-bold">4M Method Configuration</h1>
+//           <p className="text-blue-100 mt-2">Manage categories, actions, and activities</p>
+//         </div>
+
+//         {/* Filter and Add Button */}
+//         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+//           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+//             <div className="flex items-center gap-3 w-full md:w-auto">
+//               <label className="font-semibold text-gray-700">Filter by Category:</label>
+//               <select
+//                 value={selectedCategory}
+//                 onChange={(e) => setSelectedCategory(e.target.value)}
+//                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
+//               >
+//                 <option value="">All Categories</option>
+//                 <option value="Planned">Planned</option>
+//                 <option value="Unplanned">Unplanned</option>
+//                 <option value="Abnormal">Abnormal</option>
+//               </select>
+//             </div>
+//             <button
+//               onClick={() => setShowForm(!showForm)}
+//               className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-2 rounded-lg shadow hover:from-green-600 hover:to-green-700 font-semibold transition"
+//             >
+//               {showForm ? <X size={20} /> : <Plus size={20} />}
+//               {showForm ? "Cancel" : "Add New "}
+//             </button>
+//           </div>
+//         </div>
+
+//         {/* Form */}
+//         {/* Form */}
+// {showForm && (
+//   <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+//     <h2 className="text-xl font-bold text-gray-800 mb-4">
+//       {editingId ? "Edit Method" : "Add New "}
+//     </h2>
+
+//     <form onSubmit={handleSubmit} className="space-y-4">
+
+//       <div>
+//   <label className="block text-sm font-semibold text-gray-700 mb-2">
+//     4M Type <span className="text-red-500">*</span>
+//   </label>
+//   <select
+//     name="four_m"
+//     value={formData.four_m}
+//     onChange={handleInputChange}
+//     required
+//     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400"
+//   >
+//     <option value="">Select 4M</option>
+//     <option value="Man">Man</option>
+//     <option value="Machine/Tool">Machine/Tool</option>
+//     <option value="Material">Material</option>
+//     <option value="Method">Method</option>
+//   </select>
+// </div>
+
+
+//       {/* Category */}
+//       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//         <div>
+//           <label className="block text-sm font-semibold text-gray-700 mb-2">
+//             Category Type <span className="text-red-500">*</span>
+//           </label>
+//           <select
+//             name="category_type"
+//             value={formData.category_type}
+//             onChange={handleInputChange}
+//             required
+//             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
+//           >
+//             <option value="">Select Category</option>
+//             <option value="Planned">Planned</option>
+//             <option value="Unplanned">Unplanned</option>
+//             <option value="Abnormal">Abnormal</option>
+//           </select>
+//         </div>
+
+//         <div>
+//           <label className="block text-sm font-semibold text-gray-700 mb-2">
+//             Definition/Description <span className="text-red-500">*</span>
+//           </label>
+//           <input
+//             type="text"
+//             name="description"
+//             value={formData.description}
+//             onChange={handleInputChange}
+//             required
+//             placeholder="Enter definition"
+//             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
+//           />
+//         </div>
+//       </div>
+
+//       {/* Action Taken */}
+//       <div>
+//         <label className="block text-sm font-semibold text-gray-700 mb-2">
+//           Action Taken <span className="text-red-500">*</span>
+//         </label>
+//         <textarea
+//           name="action_taken"
+//           value={formData.action_taken}
+//           onChange={handleInputChange}
+//           required
+//           rows={3}
+//           placeholder="Enter action taken"
+//           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
+//         />
+//       </div>
+
+//       {/* Activities */}
+//       <div className="border-t pt-4">
+//         <h3 className="font-semibold text-gray-700 mb-3">
+//           Activities to be done
+//         </h3>
+
+//         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+//           {/* New fields */}
+//           <label className="flex items-center gap-2 cursor-pointer">
+//             <input
+//               type="checkbox"
+//               name="change_record"
+//               checked={formData.change_record}
+//               onChange={handleInputChange}
+//               className="w-5 h-5 text-indigo-600 rounded"
+//             />
+//             <span className="text-sm text-gray-700">Change Record</span>
+//           </label>
+
+//           <label className="flex items-center gap-2 cursor-pointer">
+//             <input
+//               type="checkbox"
+//               name="identification_psn_batch_no"
+//               checked={formData.identification_psn_batch_no}
+//               onChange={handleInputChange}
+//               className="w-5 h-5 text-indigo-600 rounded"
+//             />
+//             <span className="text-sm text-gray-700">
+//               Identification PSN / Batch No.
+//             </span>
+//           </label>
+
+//           <label className="flex items-center gap-2 cursor-pointer">
+//             <input
+//               type="checkbox"
+//               name="ojt"
+//               checked={formData.ojt}
+//               onChange={handleInputChange}
+//               className="w-5 h-5 text-indigo-600 rounded"
+//             />
+//             <span className="text-sm text-gray-700">OJT</span>
+//           </label>
+
+          
+
+//           {/* Existing fields */}
+//           <label className="flex items-center gap-2 cursor-pointer">
+//             <input
+//               type="checkbox"
+//               name="set_up_approval"
+//               checked={formData.set_up_approval}
+//               onChange={handleInputChange}
+//               className="w-5 h-5 text-indigo-600 rounded"
+//             />
+//             <span className="text-sm text-gray-700">Set-Up Approval</span>
+//           </label>
+
+//           <label className="flex items-center gap-2 cursor-pointer">
+//             <input
+//               type="checkbox"
+//               name="retroactive_inspection"
+//               checked={formData.retroactive_inspection}
+//               onChange={handleInputChange}
+//               className="w-5 h-5 text-indigo-600 rounded"
+//             />
+//             <span className="text-sm text-gray-700">
+//               Retroactive Inspection
+//             </span>
+//           </label>
+
+//           <label className="flex items-center gap-2 cursor-pointer">
+//             <input
+//               type="checkbox"
+//               name="containment_action"
+//               checked={formData.containment_action}
+//               onChange={handleInputChange}
+//               className="w-5 h-5 text-indigo-600 rounded"
+//             />
+//             <span className="text-sm text-gray-700">Containment Action</span>
+//           </label>
+
+//           <label className="flex items-center gap-2 cursor-pointer">
+//             <input
+//               type="checkbox"
+//               name="suspected_lot_check"
+//               checked={formData.suspected_lot_check}
+//               onChange={handleInputChange}
+//               className="w-5 h-5 text-indigo-600 rounded"
+//             />
+//             <span className="text-sm text-gray-700">
+//               Suspected Lot Check
+//             </span>
+//           </label>
+
+//           <label className="flex items-center gap-2 cursor-pointer">
+//             <input
+//               type="checkbox"
+//               name="customer_approval"
+//               checked={formData.customer_approval}
+//               onChange={handleInputChange}
+//               className="w-5 h-5 text-indigo-600 rounded"
+//             />
+//             <span className="text-sm text-gray-700">
+//               Customer Approval
+//             </span>
+//           </label>
+//         </div>
+//       </div>
+
+//       {/* Approving Authority */}
+//       <div>
+//         <label className="block text-sm font-semibold text-gray-700 mb-2">
+//           Approving Authority
+//         </label>
+//         <input
+//           type="text"
+//           name="approving_authority"
+//           value={formData.approving_authority}
+//           onChange={handleInputChange}
+//           placeholder="Enter approving authority"
+//           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
+//         />
+//       </div>
+
+//       {/* Remarks */}
+//       <div>
+//         <label className="block text-sm font-semibold text-gray-700 mb-2">
+//           Remarks
+//         </label>
+//         <textarea
+//           name="remarks"
+//           value={formData.remarks}
+//           onChange={handleInputChange}
+//           rows={2}
+//           placeholder="Enter remarks (optional)"
+//           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
+//         />
+//       </div>
+
+//       {/* Actions */}
+//       <div className="flex justify-end gap-3 pt-4">
+//         <button
+//           type="button"
+//           onClick={resetForm}
+//           className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-semibold"
+//         >
+//           Cancel
+//         </button>
+
+//         <button
+//           type="submit"
+//           className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-6 py-2 rounded-lg shadow hover:from-indigo-600 hover:to-indigo-700 font-semibold"
+//         >
+//           <Save size={20} />
+//           {editingId ? "Update" : "Save"}
+//         </button>
+//       </div>
+//     </form>
+//   </div>
+// )}
+
+
+
+//         {/* Table */}
+// <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+//   <div className="overflow-x-auto">
+//     <table className="w-full border-collapse text-sm">
+//       <thead className="bg-indigo-50">
+
+//         {/* Header Row 1 */}
+//         <tr>
+//           <th className="border border-gray-300 p-3 text-left font-semibold text-gray-700">
+//             S.No.
+//           </th>
+//           <th className="border border-gray-300 p-3 text-left font-semibold text-gray-700">
+//             4M
+//           </th>
+//           <th className="border border-gray-300 p-3 text-left font-semibold text-gray-700">
+//             Category Type
+//           </th>
+//           <th className="border border-gray-300 p-3 text-left font-semibold text-gray-700">
+//             Definition
+//           </th>
+//           <th className="border border-gray-300 p-3 text-left font-semibold text-gray-700">
+//             Action Taken
+//           </th>
+
+//           {/* FIXED colSpan */}
+//           <th
+//             className="border border-gray-300 p-3 text-center font-semibold text-gray-700"
+//             colSpan={8}
+//           >
+//             Activities to be done
+//           </th>
+
+//           <th className="border border-gray-300 p-3 text-left font-semibold text-gray-700">
+//             Remarks
+//           </th>
+
+//           <th className="border border-gray-300 p-3 text-center font-semibold text-gray-700">
+//             Actions
+//           </th>
+//         </tr>
+
+//         {/* Header Row 2 */}
+//         <tr>
+//           <th className="border border-gray-300 p-2"></th>
+//           <th className="border border-gray-300 p-2"></th> 
+//           <th className="border border-gray-300 p-2"></th>
+//           <th className="border border-gray-300 p-2"></th>
+//           <th className="border border-gray-300 p-2"></th>
+
+//           <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">
+//             Change Record
+//           </th>
+//           <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">
+//             Identification PSN / Batch No.
+//           </th>
+//           <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">
+//             OJT
+//           </th>
+         
+//           <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">
+//             Set-Up Approval
+//           </th>
+//           <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">
+//             Retroactive Inspection
+//           </th>
+//            <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">
+//             Containment Action
+//           </th>
+//           {/* <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">
+//             Suspected Lot Check
+//           </th> */}
+//           <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">
+//             Customer Approval
+//           </th>
+//           <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">
+//             Approving Authority
+//           </th>
+
+//           <th className="border border-gray-300 p-2"></th>
+//           <th className="border border-gray-300 p-2"></th>
+//         </tr>
+//       </thead>
+
+//       {/* <tbody>
+//   {filteredCategories.length === 0 ? (
+//     <tr>
+//       <td colSpan={14} className="text-center py-8 text-gray-500">
+//         No data available. Click "Add New Method" to get started.
+//       </td>
+//     </tr>
+//   ) : (
+//     (() => {
+//       let serialNo = 1; // ✅ GLOBAL COUNTER
+
+//       return filteredCategories.flatMap((category) =>
+//         category.actions.map((action) => ( */}
+//       <tbody>
+//   {filteredCategories.length === 0 ? (
+//     <tr>
+//       <td colSpan={14} className="text-center py-8 text-gray-500">
+//         No data available. Click "Add New Method" to get started.
+//       </td>
+//     </tr>
+//   ) : (
+//     (() => {
+//       let serialNo = 1;
+      
+//       // Group by 4M type
+//       const groupedBy4M: { [key: string]: CombinedData[] } = {};
+//       filteredCategories.forEach((category) => {
+//         if (!groupedBy4M[category.four_m]) {
+//           groupedBy4M[category.four_m] = [];
+//         }
+//         groupedBy4M[category.four_m].push(category);
+//       });
+
+//       return Object.entries(groupedBy4M).flatMap(([fourMType, categories]) => [
+//         // 4M Type Header Row
+//         <tr key={`4m-${fourMType}`} className="bg-gradient-to-r from-indigo-100 to-purple-100">
+//           <td colSpan={14} className="border border-gray-300 p-3 font-bold text-indigo-900 text-lg">
+//             {fourMType}
+//           </td>
+//         </tr>,
+        
+//         // Data rows for this 4M type
+//         ...categories.flatMap((category) =>
+//           category.actions.map((action) => (
+//           <tr
+//             key={`${category.id}-${action.id}`}
+//             className="hover:bg-indigo-50 transition"
+//           >
+//             {/* ✅ FIXED S.No */}
+//             <td className="border border-gray-200 p-3 text-center">
+//               {serialNo++}
+//             </td>
+
+//             <td className="border border-gray-200 p-3 text-center text-gray-400 text-xs">
+//               {/* Empty - shown in group header */}
+//             </td>
+
+
+//             <td className="border border-gray-200 p-3">
+//               <span
+//                 className={`px-3 py-1 rounded-full text-xs font-semibold ${
+//                   category.category_type === "Planned"
+//                     ? "bg-blue-100 text-blue-800"
+//                     : category.category_type === "Unplanned"
+//                     ? "bg-yellow-100 text-yellow-800"
+//                     : "bg-red-100 text-red-800"
+//                 }`}
+//               >
+//                 {category.category_type}
+//               </span>
+//             </td>
+
+//             <td className="border border-gray-200 p-3">
+//               {category.description}
+//             </td>
+
+//             <td className="border border-gray-200 p-3">
+//               {action.action_taken}
+//             </td>
+
+//             {/* Activities */}
+//             <td className="border border-gray-200 p-3 text-center">
+//               {action.change_record ? "Yes" : "No"}
+//             </td>
+
+//             <td className="border border-gray-200 p-3 text-center">
+//               {action.identification_psn_batch_no ? "Yes" : "No"}
+//             </td>
+
+//             <td className="border border-gray-200 p-3 text-center">
+//               {action.ojt ? "Yes" : "No"}
+//             </td>
+
+//             <td className="border border-gray-200 p-3 text-center">
+//               {action.set_up_approval ? "Yes" : "No"}
+//             </td>
+
+//             <td className="border border-gray-200 p-3 text-center">
+//               {action.retroactive_inspection ? "Yes" : "No"}
+//             </td>
+
+//             <td className="border border-gray-200 p-3 text-center">
+//               {action.containment_action ? "Yes" : "No"}
+//             </td>
+
+//             <td className="border border-gray-200 p-3 text-center">
+//               {action.customer_approval ? "Yes" : "No"}
+//             </td>
+
+//             <td className="border border-gray-200 p-3">
+//               {action.approving_authority || "-"}
+//             </td>
+
+//             <td className="border border-gray-200 p-3">
+//               {action.remarks || "-"}
+//             </td>
+
+//             <td className="border border-gray-200 p-3">
+//               <div className="flex justify-center gap-2">
+//                 <button
+//                   onClick={() => handleEdit(category, action)}
+//                   className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+//                   title="Edit"
+//                 >
+//                   <Pencil size={18} />
+//                 </button>
+//                 <button
+//                   onClick={() => handleDelete(action.id!, category.id!)}
+//                   className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+//                   title="Delete"
+//                 >
+//                   <Trash2 size={18} />
+//                 </button>
+//               </div>
+//             </td>
+//           </tr>
+//           ))) 
+//        ]);  
+//     })()
+//   )}
+// </tbody>
+//     </table>
+//   </div>
+// </div>
+
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
 import React, { useState, useEffect } from "react";
 import { Pencil, Trash2, Plus, X, Save } from "lucide-react";
 
 interface FourMCategory {
   id?: number;
+  four_m: string; 
   category_type: string;
   description: string;
 }
@@ -33,29 +865,24 @@ interface CombinedData extends FourMCategory {
 export default function FourMMethodPage() {
   const [categories, setCategories] = useState<CombinedData[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selected4M, setSelected4M] = useState<string>("");
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
 
-  // Form state
   const [formData, setFormData] = useState({
+    four_m: "",
     category_type: "",
     description: "",
     action_taken: "",
-
     change_record: false,
     identification_psn_batch_no: false,
     ojt: false,
     containment_action: false,
-
     set_up_approval: false,
     retroactive_inspection: false,
     suspected_lot_check: false,
-
     approving_authority: "",
     customer_approval: false,
-    // set_up_approval: false,
-    // retroactive_inspection: false,
-    // suspected_lot_check: false,
     remarks: "",
   });
 
@@ -73,11 +900,21 @@ export default function FourMMethodPage() {
       const categoriesData = await categoriesRes.json();
       const actionsData = await actionsRes.json();
 
-      // Combine categories with their actions
       const combined = categoriesData.map((cat: FourMCategory) => ({
         ...cat,
         actions: actionsData.filter((action: FourMAction) => action.category === cat.id),
       }));
+
+      combined.sort((a: CombinedData, b: CombinedData) => {
+        if (a.four_m !== b.four_m) {
+          return a.four_m.localeCompare(b.four_m);
+        }
+        if (a.category_type !== b.category_type) {
+          const order: { [key: string]: number } = { 'Planned': 1, 'Unplanned': 2, 'Abnormal': 3 };
+          return order[a.category_type] - order[b.category_type];
+        }
+        return (a.id || 0) - (b.id || 0);
+      });
 
       setCategories(combined);
     } catch (error) {
@@ -99,7 +936,7 @@ export default function FourMMethodPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.category_type || !formData.description || !formData.action_taken) {
+    if (!formData.four_m || !formData.category_type || !formData.description || !formData.action_taken) {
       alert("Please fill in all required fields");
       return;
     }
@@ -108,7 +945,6 @@ export default function FourMMethodPage() {
       let categoryId: number;
 
       if (editingId) {
-        // Update existing action
         const existingCategory = categories.find(cat => 
           cat.actions.some(action => action.id === editingId)
         );
@@ -116,44 +952,36 @@ export default function FourMMethodPage() {
         if (existingCategory) {
           categoryId = existingCategory.id!;
           
-          // Update category if needed
           await fetch(`http://127.0.0.1:8000/api/4m-categories/${categoryId}/`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
+              four_m: formData.four_m, 
               category_type: formData.category_type,
               description: formData.description,
             }),
           });
 
-          // Update action
           await fetch(`http://127.0.0.1:8000/api/actions/${editingId}/`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               category: categoryId,
               action_taken: formData.action_taken,
-
               change_record: formData.change_record,
-    identification_psn_batch_no: formData.identification_psn_batch_no,
-    ojt: formData.ojt,
-    containment_action: formData.containment_action,
-
-    set_up_approval: formData.set_up_approval,
-    retroactive_inspection: formData.retroactive_inspection,
-    suspected_lot_check: formData.suspected_lot_check,
-
-    customer_approval: formData.customer_approval,
-    approving_authority: formData.approving_authority || null,
-              // set_up_approval: formData.set_up_approval,
-              // retroactive_inspection: formData.retroactive_inspection,
-              // suspected_lot_check: formData.suspected_lot_check,
+              identification_psn_batch_no: formData.identification_psn_batch_no,
+              ojt: formData.ojt,
+              containment_action: formData.containment_action,
+              set_up_approval: formData.set_up_approval,
+              retroactive_inspection: formData.retroactive_inspection,
+              suspected_lot_check: formData.suspected_lot_check,
+              customer_approval: formData.customer_approval,
+              approving_authority: formData.approving_authority || null,
               remarks: formData.remarks,
             }),
           });
         }
       } else {
-        // Check if category already exists
         const existingCategory = categories.find(
           (cat) =>
             cat.category_type === formData.category_type &&
@@ -163,11 +991,11 @@ export default function FourMMethodPage() {
         if (existingCategory) {
           categoryId = existingCategory.id!;
         } else {
-          // Create new category
           const categoryRes = await fetch("http://127.0.0.1:8000/api/4m-categories/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
+              four_m: formData.four_m, 
               category_type: formData.category_type,
               description: formData.description,
             }),
@@ -176,28 +1004,21 @@ export default function FourMMethodPage() {
           categoryId = categoryData.id;
         }
 
-        // Create new action
         await fetch("http://127.0.0.1:8000/api/actions/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             category: categoryId,
             action_taken: formData.action_taken,
-
             change_record: formData.change_record,
-  identification_psn_batch_no: formData.identification_psn_batch_no,
-  ojt: formData.ojt,
-  containment_action: formData.containment_action,
-
-  set_up_approval: formData.set_up_approval,
-  retroactive_inspection: formData.retroactive_inspection,
-  suspected_lot_check: formData.suspected_lot_check,
-
-  approving_authority: formData.approving_authority || null,
-  customer_approval: formData.customer_approval,
-            // set_up_approval: formData.set_up_approval,
-            // retroactive_inspection: formData.retroactive_inspection,
-            // suspected_lot_check: formData.suspected_lot_check,
+            identification_psn_batch_no: formData.identification_psn_batch_no,
+            ojt: formData.ojt,
+            containment_action: formData.containment_action,
+            set_up_approval: formData.set_up_approval,
+            retroactive_inspection: formData.retroactive_inspection,
+            suspected_lot_check: formData.suspected_lot_check,
+            approving_authority: formData.approving_authority || null,
+            customer_approval: formData.customer_approval,
             remarks: formData.remarks,
           }),
         });
@@ -214,24 +1035,19 @@ export default function FourMMethodPage() {
 
   const handleEdit = (category: CombinedData, action: FourMAction) => {
     setFormData({
+      four_m: category.four_m, 
       category_type: category.category_type,
       description: category.description,
       action_taken: action.action_taken,
-      
       change_record: action.change_record,
-  identification_psn_batch_no: action.identification_psn_batch_no,
-  ojt: action.ojt,
-  containment_action: action.containment_action,
-
-  set_up_approval: action.set_up_approval,
-  retroactive_inspection: action.retroactive_inspection,
-  suspected_lot_check: action.suspected_lot_check,
-
-  approving_authority: action.approving_authority || "",
-  customer_approval: action.customer_approval,
-      // set_up_approval: action.set_up_approval,
-      // retroactive_inspection: action.retroactive_inspection,
-      // suspected_lot_check: action.suspected_lot_check,
+      identification_psn_batch_no: action.identification_psn_batch_no,
+      ojt: action.ojt,
+      containment_action: action.containment_action,
+      set_up_approval: action.set_up_approval,
+      retroactive_inspection: action.retroactive_inspection,
+      suspected_lot_check: action.suspected_lot_check,
+      approving_authority: action.approving_authority || "",
+      customer_approval: action.customer_approval,
       remarks: action.remarks || "",
     });
     setEditingId(action.id!);
@@ -246,7 +1062,6 @@ export default function FourMMethodPage() {
         method: "DELETE",
       });
 
-      // Check if category has no more actions, then delete category
       const category = categories.find(cat => cat.id === categoryId);
       if (category && category.actions.length === 1) {
         await fetch(`http://127.0.0.1:8000/api/4m-categories/${categoryId}/`, {
@@ -264,483 +1079,318 @@ export default function FourMMethodPage() {
 
   const resetForm = () => {
     setFormData({
+      four_m: "",  
       category_type: "",
       description: "",
       action_taken: "",
-
       change_record: false,
-  identification_psn_batch_no: false,
-  ojt: false,
-  containment_action: false,
-
-  set_up_approval: false,
-  retroactive_inspection: false,
-  suspected_lot_check: false,
-
-  approving_authority: "",
-  customer_approval: false,
-      // set_up_approval: false,
-      // retroactive_inspection: false,
-      // suspected_lot_check: false,
+      identification_psn_batch_no: false,
+      ojt: false,
+      containment_action: false,
+      set_up_approval: false,
+      retroactive_inspection: false,
+      suspected_lot_check: false,
+      approving_authority: "",
+      customer_approval: false,
       remarks: "",
     });
     setEditingId(null);
     setShowForm(false);
   };
 
-  const filteredCategories = selectedCategory
-    ? categories.filter((cat) => cat.category_type === selectedCategory)
-    : categories;
+  const filteredCategories = categories.filter((cat) => {
+    const matchesCategory = selectedCategory ? cat.category_type === selectedCategory : true;
+    const matches4M = selected4M ? cat.four_m === selected4M : true;
+    return matchesCategory && matches4M;
+  });
 
   return (
-    <div className="min-h-screen p-6 ">
+    <div className="min-h-screen p-6">
       <div className="max-w-full mx-auto">
-        {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-2xl shadow-xl mb-6 p-6">
           <h1 className="text-3xl font-bold">4M Method Configuration</h1>
           <p className="text-blue-100 mt-2">Manage categories, actions, and activities</p>
         </div>
 
-        {/* Filter and Add Button */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-3 w-full md:w-auto">
-              <label className="font-semibold text-gray-700">Filter by Category:</label>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
-              >
-                <option value="">All Categories</option>
-                <option value="Planned">Planned</option>
-                <option value="Unplanned">Unplanned</option>
-                <option value="Abnormal">Abnormal</option>
-              </select>
+            <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+              <div className="flex items-center gap-3">
+                <label className="font-semibold text-gray-700">Filter by 4M:</label>
+                <select
+                  value={selected4M}
+                  onChange={(e) => setSelected4M(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
+                >
+                  <option value="">All 4M Types</option>
+                  <option value="Man">Man</option>
+                  <option value="Machine/Tool">Machine/Tool</option>
+                  <option value="Material">Material</option>
+                  <option value="Method">Method</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <label className="font-semibold text-gray-700">Filter by Category:</label>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
+                >
+                  <option value="">All Categories</option>
+                  <option value="Planned">Planned</option>
+                  <option value="Unplanned">Unplanned</option>
+                  <option value="Abnormal">Abnormal</option>
+                </select>
+              </div>
             </div>
+
             <button
               onClick={() => setShowForm(!showForm)}
               className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-2 rounded-lg shadow hover:from-green-600 hover:to-green-700 font-semibold transition"
             >
               {showForm ? <X size={20} /> : <Plus size={20} />}
-              {showForm ? "Cancel" : "Add New "}
+              {showForm ? "Cancel" : "Add New"}
             </button>
           </div>
         </div>
 
-        {/* Form */}
-        {/* Form */}
-{showForm && (
-  <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-    <h2 className="text-xl font-bold text-gray-800 mb-4">
-      {editingId ? "Edit Method" : "Add New "}
-    </h2>
+        {showForm && (
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              {editingId ? "Edit Method" : "Add New"}
+            </h2>
 
-    <form onSubmit={handleSubmit} className="space-y-4">
-
-      {/* Category */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Category Type <span className="text-red-500">*</span>
-          </label>
-          <select
-            name="category_type"
-            value={formData.category_type}
-            onChange={handleInputChange}
-            required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
-          >
-            <option value="">Select Category</option>
-            <option value="Planned">Planned</option>
-            <option value="Unplanned">Unplanned</option>
-            <option value="Abnormal">Abnormal</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Definition/Description <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            name="description"
-            value={formData.description}
-            onChange={handleInputChange}
-            required
-            placeholder="Enter definition"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
-          />
-        </div>
-      </div>
-
-      {/* Action Taken */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
-          Action Taken <span className="text-red-500">*</span>
-        </label>
-        <textarea
-          name="action_taken"
-          value={formData.action_taken}
-          onChange={handleInputChange}
-          required
-          rows={3}
-          placeholder="Enter action taken"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
-        />
-      </div>
-
-      {/* Activities */}
-      <div className="border-t pt-4">
-        <h3 className="font-semibold text-gray-700 mb-3">
-          Activities to be done
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-          {/* New fields */}
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              name="change_record"
-              checked={formData.change_record}
-              onChange={handleInputChange}
-              className="w-5 h-5 text-indigo-600 rounded"
-            />
-            <span className="text-sm text-gray-700">Change Record</span>
-          </label>
-
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              name="identification_psn_batch_no"
-              checked={formData.identification_psn_batch_no}
-              onChange={handleInputChange}
-              className="w-5 h-5 text-indigo-600 rounded"
-            />
-            <span className="text-sm text-gray-700">
-              Identification PSN / Batch No.
-            </span>
-          </label>
-
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              name="ojt"
-              checked={formData.ojt}
-              onChange={handleInputChange}
-              className="w-5 h-5 text-indigo-600 rounded"
-            />
-            <span className="text-sm text-gray-700">OJT</span>
-          </label>
-
-          
-
-          {/* Existing fields */}
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              name="set_up_approval"
-              checked={formData.set_up_approval}
-              onChange={handleInputChange}
-              className="w-5 h-5 text-indigo-600 rounded"
-            />
-            <span className="text-sm text-gray-700">Set-Up Approval</span>
-          </label>
-
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              name="retroactive_inspection"
-              checked={formData.retroactive_inspection}
-              onChange={handleInputChange}
-              className="w-5 h-5 text-indigo-600 rounded"
-            />
-            <span className="text-sm text-gray-700">
-              Retroactive Inspection
-            </span>
-          </label>
-
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              name="containment_action"
-              checked={formData.containment_action}
-              onChange={handleInputChange}
-              className="w-5 h-5 text-indigo-600 rounded"
-            />
-            <span className="text-sm text-gray-700">Containment Action</span>
-          </label>
-
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              name="suspected_lot_check"
-              checked={formData.suspected_lot_check}
-              onChange={handleInputChange}
-              className="w-5 h-5 text-indigo-600 rounded"
-            />
-            <span className="text-sm text-gray-700">
-              Suspected Lot Check
-            </span>
-          </label>
-
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              name="customer_approval"
-              checked={formData.customer_approval}
-              onChange={handleInputChange}
-              className="w-5 h-5 text-indigo-600 rounded"
-            />
-            <span className="text-sm text-gray-700">
-              Customer Approval
-            </span>
-          </label>
-        </div>
-      </div>
-
-      {/* Approving Authority */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
-          Approving Authority
-        </label>
-        <input
-          type="text"
-          name="approving_authority"
-          value={formData.approving_authority}
-          onChange={handleInputChange}
-          placeholder="Enter approving authority"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
-        />
-      </div>
-
-      {/* Remarks */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
-          Remarks
-        </label>
-        <textarea
-          name="remarks"
-          value={formData.remarks}
-          onChange={handleInputChange}
-          rows={2}
-          placeholder="Enter remarks (optional)"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
-        />
-      </div>
-
-      {/* Actions */}
-      <div className="flex justify-end gap-3 pt-4">
-        <button
-          type="button"
-          onClick={resetForm}
-          className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-semibold"
-        >
-          Cancel
-        </button>
-
-        <button
-          type="submit"
-          className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-6 py-2 rounded-lg shadow hover:from-indigo-600 hover:to-indigo-700 font-semibold"
-        >
-          <Save size={20} />
-          {editingId ? "Update" : "Save"}
-        </button>
-      </div>
-    </form>
-  </div>
-)}
-
-
-
-        {/* Table */}
-<div className="bg-white rounded-xl shadow-lg overflow-hidden">
-  <div className="overflow-x-auto">
-    <table className="w-full border-collapse text-sm">
-      <thead className="bg-indigo-50">
-
-        {/* Header Row 1 */}
-        <tr>
-          <th className="border border-gray-300 p-3 text-left font-semibold text-gray-700">
-            S.No.
-          </th>
-          <th className="border border-gray-300 p-3 text-left font-semibold text-gray-700">
-            Category Type
-          </th>
-          <th className="border border-gray-300 p-3 text-left font-semibold text-gray-700">
-            Definition
-          </th>
-          <th className="border border-gray-300 p-3 text-left font-semibold text-gray-700">
-            Action Taken
-          </th>
-
-          {/* FIXED colSpan */}
-          <th
-            className="border border-gray-300 p-3 text-center font-semibold text-gray-700"
-            colSpan={8}
-          >
-            Activities to be done
-          </th>
-
-          <th className="border border-gray-300 p-3 text-left font-semibold text-gray-700">
-            Remarks
-          </th>
-
-          <th className="border border-gray-300 p-3 text-center font-semibold text-gray-700">
-            Actions
-          </th>
-        </tr>
-
-        {/* Header Row 2 */}
-        <tr>
-          <th className="border border-gray-300 p-2"></th>
-          <th className="border border-gray-300 p-2"></th>
-          <th className="border border-gray-300 p-2"></th>
-          <th className="border border-gray-300 p-2"></th>
-
-          <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">
-            Change Record
-          </th>
-          <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">
-            Identification PSN / Batch No.
-          </th>
-          <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">
-            OJT
-          </th>
-         
-          <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">
-            Set-Up Approval
-          </th>
-          <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">
-            Retroactive Inspection
-          </th>
-           <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">
-            Containment Action
-          </th>
-          {/* <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">
-            Suspected Lot Check
-          </th> */}
-          <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">
-            Customer Approval
-          </th>
-          <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">
-            Approving Authority
-          </th>
-
-          <th className="border border-gray-300 p-2"></th>
-          <th className="border border-gray-300 p-2"></th>
-        </tr>
-      </thead>
-
-      <tbody>
-  {filteredCategories.length === 0 ? (
-    <tr>
-      <td colSpan={14} className="text-center py-8 text-gray-500">
-        No data available. Click "Add New Method" to get started.
-      </td>
-    </tr>
-  ) : (
-    (() => {
-      let serialNo = 1; // ✅ GLOBAL COUNTER
-
-      return filteredCategories.flatMap((category) =>
-        category.actions.map((action) => (
-          <tr
-            key={`${category.id}-${action.id}`}
-            className="hover:bg-indigo-50 transition"
-          >
-            {/* ✅ FIXED S.No */}
-            <td className="border border-gray-200 p-3 text-center">
-              {serialNo++}
-            </td>
-
-            <td className="border border-gray-200 p-3">
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                  category.category_type === "Planned"
-                    ? "bg-blue-100 text-blue-800"
-                    : category.category_type === "Unplanned"
-                    ? "bg-yellow-100 text-yellow-800"
-                    : "bg-red-100 text-red-800"
-                }`}
-              >
-                {category.category_type}
-              </span>
-            </td>
-
-            <td className="border border-gray-200 p-3">
-              {category.description}
-            </td>
-
-            <td className="border border-gray-200 p-3">
-              {action.action_taken}
-            </td>
-
-            {/* Activities */}
-            <td className="border border-gray-200 p-3 text-center">
-              {action.change_record ? "Yes" : "No"}
-            </td>
-
-            <td className="border border-gray-200 p-3 text-center">
-              {action.identification_psn_batch_no ? "Yes" : "No"}
-            </td>
-
-            <td className="border border-gray-200 p-3 text-center">
-              {action.ojt ? "Yes" : "No"}
-            </td>
-
-            <td className="border border-gray-200 p-3 text-center">
-              {action.set_up_approval ? "Yes" : "No"}
-            </td>
-
-            <td className="border border-gray-200 p-3 text-center">
-              {action.retroactive_inspection ? "Yes" : "No"}
-            </td>
-
-            <td className="border border-gray-200 p-3 text-center">
-              {action.containment_action ? "Yes" : "No"}
-            </td>
-
-            <td className="border border-gray-200 p-3 text-center">
-              {action.customer_approval ? "Yes" : "No"}
-            </td>
-
-            <td className="border border-gray-200 p-3">
-              {action.approving_authority || "-"}
-            </td>
-
-            <td className="border border-gray-200 p-3">
-              {action.remarks || "-"}
-            </td>
-
-            <td className="border border-gray-200 p-3">
-              <div className="flex justify-center gap-2">
-                <button
-                  onClick={() => handleEdit(category, action)}
-                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                  title="Edit"
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  4M Type <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="four_m"
+                  value={formData.four_m}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400"
                 >
-                  <Pencil size={18} />
+                  <option value="">Select 4M</option>
+                  <option value="Man">Man</option>
+                  <option value="Machine/Tool">Machine/Tool</option>
+                  <option value="Material">Material</option>
+                  <option value="Method">Method</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Category Type <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="category_type"
+                    value={formData.category_type}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400"
+                  >
+                    <option value="">Select Category</option>
+                    <option value="Planned">Planned</option>
+                    <option value="Unplanned">Unplanned</option>
+                    <option value="Abnormal">Abnormal</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Definition/Description <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="Enter definition"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Action Taken <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  name="action_taken"
+                  value={formData.action_taken}
+                  onChange={handleInputChange}
+                  required
+                  rows={3}
+                  placeholder="Enter action taken"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400"
+                />
+              </div>
+
+              <div className="border-t pt-4">
+                <h3 className="font-semibold text-gray-700 mb-3">Activities to be done</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="change_record" checked={formData.change_record} onChange={handleInputChange} className="w-5 h-5 text-indigo-600 rounded" />
+                    <span className="text-sm text-gray-700">Change Record</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="identification_psn_batch_no" checked={formData.identification_psn_batch_no} onChange={handleInputChange} className="w-5 h-5 text-indigo-600 rounded" />
+                    <span className="text-sm text-gray-700">Identification PSN / Batch No.</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="ojt" checked={formData.ojt} onChange={handleInputChange} className="w-5 h-5 text-indigo-600 rounded" />
+                    <span className="text-sm text-gray-700">OJT</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="set_up_approval" checked={formData.set_up_approval} onChange={handleInputChange} className="w-5 h-5 text-indigo-600 rounded" />
+                    <span className="text-sm text-gray-700">Set-Up Approval</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="retroactive_inspection" checked={formData.retroactive_inspection} onChange={handleInputChange} className="w-5 h-5 text-indigo-600 rounded" />
+                    <span className="text-sm text-gray-700">Retroactive Inspection</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="containment_action" checked={formData.containment_action} onChange={handleInputChange} className="w-5 h-5 text-indigo-600 rounded" />
+                    <span className="text-sm text-gray-700">Containment Action</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="suspected_lot_check" checked={formData.suspected_lot_check} onChange={handleInputChange} className="w-5 h-5 text-indigo-600 rounded" />
+                    <span className="text-sm text-gray-700">Suspected Lot Check</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="customer_approval" checked={formData.customer_approval} onChange={handleInputChange} className="w-5 h-5 text-indigo-600 rounded" />
+                    <span className="text-sm text-gray-700">Customer Approval</span>
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Approving Authority</label>
+                <input
+                  type="text"
+                  name="approving_authority"
+                  value={formData.approving_authority}
+                  onChange={handleInputChange}
+                  placeholder="Enter approving authority"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Remarks</label>
+                <textarea
+                  name="remarks"
+                  value={formData.remarks}
+                  onChange={handleInputChange}
+                  rows={2}
+                  placeholder="Enter remarks (optional)"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4">
+                <button type="button" onClick={resetForm} className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-semibold">
+                  Cancel
                 </button>
-                <button
-                  onClick={() => handleDelete(action.id!, category.id!)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                  title="Delete"
-                >
-                  <Trash2 size={18} />
+                <button type="submit" className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-6 py-2 rounded-lg shadow hover:from-indigo-600 hover:to-indigo-700 font-semibold">
+                  <Save size={20} />
+                  {editingId ? "Update" : "Save"}
                 </button>
               </div>
-            </td>
-          </tr>
-        ))
-      );
-    })()
-  )}
-</tbody>
-    </table>
-  </div>
-</div>
+            </form>
+          </div>
+        )}
 
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead className="bg-indigo-50">
+                <tr>
+                  <th className="border border-gray-300 p-3 text-left font-semibold text-gray-700">S.No.</th>
+                  <th className="border border-gray-300 p-3 text-left font-semibold text-gray-700">4M</th>
+                  <th className="border border-gray-300 p-3 text-left font-semibold text-gray-700">Category Type</th>
+                  <th className="border border-gray-300 p-3 text-left font-semibold text-gray-700">Definition</th>
+                  <th className="border border-gray-300 p-3 text-left font-semibold text-gray-700">Action Taken</th>
+                  <th className="border border-gray-300 p-3 text-center font-semibold text-gray-700" colSpan={8}>Activities to be done</th>
+                  <th className="border border-gray-300 p-3 text-left font-semibold text-gray-700">Remarks</th>
+                  <th className="border border-gray-300 p-3 text-center font-semibold text-gray-700">Actions</th>
+                </tr>
+                <tr>
+                  <th className="border border-gray-300 p-2"></th>
+                  <th className="border border-gray-300 p-2"></th>
+                  <th className="border border-gray-300 p-2"></th>
+                  <th className="border border-gray-300 p-2"></th>
+                  <th className="border border-gray-300 p-2"></th>
+                  <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">Change Record</th>
+                  <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">Identification PSN / Batch No.</th>
+                  <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">OJT</th>
+                  <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">Set-Up Approval</th>
+                  <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">Retroactive Inspection</th>
+                  <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">Containment Action</th>
+                  <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">Customer Approval</th>
+                  <th className="border border-gray-300 p-2 text-center text-xs text-gray-600">Approving Authority</th>
+                  <th className="border border-gray-300 p-2"></th>
+                  <th className="border border-gray-300 p-2"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredCategories.length === 0 ? (
+                  <tr>
+                    <td colSpan={14} className="text-center py-8 text-gray-500">
+                      No data available. Click "Add New" to get started.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredCategories.flatMap((category, catIdx) =>
+                    category.actions.map((action, actIdx) => (
+                      <tr key={`${category.id}-${action.id}`} className="hover:bg-indigo-50 transition">
+                        <td className="border border-gray-200 p-3 text-center">
+                          {filteredCategories.slice(0, catIdx).reduce((sum, c) => sum + c.actions.length, 0) + actIdx + 1}
+                        </td>
+                        <td className="border border-gray-200 p-3 text-center font-semibold">{category.four_m}</td>
+                        <td className="border border-gray-200 p-3">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            category.category_type === "Planned" ? "bg-blue-100 text-blue-800" :
+                            category.category_type === "Unplanned" ? "bg-yellow-100 text-yellow-800" :
+                            "bg-red-100 text-red-800"
+                          }`}>
+                            {category.category_type}
+                          </span>
+                        </td>
+                        <td className="border border-gray-200 p-3">{category.description}</td>
+                        <td className="border border-gray-200 p-3">{action.action_taken}</td>
+                        <td className="border border-gray-200 p-3 text-center">{action.change_record ? "Yes" : "No"}</td>
+                        <td className="border border-gray-200 p-3 text-center">{action.identification_psn_batch_no ? "Yes" : "No"}</td>
+                        <td className="border border-gray-200 p-3 text-center">{action.ojt ? "Yes" : "No"}</td>
+                        <td className="border border-gray-200 p-3 text-center">{action.set_up_approval ? "Yes" : "No"}</td>
+                        <td className="border border-gray-200 p-3 text-center">{action.retroactive_inspection ? "Yes" : "No"}</td>
+                        <td className="border border-gray-200 p-3 text-center">{action.containment_action ? "Yes" : "No"}</td>
+                        <td className="border border-gray-200 p-3 text-center">{action.customer_approval ? "Yes" : "No"}</td>
+                        <td className="border border-gray-200 p-3">{action.approving_authority || "-"}</td>
+                        <td className="border border-gray-200 p-3">{action.remarks || "-"}</td>
+                        <td className="border border-gray-200 p-3">
+                          <div className="flex justify-center gap-2">
+                            <button onClick={() => handleEdit(category, action)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
+                              <Pencil size={18} />
+                            </button>
+                            <button onClick={() => handleDelete(action.id!, category.id!)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete">
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );

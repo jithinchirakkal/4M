@@ -33,6 +33,15 @@ class Station(models.Model):
 # ----------------------------- 4M Change Form ----------------------------- #
 class FourMCategories(models.Model):
 
+    FOUR_M_CHOICES = [
+        ('Man','Man'),
+        ('Machine/Tool','Machine/Tool'),
+        ('Material','Material'),
+        ('Method','Method'),
+    ]
+
+    four_m = models.CharField(max_length=20, choices=FOUR_M_CHOICES)
+
     CATEGORY_CHOICES = [
         ('Planned', 'Planned'),
         ('Unplanned', 'Unplanned'),

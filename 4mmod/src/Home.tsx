@@ -22,7 +22,7 @@ import ChangeInformationNote from './components/ChangeInformationNote/ChangeInfo
 import FourMMethodPage from './components/cm/method';
 import Ojtform from './components/Level2OjtTable/Level2OjtTable';
 import PerishableToolSheet from './components/PerishableToolChangeFrequencyCheckSheet/PerishableToolChangeFrequencyCheckSheet';
-
+import ProductCharacteristicsSheet from './components/ProductCharacteristicCheckSheet/ProductCharacteristicCheckSheet';
 
 // Define the Props interface for Home
 interface HomeProps {
@@ -89,6 +89,7 @@ const Home: React.FC<HomeProps> = ({
                     {selectedModule === 'ojt' && <Ojtform />}
                     
                     {selectedModule === 'ptcf' && <PerishableToolSheet />}
+                    {selectedModule === 'pccs' && <ProductCharacteristicsSheet />}
                 </main>
             </div>
         </div>

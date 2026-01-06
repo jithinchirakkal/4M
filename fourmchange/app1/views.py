@@ -46,8 +46,12 @@ class FourMCategoriesViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = FourMCategories.objects.all()
         category_type = self.request.query_params.get('category_type', None)
+        four_m = self.request.query_params.get('four_m')
+
         if category_type:
             queryset = queryset.filter(category_type=category_type)
+        if four_m:
+            queryset = queryset.filter(four_m=four_m)
         return queryset
 
 
