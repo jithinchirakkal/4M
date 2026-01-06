@@ -193,4 +193,13 @@ export const navModules: NavModule[] = [
 		description: "On Job Training",
 		status: "active",
 	},
+	{
+		id: "process-characteritics",
+		title: "process-characteritics",
+		fullName: "process-characteritics",
+		color: "from-gray-500 to-gray-600", // CHANGED: Unique color
+		icon: Settings,
+		description: "process-characteritics",
+		status: "active",
+	},
 ];

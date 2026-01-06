@@ -69,11 +69,16 @@ class FourMChange(models.Model):
         ('Machine/Tool', 'Machine/Tool'),
         ('Material', 'Material'),
         ('Method', 'Method'),
-    ]                
+    ]     
+    SHIFT_CHOICES = [
+        ('A', 'Shift A'),
+        ('B', 'Shift B'),
+    ]           
     shopfloor = models.ForeignKey(Shopfloor, on_delete=models.CASCADE, null=True, blank=True)
     line = models.ForeignKey(Line, on_delete=models.CASCADE, null=True, blank=True)
     station = models.ForeignKey(Station, on_delete=models.CASCADE, null=True, blank=True)
     four_m = models.CharField(max_length=20, choices=FOUR_M_CHOICES)
+    shift = models.CharField(max_length=1, choices=SHIFT_CHOICES, default='A')
     category = models.ForeignKey(FourMCategories, on_delete=models.CASCADE, null=True, blank=True)
     action = models.ForeignKey(FourMAction, on_delete=models.SET_NULL, null=True, blank=True)
     date = models.DateField(default=timezone.now)
@@ -158,42 +163,118 @@ class FourMTracking(models.Model):
     month = models.DateField()  # Store as first day of month (e.g., 2024-07-01)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='noplan')
     remarks = models.CharField(max_length=255, blank=True, null=True)
-
     class Meta:
         unique_together = ('category', 'day', 'month')
 
     def __str__(self):
         return f"{self.category.name} - Day {self.day} - {self.month} - {self.status}"
 
+# class FourMChangeDetail(models.Model):
+#     date = models.DateField()
+#     time = models.TimeField()
+#     mc_no = models.CharField(max_length=50, blank=True, null=True)
+#     change_description = models.TextField(blank=True, null=True)
+#     nature_of_change = models.TextField(blank=True, null=True)
+#     action_taken = models.TextField(blank=True, null=True)
+#     part_name_no = models.CharField(max_length=100, blank=True, null=True)
+#     control_no = models.CharField(max_length=100, blank=True, null=True)
+#     lot_no_batch_no = models.CharField(max_length=100, blank=True, null=True)
+#     tracking_no_serial = models.CharField(max_length=100, blank=True, null=True)
+#     retro_qty = models.CharField(max_length=50, blank=True, null=True)
+#     retro_wh_no = models.CharField(max_length=50, blank=True, null=True)
+#     retro_assy = models.CharField(max_length=50, blank=True, null=True)
+#     retro_moog = models.CharField(max_length=50, blank=True, null=True)
+#     retro_cust = models.CharField(max_length=50, blank=True, null=True)
+#     retro_ott_pn = models.CharField(max_length=50, blank=True, null=True)
+#     containment_assy = models.CharField(max_length=50, blank=True, null=True)
+#     containment_ship = models.CharField(max_length=50, blank=True, null=True)
+#     containment_lot_invoice = models.CharField(max_length=100, blank=True, null=True)
+#     sl_op = models.CharField(max_length=50, blank=True, null=True)
+#     sl_production = models.CharField(max_length=50, blank=True, null=True)
+#     sl_plant_impl = models.CharField(max_length=50, blank=True, null=True)
+#     material_details_1 = models.CharField(max_length=100, blank=True, null=True)
+#     material_details_2 = models.CharField(max_length=100, blank=True, null=True)
+#     remarks = models.TextField(blank=True, null=True)
+
+#     def __str__(self):
+#         return f"Change Detail {self.date} {self.time}"  
+
+# models.py - Updated FourMChangeDetail model
+# changed FourMchangeDetail model
 class FourMChangeDetail(models.Model):
+    SHIFT_CHOICES = [
+        ('A', 'Shift A'),
+        ('B', 'Shift B'),
+    ]
+    
+    NATURE_OF_CHANGE_CHOICES = [
+        ('Man', 'Man'),
+        ('Machine', 'Machine'),
+        ('Material', 'Material'),
+        ('Method', 'Method'),
+    ]
+    
+    CATEGORY_TYPE_CHOICES = [
+        ('Planned', 'Planned'),
+        ('Unplanned', 'Unplanned'),
+        ('Abnormal', 'Abnormal'),
+    ]
+    
+    # Basic Information
+    record_id = models.CharField(max_length=30, blank=True, null=True)
     date = models.DateField()
+    shift = models.CharField(max_length=1, choices=SHIFT_CHOICES, default='A')
     time = models.TimeField()
-    mc_no = models.CharField(max_length=50, blank=True, null=True)
+    model = models.CharField(max_length=100, blank=True, null=True)
+    station = models.CharField(max_length=100, blank=True, null=True)
+    line = models.CharField(max_length=100, blank=True, null=True)
+    
+    # Nature of Change
+    nature_of_change = models.CharField(max_length=20, choices=NATURE_OF_CHANGE_CHOICES, blank=True, null=True)
+    category_type = models.CharField(max_length=20, choices=CATEGORY_TYPE_CHOICES, blank=True, null=True)
     change_description = models.TextField(blank=True, null=True)
-    nature_of_change = models.TextField(blank=True, null=True)
+    
+    # Informed To (Multiple Choice - Boolean fields)
+    informed_maintenance = models.BooleanField(default=False)
+    informed_quality = models.BooleanField(default=False)
+    informed_production = models.BooleanField(default=False)
+    informed_others = models.BooleanField(default=False)
+    
+    # Customer Approval & Action
+    customer_approval_required = models.BooleanField(default=False)
     action_taken = models.TextField(blank=True, null=True)
-    part_name_no = models.CharField(max_length=100, blank=True, null=True)
-    control_no = models.CharField(max_length=100, blank=True, null=True)
-    lot_no_batch_no = models.CharField(max_length=100, blank=True, null=True)
-    tracking_no_serial = models.CharField(max_length=100, blank=True, null=True)
-    retro_qty = models.CharField(max_length=50, blank=True, null=True)
-    retro_wh_no = models.CharField(max_length=50, blank=True, null=True)
-    retro_assy = models.CharField(max_length=50, blank=True, null=True)
-    retro_moog = models.CharField(max_length=50, blank=True, null=True)
-    retro_cust = models.CharField(max_length=50, blank=True, null=True)
-    retro_ott_pn = models.CharField(max_length=50, blank=True, null=True)
-    containment_assy = models.CharField(max_length=50, blank=True, null=True)
-    containment_ship = models.CharField(max_length=50, blank=True, null=True)
-    containment_lot_invoice = models.CharField(max_length=100, blank=True, null=True)
-    sl_op = models.CharField(max_length=50, blank=True, null=True)
-    sl_production = models.CharField(max_length=50, blank=True, null=True)
-    sl_plant_impl = models.CharField(max_length=50, blank=True, null=True)
-    material_details_1 = models.CharField(max_length=100, blank=True, null=True)
-    material_details_2 = models.CharField(max_length=100, blank=True, null=True)
-    remarks = models.TextField(blank=True, null=True)
+    
+    # Applicability of Checklist
+    applicability_retro = models.BooleanField(default=False)
+    applicability_setup = models.BooleanField(default=False)
+    applicability_containment = models.BooleanField(default=False)
+    
+    # Setup
+    setup_total_qty = models.CharField(max_length=50, blank=True, null=True)
+    setup_ok_qty = models.CharField(max_length=50, blank=True, null=True)
+    setup_ng_qty = models.CharField(max_length=50, blank=True, null=True)
+    
+    # Retro Check (Before Change)
+    retrocheck_total_qty = models.CharField(max_length=50, blank=True, null=True)
+    retrocheck_ok_qty = models.CharField(max_length=50, blank=True, null=True)
+    retrocheck_ng_qty = models.CharField(max_length=50, blank=True, null=True)
+    
+    # Containment Check (After Change)
+    containmentcheck_total_qty = models.CharField(max_length=50, blank=True, null=True)
+    containmentcheck_ok_qty = models.CharField(max_length=50, blank=True, null=True)
+    containmentcheck_ng_qty = models.CharField(max_length=50, blank=True, null=True)
+    
+    # Traceability & Approvals
+    traceability = models.CharField(max_length=200, blank=True, null=True)
+    action_taken_on_ng_parts = models.CharField(max_length=200, blank=True, null=True)
+    production_approval = models.CharField(max_length=100, blank=True, null=True)
+    quality_approval = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        unique_together = ('date', 'time', 'shift', 'record_id')
 
     def __str__(self):
-        return f"Change Detail {self.date} {self.time}"    
+        return f"Change Detail {self.record_id} - {self.date} {self.time} Shift {self.shift}"  
 
 # man machine matrix
 

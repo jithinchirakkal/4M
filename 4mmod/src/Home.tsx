@@ -21,7 +21,7 @@ import Suspected from './components/suspected/suspected';
 import ChangeInformationNote from './components/ChangeInformationNote/ChangeInformationNote';
 import FourMMethodPage from './components/cm/method';
 import Ojtform from './components/Level2OjtTable/Level2OjtTable';
-
+import ProcessCheckSheet from './components/ProductCharcteristics/ProductCharacteristics'
 
 // Define the Props interface for Home
 interface HomeProps {
@@ -86,6 +86,7 @@ const Home: React.FC<HomeProps> = ({
                     {selectedModule === 'CIN' && <ChangeInformationNote />}
                     {selectedModule === '4m-method' && <FourMMethodPage />}
                     {selectedModule === 'ojt' && <Ojtform />}
+                    {selectedModule === 'process-characteritics' && <ProcessCheckSheet/>}
                     
                 </main>
             </div>
