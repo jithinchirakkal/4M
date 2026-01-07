@@ -16,7 +16,7 @@ interface CheckData {
 
 const ProcessCheckSheet = () => {
   const [formData, setFormData] = useState({
-    processName: '',
+    processName: 'ASSEMBLY SHOP',
     line: '',
     model: '',
     month: '',

@@ -218,7 +218,7 @@ class FourMChangeDetail(models.Model):
     
     NATURE_OF_CHANGE_CHOICES = [
         ('Man', 'Man'),
-        ('Machine', 'Machine'),
+        ('Machine/Tool', 'Machine/Tool'),
         ('Material', 'Material'),
         ('Method', 'Method'),
     ]

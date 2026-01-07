@@ -58,7 +58,7 @@ export const navModules: NavModule[] = [
 	},
 	{
 		id: "4m-cts",
-		title: "4M Trakking Sheet",
+		title: "4M Tracking Sheet",
 		fullName: "4M Change Tracking System",
 		color: "from-purple-500 to-purple-600",
 		icon: Activity,

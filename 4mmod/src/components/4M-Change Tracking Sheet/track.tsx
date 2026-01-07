@@ -1819,6 +1819,7 @@ interface FourMChangeRecord {
     set_up_approval: boolean;
     retroactive_inspection: boolean;
     suspected_lot_check: boolean;
+    containment_action: boolean;
     remarks: string;
   };
   shopfloor_name?: string;
@@ -2152,9 +2153,9 @@ export default function FourMChangeTrackingSheet() {
           informed_others: false,
           customer_approval_required: false,
           action_taken: change.action_details?.action_taken || '',
-          applicability_retro: false,
-          applicability_setup: false,
-          applicability_containment: false,
+          applicability_retro: change.action_details?.retroactive_inspection || false,
+          applicability_setup: change.action_details?.set_up_approval || false,
+          applicability_containment: change.action_details?.containment_action || false,
           setup_total_qty: '',
           setup_ok_qty: '',
           setup_ng_qty: '',
@@ -2669,7 +2670,7 @@ export default function FourMChangeTrackingSheet() {
                           >
                             <option value="">Select</option>
                             <option value="Man">Man</option>
-                            <option value="Machine">Machine</option>
+                            <option value="Machine/Tool">Machine</option>
                             <option value="Material">Material</option>
                             <option value="Method">Method</option>
                           </select>
