@@ -1,6 +1,45 @@
 
 from django.shortcuts import render
 from rest_framework import viewsets
+
+
+#######   USER #######
+
+from rest_framework import viewsets, permissions
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .models import User, Role
+from .serializers import (
+    UserSerializer,
+    RoleSerializer,
+    MyTokenObtainPairSerializer
+)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+# class RoleViewSet(viewsets.ReadOnlyModelViewSet):
+#     queryset = Role.objects.filter(is_active=True)
+#     serializer_class = RoleSerializer
+#     permission_classes = [permissions.IsAuthenticated]
+
+class RoleViewSet(viewsets.ModelViewSet):
+    queryset = Role.objects.all()
+    serializer_class = RoleSerializer
+    permission_classes = [permissions.AllowAny] 
+
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+
+
+#######   USER #######
+
+
+
 from .models import (
     Shopfloor, Line, Station,
     FourMCategories, FourMAction, FourMChange
