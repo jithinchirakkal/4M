@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import MaterialMovementCardViewSet
+from .views import LogoutView, MaterialMovementCardViewSet
 from .views import (
     ShopfloorViewSet, LineViewSet, StationViewSet,
     FourMCategoriesViewSet, FourMActionViewSet, FourMChangeViewSet
@@ -27,10 +27,17 @@ from .views import ManMachineMatrixViewSet,ControlPlanViewSet,RCRViewSet
 from .views import InspectionReportViewSet, ProcessParameterViewSet, InProcessParameterViewSet
 from .views import ProcessFlowViewSet, ProcessViewSet, RevisionViewSet
 
+from rest_framework_simplejwt.views import TokenRefreshView
 
-
+from .views import (
+    UserViewSet,
+    RoleViewSet,
+    MyTokenObtainPairView,
+)
 
 router = DefaultRouter()
+router.register(r'users', UserViewSet, basename='users')
+router.register(r'roles', RoleViewSet, basename='roles')
 router.register(r'shopfloors', ShopfloorViewSet)
 router.register(r'lines', LineViewSet)
 router.register(r'stations', StationViewSet)
@@ -55,6 +62,9 @@ router.register(r'revisions', RevisionViewSet, basename='revision')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('auth/login/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('auth/logout/', LogoutView.as_view(), name='logout'),
+    path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
 
 

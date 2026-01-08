@@ -6,6 +6,72 @@ from .models import (
     Shopfloor, Line, Station,
     FourMCategories, FourMAction, FourMChange
 )
+from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from .models import User, Role
+
+
+class RoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+        fields = ["id", "code", "name"]
+
+
+class UserSerializer(serializers.ModelSerializer):
+    role_name = serializers.CharField(source="role.name", read_only=True)
+    role_code = serializers.CharField(source="role.code", read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "email",
+            "name",
+            "role",        # role ID (write)
+            "role_name",   # readable
+            "role_code",   # frontend-friendly
+            "department",
+            "profile_photo",
+            "created_at",
+            "created_by",
+            "is_active",
+            "password",
+        ]
+        extra_kwargs = {
+            "password": {"write_only": True}
+        }
+
+    def create(self, validated_data):
+        password = validated_data.pop("password")
+        user = User.objects.create_user(password=password, **validated_data)
+        return user
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token["name"] = user.name
+        token["role"] = user.role.code
+        token["role_name"] = user.role.name
+        token["department"] = user.department
+        token["email"] = user.email
+        return token
+
+    def validate(self, attrs):
+        attrs["username"] = attrs.get("email")
+        data = super().validate(attrs)
+
+        data["name"] = self.user.name
+        data["role"] = self.user.role.code
+        data["role_name"] = self.user.role.name
+        data["department"] = self.user.department
+        data["email"] = self.user.email
+        data["user_id"] = self.user.id
+
+        return data
+
 
 class ShopfloorSerializer(serializers.ModelSerializer):
     class Meta:

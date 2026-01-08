@@ -9,6 +9,53 @@ from .serializers import (
     ShopfloorSerializer, LineSerializer, StationSerializer,
     FourMCategoriesSerializer, FourMActionSerializer, FourMChangeSerializer
 )
+from rest_framework import viewsets, permissions
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .models import User, Role
+from .serializers import (
+    UserSerializer,
+    RoleSerializer,
+    MyTokenObtainPairSerializer
+)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+# class RoleViewSet(viewsets.ReadOnlyModelViewSet):
+#     queryset = Role.objects.filter(is_active=True)
+#     serializer_class = RoleSerializer
+#     permission_classes = [permissions.IsAuthenticated]
+
+class RoleViewSet(viewsets.ModelViewSet):
+    queryset = Role.objects.all()
+    serializer_class = RoleSerializer
+    permission_classes = [permissions.AllowAny] 
+
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from rest_framework.views import APIView
+
+class LogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response({"message": "Logged out successfully"}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception:
+            return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
 
 class ShopfloorViewSet(viewsets.ModelViewSet):
     queryset = Shopfloor.objects.all()

@@ -31,14 +31,15 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'app1',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'rest_framework_simplejwt.token_blacklist',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'app1',
     'corsheaders',
 ]
 
@@ -70,6 +71,16 @@ TEMPLATES = [
     },
 ]
 
+AUTH_USER_MODEL = 'app1.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+SIMPLE_JWT = {
+    'BLACKLIST_AFTER_ROTATION': True,
+}
 WSGI_APPLICATION = 'fourmchange.wsgi.application'
 import os
 

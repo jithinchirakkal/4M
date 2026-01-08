@@ -1,6 +1,78 @@
 from django.db import models
 from django.utils import timezone
 
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+
+
+class UserManager(BaseUserManager):
+    use_in_migrations = True
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError("The Email must be set")
+
+        role = extra_fields.get("role")
+        if isinstance(role, int) or isinstance(role, str):
+            from .models import Role
+            extra_fields["role"] = Role.objects.get(id=role)
+
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_active", True)
+
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("Superuser must have is_staff=True.")
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("Superuser must have is_superuser=True.")
+
+        return self.create_user(email, password, **extra_fields)
+
+
+class Role(models.Model):
+    code = models.CharField(max_length=30, unique=True, editable=False)
+    name = models.CharField(max_length=50)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.code:
+            self.code = self.name.upper().replace(" ", "_")
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+
+class User(AbstractUser):
+    username = None
+    email = models.EmailField(unique=True)
+    name = models.CharField(max_length=100)
+
+    role = models.ForeignKey(
+        Role,
+        on_delete=models.PROTECT,
+        related_name="users"
+    )
+
+    department = models.CharField(max_length=100)
+    profile_photo = models.ImageField(upload_to="profile_photos/", null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.CharField(max_length=100, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["name", "role", "department"]
+
+    objects = UserManager()
+
+    def __str__(self):
+        return self.email
 class Shopfloor(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
