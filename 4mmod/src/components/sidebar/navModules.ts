@@ -25,6 +25,7 @@ interface NavModule {
 	icon: React.ComponentType<{ size?: number; className?: string }>;
 	description: string;
 	status: "active" | "development" | "beta";
+	
 }
 
 export const navModules: NavModule[] = [
@@ -222,11 +223,22 @@ export const navModules: NavModule[] = [
 		icon: Settings,
 		description: "process-characteritics",
 		status: "active",
+		
 	},
 	{
 		id: "paintshop-qualitychecksheet",
 		title: "Paintshop Quality Checksheet",
 		fullName: "process-characteritics",
+		color: "from-gray-500 to-gray-600", // CHANGED: Unique color
+		icon: Settings,
+		description: "process-characteritics",
+		status: "active",
+		
+	},
+	{
+		id: "users",
+		title: "User-Management",
+		fullName: "User Management",
 		color: "from-gray-500 to-gray-600", // CHANGED: Unique color
 		icon: Settings,
 		description: "process-characteritics",

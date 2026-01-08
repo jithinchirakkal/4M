@@ -27,6 +27,7 @@ interface NavModuleProps {
   setSelectedModule: (id: string) => void;
   sidebarCollapsed: boolean; 
   setSidebarCollapsed: (collapsed: boolean) => void;
+  onLogout?: () => void;
 }
 
 const Sidebar: React.FC<NavModuleProps> = ({

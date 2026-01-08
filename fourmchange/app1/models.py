@@ -80,6 +80,7 @@ class User(AbstractUser):
 
 #######   USER #######
 
+
 class Shopfloor(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
