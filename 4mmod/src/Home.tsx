@@ -1,30 +1,30 @@
 import React from "react";
 // Renamed NavModule to Sidebar for clarity, update import path if needed.
-import Sidebar from "./components/sidebar/sidebar";
-import { navModules } from "./components/sidebar/navModules";
-import MaterialMovementCard from "./components/4M-Material Movement/MaterialMovementCard";
-import FourMChangeTrackSheet from "./components/4M-Change Tracking Sheet/track";
-import ControlPlanForm from "./components/Control Plan/ControlPlanForm";
-import MachineCheckSheet from "./components/MachineCheckSheet/MachineCheckSheet";
-import ProcessFlowDiagram from "./components/ProcessFlowDiagram/ProcessFlowDiagram";
-import RetroactiveCheckRecord from "./components/RetroactiveCheckRecord/RetroactiveCheckRecord";
-import InspectionForm from "./components/InspectionForm/inspection";
-import ManMachineMatrix from "./components/ManMachineMatrix/ManMachineMatrix";
-import DashboardView from "./components/Dashboard/DashboardView";
-import ChangeManagementView from "./components/cm/ChangeManagementView";
-import ChangeDisplayBoard from "./components/ChangeDisplayBoard/ChangeDisplayBoard";
-import FlowDiagram from "./components/ProcessFlowDiagram/4MFlow";
-import FourMChangeResponsibility from "./components/FourMChangeResponsibility/FourMChangeResponsibility";
-import FourMChangeProcedure from "./components/FourMChangeProcedure/FourMChangeProcedure";
-import ChangeValidationForm from "./components/ChangeValidationForm/ChangeValidationForm";
-import Suspected from "./components/suspected/suspected";
-import ChangeInformationNote from "./components/ChangeInformationNote/ChangeInformationNote";
-import FourMMethodPage from "./components/cm/method";
-import Ojtform from "./components/Level2OjtTable/Level2OjtTable";
-import PerishableToolSheet from "./components/PerishableToolChangeFrequencyCheckSheet/PerishableToolChangeFrequencyCheckSheet";
-import ProductCharacteristicsSheet from "./components/ProductCharacteristicCheckSheet/ProductCharacteristicCheckSheet";
-import ProcessCheckSheet from "./components/ProductCharcteristics/ProductCharacteristics";
-
+import Sidebar from './components/sidebar/sidebar'; 
+import { navModules } from './components/sidebar/navModules';
+import MaterialMovementCard from './components/4M-Material Movement/MaterialMovementCard';
+import FourMChangeTrackSheet from './components/4M-Change Tracking Sheet/track';
+import ControlPlanForm from './components/Control Plan/ControlPlanForm';
+import MachineCheckSheet from './components/MachineCheckSheet/MachineCheckSheet';
+import ProcessFlowDiagram from './components/ProcessFlowDiagram/ProcessFlowDiagram';
+import RetroactiveCheckRecord from './components/RetroactiveCheckRecord/RetroactiveCheckRecord';
+import InspectionForm from './components/InspectionForm/inspection';
+import ManMachineMatrix from './components/ManMachineMatrix/ManMachineMatrix';
+import DashboardView from './components/Dashboard/DashboardView';
+import ChangeManagementView from './components/cm/ChangeManagementView';
+import ChangeDisplayBoard from './components/ChangeDisplayBoard/ChangeDisplayBoard';
+import FlowDiagram from './components/ProcessFlowDiagram/4MFlow';
+import FourMChangeResponsibility from './components/FourMChangeResponsibility/FourMChangeResponsibility';
+import FourMChangeProcedure from './components/FourMChangeProcedure/FourMChangeProcedure';
+import ChangeValidationForm from './components/ChangeValidationForm/ChangeValidationForm';
+import Suspected from './components/suspected/suspected';
+import ChangeInformationNote from './components/ChangeInformationNote/ChangeInformationNote';
+import FourMMethodPage from './components/cm/method';
+import Ojtform from './components/Level2OjtTable/Level2OjtTable';
+import PerishableToolSheet from './components/PerishableToolChangeFrequencyCheckSheet/PerishableToolChangeFrequencyCheckSheet';
+import ProductCharacteristicsSheet from './components/ProductCharacteristicCheckSheet/ProductCharacteristicCheckSheet';
+import ProcessCheckSheet from './components/ProductCharcteristics/ProductCharacteristics';
+import PaintQualitySheet from './components/PaintshopQualityChecksheet/PaintshopQualitychecksheet'
 // Define the Props interface for Home
 interface HomeProps {
   selectedModule: string;
@@ -98,6 +98,7 @@ const Home: React.FC<HomeProps> = ({
 
           {selectedModule === "ptcf" && <PerishableToolSheet />}
           {selectedModule === "pccs" && <ProductCharacteristicsSheet />}
+                    {selectedModule === 'paintshop-qualitychecksheet' && <PaintQualitySheet />}
         </main>
       </div>
     </div>
