@@ -24,7 +24,7 @@ import Ojtform from './components/Level2OjtTable/Level2OjtTable';
 import PerishableToolSheet from './components/PerishableToolChangeFrequencyCheckSheet/PerishableToolChangeFrequencyCheckSheet';
 import ProductCharacteristicsSheet from './components/ProductCharacteristicCheckSheet/ProductCharacteristicCheckSheet';
 import ProcessCheckSheet from './components/ProductCharcteristics/ProductCharacteristics';
-
+import PaintQualitySheet from './components/PaintshopQualityChecksheet/PaintshopQualitychecksheet'
 // Define the Props interface for Home
 interface HomeProps {
     selectedModule: string;
@@ -92,6 +92,7 @@ const Home: React.FC<HomeProps> = ({
                     
                     {selectedModule === 'ptcf' && <PerishableToolSheet />}
                     {selectedModule === 'pccs' && <ProductCharacteristicsSheet />}
+                    {selectedModule === 'paintshop-qualitychecksheet' && <PaintQualitySheet />}
                 </main>
             </div>
         </div>

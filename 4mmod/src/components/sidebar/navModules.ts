@@ -223,4 +223,13 @@ export const navModules: NavModule[] = [
 		description: "process-characteritics",
 		status: "active",
 	},
+	{
+		id: "paintshop-qualitychecksheet",
+		title: "Paintshop Quality Checksheet",
+		fullName: "process-characteritics",
+		color: "from-gray-500 to-gray-600", // CHANGED: Unique color
+		icon: Settings,
+		description: "process-characteritics",
+		status: "active",
+	},
 ];
