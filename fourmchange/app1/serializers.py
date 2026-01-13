@@ -491,6 +491,9 @@ class RCRSerializer(serializers.ModelSerializer):
     """
     Serializes all fields of the RCR model.
     """
+    record_id = serializers.CharField(source="change.record_id", read_only=True)
+    four_m_type = serializers.CharField(source="change.four_m", read_only=True)
+    change_type = serializers.CharField(source="change.category.category_type", read_only=True)
 
     class Meta:
         model = RCR

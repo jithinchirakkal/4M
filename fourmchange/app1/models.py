@@ -570,6 +570,7 @@ from django.utils import timezone
 
 class RCR(models.Model):
     
+    change = models.ForeignKey(FourMChange, on_delete=models.CASCADE, related_name="rcrs", null=True, blank=True)
     date = models.DateField(default=timezone.now)
     part_name_number = models.CharField(max_length=200)
     type_of_change = models.CharField(max_length=200)

@@ -67,7 +67,6 @@ router.register(r'inprocess-parameters', InProcessParameterViewSet)
 router.register(r'process-flows', ProcessFlowViewSet, basename='processflow')
 router.register(r'processes', ProcessViewSet, basename='process')
 router.register(r'revisions', RevisionViewSet, basename='revision')
-router.register(r'4m-approvals', FourMApprovalViewSet, basename='fourm-approvals')
 
 urlpatterns = [
     path('', include(router.urls)),
