@@ -15,6 +15,7 @@ import {
 	CheckCircle,
 	Search,
 	Bell,
+	CheckSquare,
 } from "lucide-react";
 
 interface NavModule {
@@ -44,6 +45,15 @@ export const navModules: NavModule[] = [
 		fullName: "Change Management Sheet",
 		color: "from-blue-500 to-blue-600",
 		icon: FileText,
+		description: "Manage and track change requests and approvals",
+		status: "active",
+	},
+	{
+		id: "approvals",
+		title: "Approvals",
+		fullName: "Approvals",
+		color: "from-blue-500 to-blue-600",
+		icon: CheckSquare,
 		description: "Manage and track change requests and approvals",
 		status: "active",
 	},

@@ -26,6 +26,7 @@ import ProductCharacteristicsSheet from './components/ProductCharacteristicCheck
 import ProcessCheckSheet from './components/ProductCharcteristics/ProductCharacteristics';
 import PaintQualitySheet from './components/PaintshopQualityChecksheet/PaintshopQualitychecksheet'
 import UserManagement from './components/Usermanagement/Usermanagement'
+import ApprovalsPage from './components/Approvals/ApprovalsPage';
 // Define the Props interface for Home
 interface HomeProps {
   selectedModule: string;
@@ -85,7 +86,7 @@ const Home: React.FC<HomeProps> = ({
           {selectedModule === "cm" && (
             <ChangeManagementView setSelectedModule={setSelectedModule} />
           )}
-
+          {selectedModule === "approvals" && <ApprovalsPage />}
           {selectedModule === "cdb" && <ChangeDisplayBoard />}
           {selectedModule === "4m-flow" && <FlowDiagram />}
           {selectedModule === "4m" && <FourMChangeResponsibility />}

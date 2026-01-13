@@ -8,6 +8,7 @@ interface User {
   role: string;
   role_name: string;
   department: string;
+  is_superuser: boolean;
 }
 
 interface AuthContextType {

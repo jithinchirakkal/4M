@@ -412,6 +412,9 @@ class FourMChangeDetail(models.Model):
 
     def __str__(self):
         return f"Change Detail {self.record_id} - {self.date} {self.time} Shift {self.shift}"  
+    
+
+
 
 # man machine matrix
 

@@ -185,12 +185,16 @@ class FourMCategoriesSerializer(serializers.ModelSerializer):
 #         model = FourMChange
 #         fields = '__all__'
 
+
+
+
 class FourMChangeSerializer(serializers.ModelSerializer):
     category_details = FourMCategoriesSerializer(source='category', read_only=True)
     action_details = FourMActionSerializer(source='action', read_only=True)
     shopfloor_name = serializers.CharField(source='shopfloor.name', read_only=True)
     line_name = serializers.CharField(source='line.name', read_only=True)
     station_name = serializers.CharField(source='station.name', read_only=True)
+    approval_status = serializers.SerializerMethodField()
     approval_status = serializers.SerializerMethodField()
     class Meta:
         model = FourMChange
