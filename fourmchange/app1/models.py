@@ -192,8 +192,56 @@ class FourMChange(models.Model):
         return f"{self.record_id} - {self.four_m} - {self.category.category_type}"
 
 
-    
+############### set up approval  ###########
 
+
+class FourMApproval(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+
+    change = models.ForeignKey(
+        FourMChange,
+        on_delete=models.CASCADE,
+        related_name='approvals'
+    )
+
+    # ROLE who must approve (Prod HOD / QA HOD)
+    role = models.ForeignKey(
+        Role,
+        on_delete=models.PROTECT,
+        related_name='fourm_approvals'
+    )
+
+    # USER who actually approved
+    approved_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_fourm_changes'
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending'
+    )
+
+    remarks = models.TextField(blank=True, null=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('change', 'role')
+
+    def __str__(self):
+        return f"{self.change.record_id} - {self.role.name} - {self.status}"
+
+
+############### set up approval  ###########
 
 from django.db import models
 

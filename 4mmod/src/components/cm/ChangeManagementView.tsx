@@ -1413,9 +1413,24 @@ export default function ChangeManagementView({
                       {renderStatusTag(item.action_details?.ojt)}
                     </td>
 
-                    <td className="p-3 whitespace-nowrap">
+                    {/* <td className="p-3 whitespace-nowrap">
                       {renderStatusTag(item.action_details?.set_up_approval)}
-                    </td>
+                    </td> */}
+                    <td className="p-3 whitespace-nowrap">
+  <span
+    className={`px-2 py-1 rounded-full text-xs font-bold shadow-sm ${
+      item.approval_status === "APPROVED"
+        ? "bg-green-100 text-green-700"
+        : item.approval_status === "REJECTED"
+        ? "bg-red-100 text-red-700"
+        : item.approval_status === "REQUIRED"
+        ? "bg-yellow-100 text-yellow-800"
+        : "bg-gray-100 text-gray-600"
+    }`}
+  >
+    {item.approval_status}
+  </span>
+</td>
 
                     <td className="p-3 whitespace-nowrap">
                       {renderStatusTag(

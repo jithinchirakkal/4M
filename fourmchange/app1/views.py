@@ -153,11 +153,150 @@ class FourMActionViewSet(viewsets.ModelViewSet):
         return queryset
 
 
+# class FourMChangeViewSet(viewsets.ModelViewSet):
+#     queryset = FourMChange.objects.all().order_by('-created_at')
+#     serializer_class = FourMChangeSerializer
+
+
+
+# class FourMChangeViewSet(viewsets.ModelViewSet):
+#     queryset = FourMChange.objects.all().order_by('-created_at')
+#     serializer_class = FourMChangeSerializer
+
+#     def perform_create(self, serializer):
+#         change = serializer.save()
+
+#         action = change.action
+#         if action and action.set_up_approval and action.approving_authority:
+#             authorities = action.approving_authority.replace('&', '/').split('/')
+
+#             for auth in authorities:
+#                 role_code = auth.strip().upper().replace(" ", "_")
+#                 try:
+#                     role = Role.objects.get(code=role_code)
+#                     FourMApproval.objects.get_or_create(
+#                         change=change,
+#                         role=role
+#                     )
+#                 except Role.DoesNotExist:
+#                     pass
+
+#             change.status = 'pending_approval'
+#             change.save()
+
+from .models import FourMApproval
+from .serializers import FourMApprovalSerializer
+
 class FourMChangeViewSet(viewsets.ModelViewSet):
     queryset = FourMChange.objects.all().order_by('-created_at')
     serializer_class = FourMChangeSerializer
+
+    def perform_create(self, serializer):
+        change = serializer.save()
+
+        action = change.action
+        if not action or not action.set_up_approval:
+            return
+
+        authority_text = (action.approving_authority or "").upper()
+
+        role_codes = set()
+        if "PROD" in authority_text:
+            role_codes.add("PROD_HOD")
+        if "QA" in authority_text:
+            role_codes.add("QA_HOD")
+
+        for role_code in role_codes:
+            try:
+                role = Role.objects.get(code=role_code)
+                FourMApproval.objects.get_or_create(
+                    change=change,
+                    role=role
+                )
+            except Role.DoesNotExist:
+                pass
+
+
     
-    
+############### set up approval  ###########
+  
+
+from rest_framework.decorators import action
+from django.utils import timezone
+
+class FourMApprovalViewSet(viewsets.ModelViewSet):
+    queryset = FourMApproval.objects.all().order_by('-created_at')
+    serializer_class = FourMApprovalSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        # Admin sees all approvals
+        if user.is_superuser:
+            return FourMApproval.objects.all()
+
+        # Role-based approvals
+        return FourMApproval.objects.filter(
+            role=user.role,
+            status='pending'
+        )
+
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        approval = self.get_object()
+
+        if approval.role != request.user.role:
+            return Response(
+                {"error": "You are not authorized to approve this record"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        approval.status = 'approved'
+        approval.approved_by = request.user
+        approval.approved_at = timezone.now()
+        approval.remarks = request.data.get('remarks', '')
+        approval.save()
+
+        # Check if all approvals are completed
+        pending_exists = approval.change.approvals.filter(status='pending').exists()
+        if not pending_exists:
+            approval.change.status = 'approved'
+            approval.change.save()
+
+        return Response(
+            FourMApprovalSerializer(approval).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        approval = self.get_object()
+
+        if approval.role != request.user.role:
+            return Response(
+                {"error": "You are not authorized to reject this record"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        approval.status = 'rejected'
+        approval.approved_by = request.user
+        approval.approved_at = timezone.now()
+        approval.remarks = request.data.get('remarks', '')
+        approval.save()
+
+        approval.change.status = 'rejected'
+        approval.change.save()
+
+        return Response(
+            FourMApprovalSerializer(approval).data,
+            status=status.HTTP_200_OK
+        )
+
+
+
+############### set up approval  ###########
+
 
 from rest_framework import viewsets
 from .models import MaterialMovementCard

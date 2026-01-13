@@ -19,7 +19,7 @@ from rest_framework.routers import DefaultRouter
 from .views import LogoutView, MaterialMovementCardViewSet
 from .views import (
     ShopfloorViewSet, LineViewSet, StationViewSet,
-    FourMCategoriesViewSet, FourMActionViewSet, FourMChangeViewSet
+    FourMCategoriesViewSet, FourMActionViewSet, FourMChangeViewSet,FourMApprovalViewSet
 )
 
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -49,6 +49,9 @@ router.register(r'stations', StationViewSet)
 router.register(r'4m-categories', FourMCategoriesViewSet)
 router.register(r'actions', FourMActionViewSet)
 router.register(r'4m-changes', FourMChangeViewSet)
+
+router.register(r'4m-approvals', FourMApprovalViewSet, basename='fourm-approvals')
+
 
 router.register(r'material-movement-cards', MaterialMovementCardViewSet)
 

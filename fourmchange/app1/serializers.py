@@ -175,17 +175,82 @@ class FourMCategoriesSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+# class FourMChangeSerializer(serializers.ModelSerializer):
+#     category_details = FourMCategoriesSerializer(source='category', read_only=True)
+#     action_details = FourMActionSerializer(source='action', read_only=True)
+#     shopfloor_name = serializers.CharField(source='shopfloor.name', read_only=True)
+#     line_name = serializers.CharField(source='line.name', read_only=True)
+#     station_name = serializers.CharField(source='station.name', read_only=True)
+#     class Meta:
+#         model = FourMChange
+#         fields = '__all__'
+
 class FourMChangeSerializer(serializers.ModelSerializer):
     category_details = FourMCategoriesSerializer(source='category', read_only=True)
     action_details = FourMActionSerializer(source='action', read_only=True)
     shopfloor_name = serializers.CharField(source='shopfloor.name', read_only=True)
     line_name = serializers.CharField(source='line.name', read_only=True)
     station_name = serializers.CharField(source='station.name', read_only=True)
+    approval_status = serializers.SerializerMethodField()
     class Meta:
         model = FourMChange
         fields = '__all__'
 
+    def get_approval_status(self, obj):
+        action = obj.action
 
+        # No approval needed at all
+        if not action or not action.set_up_approval:
+            return "N/A"
+        
+        approvals = obj.approvals.all()
+       
+       # approval required but records not created
+        if approvals.count() == 0:
+            return "REQUIRED"
+
+        # Any rejection
+        if approvals.filter(status="rejected").exists():
+            return "REJECTED"
+
+        # Still waiting
+        if approvals.filter(status="pending").exists():
+            return "REQUIRED"
+
+        # All approved
+        return "APPROVED"
+        
+
+############### set up approval  ###########
+
+from .models import FourMApproval
+
+class FourMApprovalSerializer(serializers.ModelSerializer):
+    role_name = serializers.CharField(source='role.name', read_only=True)
+    role_code = serializers.CharField(source='role.code', read_only=True)
+    approved_by_name = serializers.CharField(source='approved_by.name', read_only=True)
+
+    class Meta:
+        model = FourMApproval
+        fields = [
+            'id',
+            'change',
+            'role',
+            'role_name',
+            'role_code',
+            'status',
+            'approved_by',
+            'approved_by_name',
+            'remarks',
+            'approved_at',
+            'created_at',
+        ]
+
+
+
+
+
+############### set up approval  ###########
 
 
 from rest_framework import serializers
