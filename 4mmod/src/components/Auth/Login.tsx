@@ -340,6 +340,7 @@ const LoginPage: React.FC = () => {
           role: response.role,
           role_name: response.role_name,
           department: response.department,
+          is_superuser: response.is_superuser,
         },
         {
           access: response.access,

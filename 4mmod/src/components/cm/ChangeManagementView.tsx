@@ -619,6 +619,49 @@ import {
   Moon,
 } from "lucide-react";
 
+const renderApprovalStatus = (item: any) => {
+  const approvalStatus = item.approval_status;
+  
+  if (approvalStatus === "N/A") {
+    return (
+      <span className="px-2 py-1 rounded-full text-xs font-bold shadow-sm bg-gray-100 text-gray-600">
+        N/A
+      </span>
+    );
+  }
+  
+  if (approvalStatus === "REQUIRED") {
+    return (
+      <span className="px-2 py-1 rounded-full text-xs font-bold shadow-sm bg-yellow-100 text-yellow-700 animate-pulse">
+        PENDING
+      </span>
+    );
+  }
+  
+  if (approvalStatus === "APPROVED") {
+    return (
+      <span className="px-2 py-1 rounded-full text-xs font-bold shadow-sm bg-green-100 text-green-700">
+        APPROVED
+      </span>
+    );
+  }
+  
+  if (approvalStatus === "REJECTED") {
+    return (
+      <span className="px-2 py-1 rounded-full text-xs font-bold shadow-sm bg-red-100 text-red-700">
+        REJECTED
+      </span>
+    );
+  }
+  
+  return (
+    <span className="px-2 py-1 rounded-full text-xs font-bold shadow-sm bg-gray-100 text-gray-600">
+      UNKNOWN
+    </span>
+  );
+};
+
+
 const changeCategories = [
   {
     name: "Man",
@@ -1413,8 +1456,11 @@ export default function ChangeManagementView({
                       {renderStatusTag(item.action_details?.ojt)}
                     </td>
 
-                    <td className="p-3 whitespace-nowrap">
+                    {/* <td className="p-3 whitespace-nowrap">
                       {renderStatusTag(item.action_details?.set_up_approval)}
+                    </td> */}
+                    <td className="p-3 whitespace-nowrap">
+                    {renderApprovalStatus(item)}
                     </td>
 
                     <td className="p-3 whitespace-nowrap">
