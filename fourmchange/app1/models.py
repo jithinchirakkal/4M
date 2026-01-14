@@ -192,7 +192,7 @@ class FourMChange(models.Model):
         return f"{self.record_id} - {self.four_m} - {self.category.category_type}"
 
 
-############### set up approval  ###########
+############### set up approval  ############
 
 
 class FourMApproval(models.Model):
@@ -606,6 +606,66 @@ class RCR(models.Model):
     def __str__(self):
         return f"RCR-{self.pk} | {self.part_name_number}"
 
+# Suspected Lot 
+
+from django.db import models
+from django.utils import timezone
+
+class SuspectedLot(models.Model):   
+    rcr = models.ForeignKey(
+        'RCR', 
+        on_delete=models.CASCADE, 
+        related_name="suspected_lots",
+        null=True,
+        blank=True
+    )
+    # Basic Information (auto-populated from RCR)
+    date = models.DateField(default=timezone.now, help_text="Date of change/incident")
+    part_name = models.CharField(max_length=200, help_text="Part Name/Model")
+    change_type = models.CharField(
+        max_length=200, 
+        help_text="Change Type: Planned/Unplanned/Abnormal")
+    # Suspected Quantity Information
+    suspected_qty = models.PositiveIntegerField(
+        default=0, 
+        help_text="Total suspected quantity")
+    # Dispatch Information
+    dispatch_date = models.DateField(
+        null=True, 
+        blank=True,
+        help_text="Date of dispatch")
+    qty = models.PositiveIntegerField(
+        default=0, 
+        help_text="Quantity dispatched/affected")
+    # Customer/Location Information
+    city = models.CharField(
+        max_length=100, 
+        blank=True,
+        help_text="Customer city"
+    )
+    invoice = models.CharField(
+        max_length=100, 
+        blank=True,
+        help_text="Invoice/Reference number"
+    )
+    
+    # Additional Information
+    remarks = models.TextField(
+        blank=True,
+        help_text="Containment remarks or additional notes"
+    )
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Suspected Lot Record"
+        verbose_name_plural = "Suspected Lot Records"
+
+    def __str__(self):
+        return f"Suspected-{self.pk} | {self.part_name} | {self.suspected_qty} pcs"
 
 # IIC-SAR
 
