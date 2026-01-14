@@ -9,6 +9,7 @@ import {
 // import logo from '../../assets/Images/logo.png';
 // import logo from '../../assets/Images/logobr.png';
 import logo from '../../assets/Images/logo1.png';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Re-using your original prop and module interfaces for type compatibility
 interface NavModule {
@@ -39,6 +40,7 @@ const Sidebar: React.FC<NavModuleProps> = ({
 }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [hoveredModule, setHoveredModule] = useState<string | null>(null);
+  const { user } = useAuth(); 
 
   const collapsed = sidebarCollapsed;
   const setCollapsed = setSidebarCollapsed;

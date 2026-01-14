@@ -707,6 +707,7 @@ const shiftOptions = [
   { value: "B", label: "Shift B" },
 ];
 
+const today = new Date();   // new line to get date and time 
 const initialState = {
   four_m: "Man",
   shift: "A",
@@ -715,8 +716,10 @@ const initialState = {
   station: "",
   category: "",
   action: "",
-  date: "",
-  time: "",
+  // date: "",
+  // time: "",
+  date: today.toISOString().split("T")[0], // e.g., "2026-01-14"
+  time: today.toTimeString().slice(0, 5),  // e.g., "16:40"
 };
 
 export default function ChangeManagementView({
@@ -1481,7 +1484,7 @@ export default function ChangeManagementView({
                     <td className="p-3 whitespace-nowrap">
                       {renderStatusTag(item.action_details?.customer_approval)}
                     </td>
-
+                
                     <td className="p-3 whitespace-nowrap text-sm font-medium">
                       {item.action_details?.approving_authority || "-"}
                     </td>

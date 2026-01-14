@@ -7,6 +7,7 @@ interface User {
   email: string;
   role: string;
   role_name: string;
+  role_code?: string;
   department: string;
   is_superuser: boolean;
 }

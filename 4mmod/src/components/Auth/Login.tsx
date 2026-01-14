@@ -339,6 +339,7 @@ const LoginPage: React.FC = () => {
           email: response.email,
           role: response.role,
           role_name: response.role_name,
+          role_code: response.role_code,
           department: response.department,
           is_superuser: response.is_superuser,
         },

@@ -254,4 +254,14 @@ export const navModules: NavModule[] = [
 		description: "process-characteritics",
 		status: "active",
 	},
+	// {
+	// 	id: "customer-approvals",
+	// 	title: "Customer Approvals ",
+	// 	fullName: "Customer Approvals",
+	// 	color: "from-gray-500 to-gray-600", // CHANGED: Unique color
+	// 	icon: Settings,
+	// 	description: "process-characteritics",
+	// 	status: "active",
+		
+	// },
 ];

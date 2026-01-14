@@ -233,7 +233,7 @@ class FourMApprovalSerializer(serializers.ModelSerializer):
     role_name = serializers.CharField(source='role.name', read_only=True)
     role_code = serializers.CharField(source='role.code', read_only=True)
     approved_by_name = serializers.CharField(source='approved_by.name', read_only=True)
-
+    
     class Meta:
         model = FourMApproval
         fields = [
@@ -249,10 +249,6 @@ class FourMApprovalSerializer(serializers.ModelSerializer):
             'approved_at',
             'created_at',
         ]
-
-
-
-
 
 ############### set up approval  ###########
 
