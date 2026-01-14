@@ -499,6 +499,51 @@ class RCRSerializer(serializers.ModelSerializer):
         model = RCR
         fields = "__all__" 
 
+# Suspected Lot
+from rest_framework import serializers
+from .models import SuspectedLot
+
+class SuspectedLotSerializer(serializers.ModelSerializer):
+    """
+    Serializes all fields of the SuspectedLot model.
+    Includes related RCR information.
+    """
+    # Read-only fields from related RCR and its change record
+    record_id = serializers.CharField(
+        source="rcr.change.record_id", 
+        read_only=True
+    )
+    four_m_type = serializers.CharField(
+        source="rcr.change.four_m", 
+        read_only=True
+    )
+    rcr_id = serializers.IntegerField(
+        source="rcr.id", 
+        read_only=True
+    )
+    
+    class Meta:
+        model = SuspectedLot
+        fields = [
+            'id',
+            'rcr',
+            'rcr_id',
+            'record_id',
+            'four_m_type',
+            'date',
+            'part_name',
+            'change_type',
+            'suspected_qty',
+            'dispatch_date',
+            'qty',
+            'city',
+            'invoice',
+            'remarks',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
 # IIC-SAR
 
 from rest_framework import serializers

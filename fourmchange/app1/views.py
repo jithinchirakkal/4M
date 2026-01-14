@@ -530,6 +530,43 @@ class RCRViewSet(viewsets.ModelViewSet):
     queryset = RCR.objects.all()
     serializer_class = RCRSerializer
 
+# Suspected Lot
+from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from .models import SuspectedLot, RCR
+from .serializers import SuspectedLotSerializer
+
+class SuspectedLotViewSet(viewsets.ModelViewSet):
+    queryset = SuspectedLot.objects.all()
+    serializer_class = SuspectedLotSerializer
+    
+    @action(detail=False, methods=['get'])
+    def pending_rcrs(self, request):
+        # Get all RCR IDs that already have suspected lot records
+        completed_rcr_ids = SuspectedLot.objects.values_list('rcr_id', flat=True)
+        
+        # Get RCRs that don't have suspected lot records
+        pending_rcrs = RCR.objects.exclude(
+            id__in=completed_rcr_ids
+        ).select_related('change', 'change__category')
+        
+        # Serialize the pending RCRs
+        pending_data = []
+        for rcr in pending_rcrs:
+            pending_data.append({
+                'id': rcr.id,
+                'record_id': rcr.change.record_id if rcr.change else None,
+                'four_m': rcr.change.four_m if rcr.change else None,
+                'category_type': rcr.change.category.category_type if rcr.change and rcr.change.category else None,
+                'part_name_number': rcr.part_name_number,
+                'type_of_change': rcr.type_of_change,
+                'date': rcr.date,
+                'reject_qty': rcr.reject_qty,
+                'lot_qty': rcr.lot_qty,
+            })
+        
+        return Response(pending_data)
 
 # IIC-SAR
 
