@@ -184,8 +184,45 @@ class FourMActionViewSet(viewsets.ModelViewSet):
 #             change.status = 'pending_approval'
 #             change.save()
 
-from .models import FourMApproval
+# from .models import FourMApproval
+# from .serializers import FourMApprovalSerializer
+
+# class FourMChangeViewSet(viewsets.ModelViewSet):
+#     queryset = FourMChange.objects.all().order_by('-created_at')
+#     serializer_class = FourMChangeSerializer
+
+#     def perform_create(self, serializer):
+#         change = serializer.save()
+
+#         action = change.action
+#         if not action or not action.set_up_approval:
+#             return
+
+#         authority_text = (action.approving_authority or "").upper()
+
+#         role_codes = set()
+#         if "PROD" in authority_text:
+#             role_codes.add("PROD_HOD")
+#         if "QA" in authority_text:
+#             role_codes.add("QA_HOD")
+
+#         for role_code in role_codes:
+#             try:
+#                 role = Role.objects.get(code=role_code)
+#                 FourMApproval.objects.get_or_create(
+#                     change=change,
+#                     role=role
+#                 )
+#             except Role.DoesNotExist:
+#                 pass
+
+
+from django.contrib.auth import get_user_model
+from .models import FourMApproval, Role
 from .serializers import FourMApprovalSerializer
+from .utils.email import send_customer_approval_email  # Adjust path if needed
+
+User = get_user_model()
 
 class FourMChangeViewSet(viewsets.ModelViewSet):
     queryset = FourMChange.objects.all().order_by('-created_at')
@@ -193,8 +230,8 @@ class FourMChangeViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         change = serializer.save()
-
         action = change.action
+
         if not action or not action.set_up_approval:
             return
 
@@ -209,13 +246,23 @@ class FourMChangeViewSet(viewsets.ModelViewSet):
         for role_code in role_codes:
             try:
                 role = Role.objects.get(code=role_code)
-                FourMApproval.objects.get_or_create(
-                    change=change,
-                    role=role
-                )
+                FourMApproval.objects.get_or_create(change=change, role=role)
             except Role.DoesNotExist:
                 pass
 
+        # Handle Customer Approval
+        if action.customer_approval:
+            try:
+                customer_role = Role.objects.get(code='CUSTOMER')
+                FourMApproval.objects.get_or_create(change=change, role=customer_role)
+
+                # Send email to all customer approvers
+                customer_users = User.objects.filter(role=customer_role)
+                for customer in customer_users:
+                    if customer.email:
+                        send_customer_approval_email(customer.email, change.record_id)
+            except Role.DoesNotExist:
+                pass
 
     
 ############### set up approval  ###########
