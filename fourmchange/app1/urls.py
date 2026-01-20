@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import  FourMApprovalViewSet, LogoutView, MaterialMovementCardViewSet, SuspectedLotViewSet
+from .views import  CustomerApprovalViewSet, FourMApprovalViewSet, LogoutView, MaterialMovementCardViewSet, SuspectedLotViewSet
 from .views import (
     ShopfloorViewSet, LineViewSet, StationViewSet,
     FourMCategoriesViewSet, FourMActionViewSet, FourMChangeViewSet,FourMApprovalViewSet
@@ -51,7 +51,7 @@ router.register(r'actions', FourMActionViewSet)
 router.register(r'4m-changes', FourMChangeViewSet)
 
 router.register(r'4m-approvals', FourMApprovalViewSet, basename='fourm-approvals')
-# router.register(r'customer-approvals', CustomerApprovalViewSet, basename='customer-approvals')  # NEW
+router.register(r'customer-approvals', CustomerApprovalViewSet, basename='customer-approvals')  # NEW
 
 router.register(r'material-movement-cards', MaterialMovementCardViewSet)
 

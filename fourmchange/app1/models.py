@@ -194,7 +194,6 @@ class FourMChange(models.Model):
 
 ############### set up approval  ############
 
-
 class FourMApproval(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),

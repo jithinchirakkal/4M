@@ -26,6 +26,7 @@ interface NavModule {
 	icon: React.ComponentType<{ size?: number; className?: string }>;
 	description: string;
 	status: "active" | "development" | "beta";
+	allowedRoles?: string[];
 	
 }
 
@@ -56,6 +57,7 @@ export const navModules: NavModule[] = [
 		icon: CheckSquare,
 		description: "Manage and track change requests and approvals",
 		status: "active",
+		allowedRoles: ["PROD_HOD", "QA_HOD"],
 	},
 	{
 		id: "mmc",
@@ -254,14 +256,15 @@ export const navModules: NavModule[] = [
 		description: "process-characteritics",
 		status: "active",
 	},
-	// {
-	// 	id: "customer-approvals",
-	// 	title: "Customer Approvals ",
-	// 	fullName: "Customer Approvals",
-	// 	color: "from-gray-500 to-gray-600", // CHANGED: Unique color
-	// 	icon: Settings,
-	// 	description: "process-characteritics",
-	// 	status: "active",
+	{
+		id: "customer-approvals",
+		title: "Customer Approvals ",
+		fullName: "Customer Approvals",
+		color: "from-gray-500 to-gray-600", // CHANGED: Unique color
+		icon: Settings,
+		description: "process-characteritics",
+		status: "active",
+		allowedRoles: ["CUSTOMER"],
 		
-	// },
+	},
 ];

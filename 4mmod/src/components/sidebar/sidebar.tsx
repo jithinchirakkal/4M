@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Menu,
   X,
@@ -20,6 +20,8 @@ interface NavModule {
   icon: React.ComponentType<{ size?: number; className?: string }> | LucideIcon;
   description: string;
   status: 'active' | 'development' | 'beta';
+  allowedRoles?: string[];
+  
 }
 
 interface NavModuleProps {
@@ -44,7 +46,26 @@ const Sidebar: React.FC<NavModuleProps> = ({
 
   const collapsed = sidebarCollapsed;
   const setCollapsed = setSidebarCollapsed;
+  
+  const filteredModules = useMemo(() => {
+    const isAdmin = user?.is_superuser || user?.role?.toLowerCase().includes('admin');
+    
+    // Admin sees everything
+    if (isAdmin) {
+      return modules;
+    }
 
+    // Filter based on user's role
+    return modules.filter(module => {
+      // If no allowedRoles specified, everyone can see it
+      if (!module.allowedRoles || module.allowedRoles.length === 0) {
+        return true;
+      }
+
+      // Check if user's role code is in the allowed roles
+      return user?.role && module.allowedRoles.includes(user.role);
+    });
+  }, [modules, user]);
   /* ───────────────────────── Sidebar inner content (Crisp White & Sky Blue Theme) ───────────────────────── */
   const sidebarContent = (
     // Base: Bright white background with subtle shadow for lift
@@ -102,7 +123,7 @@ const Sidebar: React.FC<NavModuleProps> = ({
       {/* ── Scrollable nav list ─────────────────────────────── */}
       <div className="flex-1 overflow-y-auto scrollbar-hide">
         <div className="p-4 space-y-2">
-          {modules.map((module) => {
+          {filteredModules.map((module) => {
             const Icon = module.icon;
             const isActive = selectedModule === module.id;
             const isHovered = hoveredModule === module.id;

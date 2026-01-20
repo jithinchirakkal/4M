@@ -185,7 +185,33 @@ class FourMCategoriesSerializer(serializers.ModelSerializer):
 #         model = FourMChange
 #         fields = '__all__'
 
+############### set up approval  ###########
 
+
+from .models import FourMApproval
+
+class FourMApprovalSerializer(serializers.ModelSerializer):
+    role_name = serializers.CharField(source='role.name', read_only=True)
+    role_code = serializers.CharField(source='role.code', read_only=True)
+    approved_by_name = serializers.CharField(source='approved_by.name', read_only=True)
+    
+    class Meta:
+        model = FourMApproval
+        fields = [
+            'id',
+            'change',
+            'role',
+            'role_name',
+            'role_code',
+            'status',
+            'approved_by',
+            'approved_by_name',
+            'remarks',
+            'approved_at',
+            'created_at',
+        ]
+
+############### set up approval  ###########
 
 
 class FourMChangeSerializer(serializers.ModelSerializer):
@@ -196,6 +222,7 @@ class FourMChangeSerializer(serializers.ModelSerializer):
     station_name = serializers.CharField(source='station.name', read_only=True)
     approval_status = serializers.SerializerMethodField()
     approval_status = serializers.SerializerMethodField()
+    approvals = FourMApprovalSerializer(many=True, read_only=True)
     class Meta:
         model = FourMChange
         fields = '__all__'
@@ -225,30 +252,8 @@ class FourMChangeSerializer(serializers.ModelSerializer):
         return "APPROVED"
         
 
-############### set up approval  ###########
 
-from .models import FourMApproval
 
-class FourMApprovalSerializer(serializers.ModelSerializer):
-    role_name = serializers.CharField(source='role.name', read_only=True)
-    role_code = serializers.CharField(source='role.code', read_only=True)
-    approved_by_name = serializers.CharField(source='approved_by.name', read_only=True)
-    
-    class Meta:
-        model = FourMApproval
-        fields = [
-            'id',
-            'change',
-            'role',
-            'role_name',
-            'role_code',
-            'status',
-            'approved_by',
-            'approved_by_name',
-            'remarks',
-            'approved_at',
-            'created_at',
-        ]
 
 ############### set up approval  ###########
 

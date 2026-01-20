@@ -25,6 +25,15 @@ interface ChangeItem {
     retroactive_inspection: boolean;
     suspected_lot_check: boolean;
   };
+  approvals?: Array<{  // ADD THIS ENTIRE BLOCK
+    id: number;
+    role_code: string;
+    role_name: string;
+    status: string;
+    approved_by_name?: string;
+    approved_at?: string;
+    remarks?: string;
+  }>;
 }
 // --- End Original Types ---
 
@@ -344,28 +353,66 @@ const DashboardView = () => {
   ];
 
   // Get recent changes (latest 3)
-  const recentChanges = changeList
-    .sort((a, b) => new Date(b.date || b.created_at || '').getTime() - new Date(a.date || a.created_at || '').getTime())
-    .slice(0, 3)
-    .map(item => {
-      const fourM = item.four_m || 'Unknown';
-      return {
-        type: fourM.toUpperCase(),
-        title: item.category_details?.description?.substring(0, 40) + (item.category_details?.description?.length && item.category_details.description.length > 40 ? '...' : '') || 'No description',
-        action: item.action_details?.action_taken?.substring(0, 30) + (item.action_details?.action_taken.length && item.action_details.action_taken.length > 30 ? '...' : '') || 'No action',
-        category: item.category_details?.category_type || 'Unknown',
-        date: item.date ? new Date(item.date).toLocaleDateString() : 'No date',
-        setUpApproval: item.action_details?.set_up_approval || false,
-        retroactiveInspection: item.action_details?.retroactive_inspection || false,
-        suspectedLotCheck: item.action_details?.suspected_lot_check || false,
-        color: fourM === 'Man' ? 'bg-blue-600' : 
-              fourM === 'Machine/Tool' ? 'bg-green-500' :
-              fourM === 'Material' ? 'bg-purple-500' : 'bg-orange-500',
-        priorityColor: item.category_details?.category_type === 'Abnormal' ? 'bg-red-500/10 text-red-600 border border-red-500/30' :
-                      item.category_details?.category_type === 'Unplanned' ? 'bg-orange-500/10 text-orange-600 border border-orange-500/30' :
-                      'bg-green-500/10 text-green-600 border border-green-500/30',
-      };
-    });
+  // const recentChanges = changeList
+  //   .sort((a, b) => new Date(b.date || b.created_at || '').getTime() - new Date(a.date || a.created_at || '').getTime())
+  //   .slice(0, 3)
+  //   .map(item => {
+  //     const fourM = item.four_m || 'Unknown';
+  //     return {
+  //       type: fourM.toUpperCase(),
+  //       title: item.category_details?.description?.substring(0, 40) + (item.category_details?.description?.length && item.category_details.description.length > 40 ? '...' : '') || 'No description',
+  //       action: item.action_details?.action_taken?.substring(0, 30) + (item.action_details?.action_taken.length && item.action_details.action_taken.length > 30 ? '...' : '') || 'No action',
+  //       category: item.category_details?.category_type || 'Unknown',
+  //       date: item.date ? new Date(item.date).toLocaleDateString() : 'No date',
+  //       setUpApproval: item.action_details?.set_up_approval || false,
+  //       retroactiveInspection: item.action_details?.retroactive_inspection || false,
+  //       suspectedLotCheck: item.action_details?.suspected_lot_check || false,
+  //       color: fourM === 'Man' ? 'bg-blue-600' : 
+  //             fourM === 'Machine/Tool' ? 'bg-green-500' :
+  //             fourM === 'Material' ? 'bg-purple-500' : 'bg-orange-500',
+  //       priorityColor: item.category_details?.category_type === 'Abnormal' ? 'bg-red-500/10 text-red-600 border border-red-500/30' :
+  //                     item.category_details?.category_type === 'Unplanned' ? 'bg-orange-500/10 text-orange-600 border border-orange-500/30' :
+  //                     'bg-green-500/10 text-green-600 border border-green-500/30',
+  //     };
+  //   });
+  // Get recent changes (latest 3) - UPDATED VERSION
+// Get recent changes (latest 3) - FIXED VERSION
+const recentChanges = changeList
+  .sort((a, b) => new Date(b.date || b.created_at || '').getTime() - new Date(a.date || a.created_at || '').getTime())
+  .slice(0, 3)
+  .map(item => {
+    const fourM = item.four_m || 'Unknown';
+    
+    // Check actual approval status from approvals array
+    const isSetupApprovalRequired = item.action_details?.set_up_approval || false;
+    const isSetupApproved = item.approvals?.some((approval) =>   // CHANGED: Use optional chaining
+      (approval.role_code === 'PROD_HOD' || approval.role_code === 'QA_HOD') && 
+      approval.status === 'approved'
+    ) || false;  // CHANGED: Add || false as fallback
+    
+    return {
+      type: fourM.toUpperCase(),
+      title: item.category_details?.description?.substring(0, 40) + (item.category_details?.description?.length && item.category_details.description.length > 40 ? '...' : '') || 'No description',
+      action: item.action_details?.action_taken?.substring(0, 30) + (item.action_details?.action_taken.length && item.action_details.action_taken.length > 30 ? '...' : '') || 'No action',
+      category: item.category_details?.category_type || 'Unknown',
+      date: item.date ? new Date(item.date).toLocaleDateString() : 'No date',
+      
+      // UPDATED: Check actual approval status, not just if it's required
+      setUpApprovalRequired: isSetupApprovalRequired,
+      setUpApproved: isSetupApproved,
+      
+      // Keep these as they are (they check if action is required)
+      retroactiveInspectionRequired: item.action_details?.retroactive_inspection || false,
+      suspectedLotCheckRequired: item.action_details?.suspected_lot_check || false,
+      
+      color: fourM === 'Man' ? 'bg-blue-600' : 
+            fourM === 'Machine/Tool' ? 'bg-green-500' :
+            fourM === 'Material' ? 'bg-purple-500' : 'bg-orange-500',
+      priorityColor: item.category_details?.category_type === 'Abnormal' ? 'bg-red-500/10 text-red-600 border border-red-500/30' :
+                    item.category_details?.category_type === 'Unplanned' ? 'bg-orange-500/10 text-orange-600 border border-orange-500/30' :
+                    'bg-green-500/10 text-green-600 border border-green-500/30',
+    };
+  });
 
   if (loading) {
     return (
@@ -751,7 +798,7 @@ const DashboardView = () => {
             </button>
           </div>
           
-          {recentChanges.length > 0 ? (
+          {/* {recentChanges.length > 0 ? (
             <div className="space-y-4">
               {recentChanges.map((item, idx) => (
                 <div key={idx} className="bg-white rounded-2xl shadow-lg p-6 flex flex-col md:flex-row justify-between items-start md:items-center transition-all duration-300 hover:shadow-2xl hover:ring-4 hover:ring-purple-500/10 border border-gray-100/50">
@@ -779,8 +826,46 @@ const DashboardView = () => {
             <NoRecordsPlaceholder />
           )}
         </div>
+      </div> */}
+      {recentChanges.length > 0 ? (
+  <div className="space-y-4">
+    {recentChanges.map((item, idx) => (
+      <div key={idx} className="bg-white rounded-2xl shadow-lg p-6 flex flex-col md:flex-row justify-between items-start md:items-center transition-all duration-300 hover:shadow-2xl hover:ring-4 hover:ring-purple-500/10 border border-gray-100/50">
+        <div className="flex items-start md:items-center flex-grow space-x-4 mb-4 md:mb-0">
+          <span className={`flex-shrink-0 w-3 h-3 rounded-full ${item.color} shadow-lg shadow-gray-400/30`}></span>
+          <div className="min-w-0">
+            <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${item.priorityColor} mb-1`}>{item.category} / {item.type}</span>
+            <div className="font-bold text-lg text-gray-900 truncate">{item.title}</div>
+            <div className="text-sm text-gray-500 mt-1">Action: <span className="text-gray-700 font-medium">{item.action}</span></div>
+          </div>
+        </div>
+        
+        <div className="flex flex-col md:items-end flex-shrink-0 min-w-[150px]">
+          <span className="text-sm font-medium text-gray-500 mb-2">Change Date: <span className="font-semibold text-gray-700">{item.date}</span></span>
+          <div className="flex flex-wrap gap-2 justify-start md:justify-end">
+            {/* UPDATED: Show different badges based on approval status */}
+            {item.setUpApprovalRequired && item.setUpApproved && (
+              <Badge label="✓ Set-Up Approved" color="bg-green-100 text-green-700" />
+            )}
+            {item.setUpApprovalRequired && !item.setUpApproved && (
+              <Badge label="⏳ Set-Up Approval Pending" color="bg-yellow-100 text-yellow-700" />
+            )}
+            {item.retroactiveInspectionRequired && (
+              <Badge label="Inspection Required" color="bg-orange-100 text-orange-700" />
+            )}
+            {item.suspectedLotCheckRequired && (
+              <Badge label="Lot Check Required" color="bg-red-100 text-red-700" />
+            )}
+          </div>
+        </div>
       </div>
-
+    ))}
+  </div>
+) : (
+  <NoRecordsPlaceholder />
+)}
+</div>
+      </div> 
       {/* -------------------------------------------------------------------------------------- */}
       {/* 6. CHARTS SECTION (NEW LAST POSITION - Quarterly THEN Current Month) */}
       {/* -------------------------------------------------------------------------------------- */}

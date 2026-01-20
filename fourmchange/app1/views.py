@@ -271,6 +271,78 @@ class FourMChangeViewSet(viewsets.ModelViewSet):
 from rest_framework.decorators import action
 from django.utils import timezone
 
+# class FourMApprovalViewSet(viewsets.ModelViewSet):
+#     queryset = FourMApproval.objects.all().order_by('-created_at')
+#     serializer_class = FourMApprovalSerializer
+#     permission_classes = [permissions.IsAuthenticated]
+
+#     def get_queryset(self):
+#         user = self.request.user
+
+#         # Admin sees all approvals
+#         if user.is_superuser:
+#             return FourMApproval.objects.all()
+
+#         # Role-based approvals
+#         return FourMApproval.objects.filter(
+#             role=user.role,
+#             status='pending'
+#         )
+
+#     @action(detail=True, methods=['post'])
+#     def approve(self, request, pk=None):
+#         approval = self.get_object()
+
+#         if approval.role != request.user.role:
+#             return Response(
+#                 {"error": "You are not authorized to approve this record"},
+#                 status=status.HTTP_403_FORBIDDEN
+#             )
+
+#         approval.status = 'approved'
+#         approval.approved_by = request.user
+#         approval.approved_at = timezone.now()
+#         approval.remarks = request.data.get('remarks', '')
+#         approval.save()
+
+#         # Check if all approvals are completed
+#         pending_exists = approval.change.approvals.filter(status='pending').exists()
+#         if not pending_exists:
+#             approval.change.status = 'approved'
+#             approval.change.save()
+
+#         return Response(
+#             FourMApprovalSerializer(approval).data,
+#             status=status.HTTP_200_OK
+#         )
+
+#     @action(detail=True, methods=['post'])
+#     def reject(self, request, pk=None):
+#         approval = self.get_object()
+
+#         if approval.role != request.user.role:
+#             return Response(
+#                 {"error": "You are not authorized to reject this record"},
+#                 status=status.HTTP_403_FORBIDDEN
+#             )
+
+#         approval.status = 'rejected'
+#         approval.approved_by = request.user
+#         approval.approved_at = timezone.now()
+#         approval.remarks = request.data.get('remarks', '')
+#         approval.save()
+
+#         approval.change.status = 'rejected'
+#         approval.change.save()
+
+#         return Response(
+#             FourMApprovalSerializer(approval).data,
+#             status=status.HTTP_200_OK
+#         )
+
+# views.py - Add this NEW ViewSet for Customer Approvals
+# views.py - Update FourMApprovalViewSet
+
 class FourMApprovalViewSet(viewsets.ModelViewSet):
     queryset = FourMApproval.objects.all().order_by('-created_at')
     serializer_class = FourMApprovalSerializer
@@ -279,19 +351,32 @@ class FourMApprovalViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
 
-        # Admin sees all approvals
+        # Admin sees all approvals EXCEPT customer approvals
         if user.is_superuser:
-            return FourMApproval.objects.all()
+            return FourMApproval.objects.exclude(role__code='CUSTOMER')
 
-        # Role-based approvals
+        # If user is a customer, return empty queryset for main approvals page
+        # (They should use CustomerApprovalsPage instead)
+        if user.role and user.role.code == 'CUSTOMER':
+            return FourMApproval.objects.none()
+
+        # For Prod HOD and QA HOD - show only their pending approvals
+        # Exclude customer approvals
         return FourMApproval.objects.filter(
             role=user.role,
             status='pending'
-        )
+        ).exclude(role__code='CUSTOMER')
 
     @action(detail=True, methods=['post'])
     def approve(self, request, pk=None):
         approval = self.get_object()
+
+        # Prevent customers from using this endpoint
+        if approval.role.code == 'CUSTOMER':
+            return Response(
+                {"error": "Customer approvals must be done through the customer portal"},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
         if approval.role != request.user.role:
             return Response(
@@ -320,6 +405,13 @@ class FourMApprovalViewSet(viewsets.ModelViewSet):
     def reject(self, request, pk=None):
         approval = self.get_object()
 
+        # Prevent customers from using this endpoint
+        if approval.role.code == 'CUSTOMER':
+            return Response(
+                {"error": "Customer approvals must be done through the customer portal"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         if approval.role != request.user.role:
             return Response(
                 {"error": "You are not authorized to reject this record"},
@@ -339,8 +431,104 @@ class FourMApprovalViewSet(viewsets.ModelViewSet):
             FourMApprovalSerializer(approval).data,
             status=status.HTTP_200_OK
         )
+# views.py - Update CustomerApprovalViewSet with proper permission checks
 
+class CustomerApprovalViewSet(viewsets.ModelViewSet):
+    """
+    Separate ViewSet specifically for Customer Approvals
+    Only accessible by users with CUSTOMER role
+    """
+    queryset = FourMApproval.objects.all().order_by('-created_at')
+    serializer_class = FourMApprovalSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        user = self.request.user
+
+        # CRITICAL: Only users with CUSTOMER role can see customer approvals
+        if not user.role or user.role.code != 'CUSTOMER':
+            return FourMApproval.objects.none()  # Return empty queryset
+
+        # Only show customer approvals for actual customers
+        return FourMApproval.objects.filter(
+            role__code='CUSTOMER'
+        )
+
+    def list(self, request, *args, **kwargs):
+        """Override list to add explicit permission check"""
+        if not request.user.role or request.user.role.code != 'CUSTOMER':
+            return Response(
+                {"error": "Access denied. Customer approvals are only visible to customer users."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """Override retrieve to add explicit permission check"""
+        if not request.user.role or request.user.role.code != 'CUSTOMER':
+            return Response(
+                {"error": "Access denied. Customer approvals are only visible to customer users."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        return super().retrieve(request, *args, **kwargs)
+
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        approval = self.get_object()
+
+        # Verify this is a customer approval
+        if approval.role.code != 'CUSTOMER':
+            return Response(
+                {"error": "This endpoint is only for customer approvals"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Verify user has customer role
+        if not request.user.role or request.user.role.code != 'CUSTOMER':
+            return Response(
+                {"error": "Only customers can approve these requests"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        approval.status = 'approved'
+        approval.approved_by = request.user
+        approval.approved_at = timezone.now()
+        approval.remarks = request.data.get('remarks', '')
+        approval.save()
+
+        return Response(
+            FourMApprovalSerializer(approval).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        approval = self.get_object()
+
+        # Verify this is a customer approval
+        if approval.role.code != 'CUSTOMER':
+            return Response(
+                {"error": "This endpoint is only for customer approvals"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Verify user has customer role
+        if not request.user.role or request.user.role.code != 'CUSTOMER':
+            return Response(
+                {"error": "Only customers can reject these requests"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        approval.status = 'rejected'
+        approval.approved_by = request.user
+        approval.approved_at = timezone.now()
+        approval.remarks = request.data.get('remarks', '')
+        approval.save()
+
+        return Response(
+            FourMApprovalSerializer(approval).data,
+            status=status.HTTP_200_OK
+        )
 
 
 

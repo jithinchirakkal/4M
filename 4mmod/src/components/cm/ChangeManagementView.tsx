@@ -641,7 +641,7 @@ const renderApprovalStatus = (item: any) => {
   if (approvalStatus === "APPROVED") {
     return (
       <span className="px-2 py-1 rounded-full text-xs font-bold shadow-sm bg-green-100 text-green-700">
-        APPROVED
+        ✓ APPROVED
       </span>
     );
   }
@@ -649,7 +649,7 @@ const renderApprovalStatus = (item: any) => {
   if (approvalStatus === "REJECTED") {
     return (
       <span className="px-2 py-1 rounded-full text-xs font-bold shadow-sm bg-red-100 text-red-700">
-        REJECTED
+         ✗ REJECTED
       </span>
     );
   }
@@ -660,6 +660,57 @@ const renderApprovalStatus = (item: any) => {
     </span>
   );
 };
+
+const renderCustomerApprovalStatus = (item: any) => {
+  // Check if customer approval is required
+  if (!item.action_details?.customer_approval) {
+    return (
+      <span className="px-2 py-1 rounded-full text-xs font-bold shadow-sm bg-gray-100 text-gray-600">
+        N/A
+      </span>
+    );
+  }
+
+  // If customer approval is required, check the approval status
+  // Look for a CUSTOMER role approval in the approvals array
+  const customerApproval = item.approvals?.find(
+    (approval: any) => approval.role_code === 'CUSTOMER'
+  );
+
+  if (!customerApproval) {
+    // Approval required but not yet created
+    return (
+      <span className="px-2 py-1 rounded-full text-xs font-bold shadow-sm bg-yellow-100 text-yellow-700 animate-pulse">
+        PENDING
+      </span>
+    );
+  }
+
+  // Check the status of the customer approval
+  if (customerApproval.status === 'approved') {
+    return (
+      <span className="px-2 py-1 rounded-full text-xs font-bold shadow-sm bg-green-100 text-green-700">
+        ✓ APPROVED
+      </span>
+    );
+  }
+
+  if (customerApproval.status === 'rejected') {
+    return (
+      <span className="px-2 py-1 rounded-full text-xs font-bold shadow-sm bg-red-100 text-red-700">
+        ✗ REJECTED
+      </span>
+    );
+  }
+
+  // Pending approval
+  return (
+    <span className="px-2 py-1 rounded-full text-xs font-bold shadow-sm bg-yellow-100 text-yellow-700 animate-pulse">
+      PENDING
+    </span>
+  );
+};
+
 
 const changeCategories = [
   {
@@ -1481,8 +1532,11 @@ export default function ChangeManagementView({
                       {renderStatusTag(item.action_details?.containment_action)}
                     </td>
 
-                    <td className="p-3 whitespace-nowrap">
+                    {/* <td className="p-3 whitespace-nowrap">
                       {renderStatusTag(item.action_details?.customer_approval)}
+                    </td> */}
+                    <td className="p-3 whitespace-nowrap">
+                      {renderCustomerApprovalStatus(item)}
                     </td>
                 
                     <td className="p-3 whitespace-nowrap text-sm font-medium">
