@@ -607,3 +607,98 @@ class InspectionReportSerializer(serializers.ModelSerializer):
                 InProcessParameter.objects.create(report=instance, **item)
 
         return instance
+
+ 
+ # 4M Procedure 
+
+from .models import ProcessInformation, FormatRecord
+
+class ProcessInformationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProcessInformation
+        fields = '__all__'
+
+
+class FormatRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FormatRecord
+        fields = '__all__'
+
+
+ # 4M Procedure 
+
+ # 4M Validation
+
+
+# from rest_framework import serializers
+# from .models import ChangeValidation, ChangeValidationRow
+
+# class ChangeValidationRowSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = ChangeValidationRow
+#         fields = '__all__'
+
+
+# class ChangeValidationSerializer(serializers.ModelSerializer):
+#     rows = ChangeValidationRowSerializer(many=True)
+
+#     class Meta:
+#         model = ChangeValidation
+#         fields = '__all__'
+
+#     def create(self, validated_data):
+#         rows_data = validated_data.pop('rows', [])
+#         validation = ChangeValidation.objects.create(**validated_data)
+#         for row in rows_data:
+#             ChangeValidationRow.objects.create(validation=validation, **row)
+#         return validation
+
+#     def update(self, instance, validated_data):
+#         rows_data = validated_data.pop('rows', [])
+#         for attr, value in validated_data.items():
+#             setattr(instance, attr, value)
+#         instance.save()
+
+#         for row in rows_data:
+#             ChangeValidationRow.objects.create(validation=instance, **row)
+
+#         return instance
+
+
+from rest_framework import serializers
+from .models import ChangeValidation, ChangeValidationRow
+
+class ChangeValidationRowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChangeValidationRow
+        exclude = ['validation']  # Don't include validation field - it's set by parent
+
+class ChangeValidationSerializer(serializers.ModelSerializer):
+    rows = ChangeValidationRowSerializer(many=True)
+
+    class Meta:
+        model = ChangeValidation
+        fields = '__all__'
+
+    def create(self, validated_data):
+        rows_data = validated_data.pop('rows', [])
+        validation = ChangeValidation.objects.create(**validated_data)
+        for row_data in rows_data:
+            ChangeValidationRow.objects.create(validation=validation, **row_data)
+        return validation
+
+    def update(self, instance, validated_data):
+        rows_data = validated_data.pop('rows', [])
+        
+        # Update the main validation object
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        # Replace all rows (delete old, create new)
+        instance.rows.all().delete()
+        for row_data in rows_data:
+            ChangeValidationRow.objects.create(validation=instance, **row_data)
+        
+        return instance
+ # 4M Validation

@@ -733,3 +733,80 @@ class InProcessParameter(models.Model):
         return f"{self.parameter_name}"
 
  
+ # 4M Procedure 
+
+
+# Process Information 
+class ProcessInformation(models.Model):
+    process_name = models.CharField(max_length=255)
+    purpose = models.TextField()
+    scope = models.TextField()
+    process_owner = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.process_name
+
+
+# Format Record 
+class FormatRecord(models.Model):
+    sr_no = models.PositiveIntegerField()
+    record_no = models.CharField(max_length=100)
+    rev_no = models.CharField(max_length=10)
+    rev_date = models.DateField()
+    record_name = models.TextField()
+    retention_period = models.CharField(max_length=100, blank=True)
+    disposal_authority = models.CharField(max_length=100, blank=True)
+    file = models.FileField(upload_to='format_files/', blank=True, null=True)
+
+    def __str__(self):
+        return self.record_no
+
+
+ # 4M Procedure 
+
+
+# 4M Validation
+
+class ChangeValidation(models.Model):
+    product = models.CharField(max_length=255)
+    process = models.CharField(max_length=255)
+    line = models.CharField(max_length=255)
+    customer = models.CharField(max_length=255, blank=True, null=True)
+    date = models.DateField()
+    shift = models.CharField(max_length=20)
+    unexpected_change = models.CharField(
+        max_length=20,
+        choices=[("Man", "Man"), ("Machine", "Machine"), ("Material", "Material"), ("Method", "Method"), ("Others", "Others")]
+    )
+    change_point = models.TextField(blank=True, null=True)
+    result_confirmation_status = models.CharField(max_length=100, blank=True)
+    prepared_by = models.CharField(max_length=100, blank=True, null=True)
+    approved_by = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.product} - {self.date}"
+
+
+class ChangeValidationRow(models.Model):
+    validation = models.ForeignKey(ChangeValidation, on_delete=models.CASCADE, related_name="rows")
+    spec = models.TextField()  # Spec (Process & Product)
+    remarks = models.TextField(blank=True, null=True)
+
+    before_change_1 = models.CharField(max_length=100, blank=True, null=True)
+    before_change_2 = models.CharField(max_length=100, blank=True, null=True)
+    before_change_3 = models.CharField(max_length=100, blank=True, null=True)
+
+    after_change_1 = models.CharField(max_length=100, blank=True, null=True)
+    after_change_2 = models.CharField(max_length=100, blank=True, null=True)
+    after_change_3 = models.CharField(max_length=100, blank=True, null=True)
+
+    end_change_1 = models.CharField(max_length=100, blank=True, null=True)
+    end_change_2 = models.CharField(max_length=100, blank=True, null=True)
+    end_change_3 = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return f"Row for {self.validation.id}"
+
+
+# 4M Validation
+ 

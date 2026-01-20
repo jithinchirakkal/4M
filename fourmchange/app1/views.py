@@ -792,3 +792,31 @@ class InProcessParameterViewSet(viewsets.ModelViewSet):
     queryset = InProcessParameter.objects.all()
     serializer_class = InProcessParameterSerializer
 
+
+ 
+ # 4M Procedure 
+
+from .models import ProcessInformation, FormatRecord
+from .serializers import ProcessInformationSerializer, FormatRecordSerializer
+
+class ProcessInformationViewSet(viewsets.ModelViewSet):
+    queryset = ProcessInformation.objects.all()
+    serializer_class = ProcessInformationSerializer
+
+class FormatRecordViewSet(viewsets.ModelViewSet):
+    queryset = FormatRecord.objects.all()
+    serializer_class = FormatRecordSerializer
+
+  
+ # 4M Procedure 
+
+ # 4M Validation
+
+from .models import ChangeValidation
+from .serializers import ChangeValidationSerializer
+
+class ChangeValidationViewSet(viewsets.ModelViewSet):
+    queryset = ChangeValidation.objects.all().order_by('-date')
+    serializer_class = ChangeValidationSerializer
+
+ # 4M Validation

@@ -34,7 +34,8 @@ from .views import FourMCategoryViewSet, FourMTrackingViewSet, FourMChangeDetail
 from .views import ManMachineMatrixViewSet,ControlPlanViewSet,RCRViewSet
 from .views import InspectionReportViewSet, ProcessParameterViewSet, InProcessParameterViewSet
 from .views import ProcessFlowViewSet, ProcessViewSet, RevisionViewSet
-
+from .views import ProcessInformationViewSet, FormatRecordViewSet
+from .views import ChangeValidationViewSet
 
 
 
@@ -68,6 +69,13 @@ router.register(r'inprocess-parameters', InProcessParameterViewSet)
 router.register(r'process-flows', ProcessFlowViewSet, basename='processflow')
 router.register(r'processes', ProcessViewSet, basename='process')
 router.register(r'revisions', RevisionViewSet, basename='revision')
+
+
+router.register(r'process-info', ProcessInformationViewSet)
+router.register(r'format-records', FormatRecordViewSet)
+
+router.register(r'validation', ChangeValidationViewSet)
+
 
 urlpatterns = [
     path('', include(router.urls)),
