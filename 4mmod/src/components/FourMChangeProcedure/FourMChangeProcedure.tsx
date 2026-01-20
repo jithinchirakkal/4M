@@ -552,159 +552,621 @@
 
 
 
-import { FileText } from 'lucide-react';
+// import { FileText } from 'lucide-react';
+// import React, { useState, useEffect } from 'react';
+
+// // Define the record interface
+// interface Record {
+//   srNo: number;
+//   recordNo: string;
+//   revNo: string;
+//   revDate: string;
+//   recordName: string;
+//   retentionPeriod: string;
+//   disposalAuthority: string;
+//   file: File | null;
+// }
+
+// // Demo Data with placeholder files
+// const demoData: Record[] = [
+//   {
+//     srNo: 1,
+//     recordNo: 'MS-4M-WI-01',
+//     revNo: '0.0',
+//     revDate: '2017-04-01',
+//     recordName: '4M change identification sheet (Planned/unplanned)',
+//     retentionPeriod: 'One Year',
+//     disposalAuthority: 'Head quality/Prod.',
+//     file: new File(['sample content'], 'sample1.pdf', { type: 'application/pdf' }),
+//   },
+//   {
+//     srNo: 2,
+//     recordNo: 'MS-4M-WI-01a',
+//     revNo: '0.0',
+//     revDate: '2017-04-01',
+//     recordName: 'Handling of abnormal situation',
+//     retentionPeriod: 'One Year',
+//     disposalAuthority: 'Head quality/Prod.',
+//     file: new File(['sample content'], 'sample2.doc', { type: 'application/msword' }),
+//   },
+//   {
+//     srNo: 3,
+//     recordNo: 'MS-4M-02',
+//     revNo: '0.0',
+//     revDate: '2017-03-25',
+//     recordName: 'List of break down',
+//     retentionPeriod: 'One Year',
+//     disposalAuthority: 'Head quality/Prod.',
+//     file: null,
+//   },
+//   {
+//     srNo: 4,
+//     recordNo: 'MS-4M-03',
+//     revNo: '0.0',
+//     revDate: '2017-04-01',
+//     recordName: '4M change information flow sheet',
+//     retentionPeriod: 'Up to tool life',
+//     disposalAuthority: 'Head quality/Prod.',
+//     file: new File(['sample content'], 'sample3.png', { type: 'image/png' }),
+//   },
+//   {
+//     srNo: 5,
+//     recordNo: 'MS-4M-04',
+//     revNo: '0.0',
+//     revDate: '2017-04-01',
+//     recordName: '4M change identification tag',
+//     retentionPeriod: 'One Year',
+//     disposalAuthority: 'Head quality/Prod.',
+//     file: null,
+//   },
+//   {
+//     srNo: 6,
+//     recordNo: 'MS-4M-07',
+//     revNo: '0.0',
+//     revDate: '2017-04-01',
+//     recordName: '4M change traceability record sheet',
+//     retentionPeriod: 'One Year',
+//     disposalAuthority: 'Head quality/Prod.',
+//     file: new File(['sample content'], 'sample4.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+//   },
+//   {
+//     srNo: 7,
+//     recordNo: 'MS-4M-06',
+//     revNo: '0.0',
+//     revDate: '2017-04-01',
+//     recordName: '4M Change inspection report',
+//     retentionPeriod: 'One Year',
+//     disposalAuthority: 'Head quality',
+//     file: null,
+//   },
+//   {
+//     srNo: 8,
+//     recordNo: 'MS-4M-05A',
+//     revNo: '0.0',
+//     revDate: '2017-04-10',
+//     recordName: '4M Change summary sheet',
+//     retentionPeriod: 'One Year',
+//     disposalAuthority: 'Head quality',
+//     file: new File(['sample content'], 'sample5.jpg', { type: 'image/jpeg' }),
+//   },
+//   {
+//     srNo: 9,
+//     recordNo: 'MS-4M-05',
+//     revNo: '0.0',
+//     revDate: '2017-04-01',
+//     recordName: '4M Change record sheet',
+//     retentionPeriod: 'One Year',
+//     disposalAuthority: 'Quality Sup.',
+//     file: null,
+//   },
+//   {
+//     srNo: 10,
+//     recordNo: 'MS-4M-08',
+//     revNo: '0.0',
+//     revDate: '2017-04-01',
+//     recordName: '4M Change display board',
+//     retentionPeriod: 'Daily',
+//     disposalAuthority: 'Quality Sup.',
+//     file: new File(['sample content'], 'sample6.pdf', { type: 'application/pdf' }),
+//   },
+// ];
+
+// // Header Info
+// const headerInfo = {
+//   docNo: 'MS/4M/PR/05',
+//   revNo: '28.02.20',
+//   date: '2020-02-28',
+//   processName: '4M Change Procedure',
+//   purpose: 'To implement the system for control the 4M (Man, Machine, Material, Method) changes in process',
+//   scope: 'Applicable to all manufacturing process',
+//   processOwner: 'Head quality & Production',
+// };
+
+// // Component
+// const FourMChangeProcedure: React.FC = () => {
+//   const [records, setRecords] = useState<Record[]>(demoData);
+//   const [showForm, setShowForm] = useState<boolean>(false);
+//   const [formData, setFormData] = useState<Record>({
+//     srNo: 0,
+//     recordNo: '',
+//     revNo: '',
+//     revDate: '',
+//     recordName: '',
+//     retentionPeriod: '',
+//     disposalAuthority: '',
+//     file: null,
+//   });
+//   const [editingIndex, setEditingIndex] = useState<number>(-1);
+
+//   useEffect(() => {
+//     const updatedRecords = records.map((record, index) => ({
+//       ...record,
+//       srNo: index + 1,
+//     }));
+//     setRecords(updatedRecords);
+//   }, []);
+
+//   const handleInputChange = (
+//     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+//   ) => {
+//     const { name, value } = e.target;
+//     setFormData((prev) => ({
+//       ...prev,
+//       [name]: value,
+//     }));
+//   };
+
+//   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     setFormData((prev) => ({
+//       ...prev,
+//       file: e.target.files ? e.target.files[0] : null,
+//     }));
+//   };
+
+//   const handleAdd = () => {
+//     if (editingIndex === -1) {
+//       const newRecord: Record = {
+//         ...formData,
+//         srNo: records.length + 1,
+//       };
+//       setRecords([...records, newRecord]);
+//     } else {
+//       const updatedRecords = [...records];
+//       updatedRecords[editingIndex] = { ...formData, srNo: records[editingIndex].srNo };
+//       setRecords(updatedRecords);
+//       setEditingIndex(-1);
+//     }
+
+//     setFormData({
+//       srNo: 0,
+//       recordNo: '',
+//       revNo: '',
+//       revDate: '',
+//       recordName: '',
+//       retentionPeriod: '',
+//       disposalAuthority: '',
+//       file: null,
+//     });
+//     setShowForm(false);
+//   };
+
+//   const handleEdit = (index: number) => {
+//     const record = records[index];
+//     setFormData(record);
+//     setEditingIndex(index);
+//     setShowForm(true);
+//   };
+
+//   const handleDelete = (index: number) => {
+//     if (window.confirm('Are you sure you want to delete this record?')) {
+//       const updatedRecords = records.filter((_, i) => i !== index);
+//       setRecords(updatedRecords);
+//     }
+//   };
+
+//   const handleCancel = () => {
+//     setShowForm(false);
+//     setEditingIndex(-1);
+//     setFormData({
+//       srNo: 0,
+//       recordNo: '',
+//       revNo: '',
+//       revDate: '',
+//       recordName: '',
+//       retentionPeriod: '',
+//       disposalAuthority: '',
+//       file: null,
+//     });
+//   };
+
+//   return (
+//     <div className="max-w-full p-6 ">
+//       <div className="max-w-full mx-auto">
+//         {/* Header Section */}
+//         <div className="mb-8 text-center">
+//           <div className="flex justify-center items-center mb-4">
+//             <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mr-3">
+//               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                 <path
+//                   strokeLinecap="round"
+//                   strokeLinejoin="round"
+//                   strokeWidth={2}
+//                   d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+//                 />
+//               </svg>
+//             </div>
+//             <h1 className="text-3xl font-bold text-blue-800">4M Change Procedure</h1>
+//           </div>
+//           <div className="flex justify-center gap-6 text-sm text-gray-700">
+//             <div>
+//               <span className="font-medium">Doc. No.:</span> {headerInfo.docNo}
+//             </div>
+//             <div>
+//               <span className="font-medium">Rev. No.:</span> {headerInfo.revNo}
+//             </div>
+//             <div>
+//               <span className="font-medium">Date:</span> {headerInfo.date}
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Process Information */}
+//         <div className="bg-white shadow-xl rounded-2xl overflow-hidden mb-6">
+//           <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white">
+//             <h2 className="text-xl font-semibold">Process Information</h2>
+//           </div>
+//           <div className="p-6 bg-gray-50">
+//             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//               <div>
+//                 <span className="font-medium text-gray-700">Process Name:</span>
+//                 <p className="text-gray-900">{headerInfo.processName}</p>
+//               </div>
+//               <div>
+//                 <span className="font-medium text-gray-700">Purpose:</span>
+//                 <p className="text-gray-900">{headerInfo.purpose}</p>
+//               </div>
+//               <div>
+//                 <span className="font-medium text-gray-700">Scope:</span>
+//                 <p className="text-gray-900">{headerInfo.scope}</p>
+//               </div>
+//               <div>
+//                 <span className="font-medium text-gray-700">Process Owner:</span>
+//                 <p className="text-gray-900">{headerInfo.processOwner}</p>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Action Buttons and Records Table */}
+//         {showForm ? (
+//           <div className="bg-white shadow-xl rounded-2xl overflow-hidden mb-6">
+//             <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white flex justify-between items-center">
+//               <h2 className="text-xl font-semibold">
+//                 {editingIndex === -1 ? 'Add New Record' : 'Edit Record'}
+//               </h2>
+//               <button
+//                 onClick={handleCancel}
+//                 className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md text-sm font-medium"
+//               >
+//                 Back to List
+//               </button>
+//             </div>
+//             <div className="p-6">
+//               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+//                 <div>
+//                   <label className="block text-sm font-medium text-gray-700 mb-1">Record No.</label>
+//                   <input
+//                     type="text"
+//                     name="recordNo"
+//                     value={formData.recordNo}
+//                     onChange={handleInputChange}
+//                     placeholder="e.g., MS-4M-WI-01"
+//                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+//                     required
+//                   />
+//                 </div>
+//                 <div>
+//                   <label className="block text-sm font-medium text-gray-700 mb-1">Rev. No.</label>
+//                   <input
+//                     type="text"
+//                     name="revNo"
+//                     value={formData.revNo}
+//                     onChange={handleInputChange}
+//                     placeholder="e.g., 0.0"
+//                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+//                     required
+//                   />
+//                 </div>
+//                 <div>
+//                   <label className="block text-sm font-medium text-gray-700 mb-1">Rev. Date</label>
+//                   <input
+//                     type="date"
+//                     name="revDate"
+//                     value={formData.revDate}
+//                     onChange={handleInputChange}
+//                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+//                     required
+//                   />
+//                 </div>
+//                 <div className="md:col-span-2">
+//                   <label className="block text-sm font-medium text-gray-700 mb-1">Record Name</label>
+//                   <textarea
+//                     name="recordName"
+//                     value={formData.recordName}
+//                     onChange={handleInputChange}
+//                     placeholder="Enter record name"
+//                     rows={3}
+//                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+//                     required
+//                   />
+//                 </div>
+//                 <div>
+//                   <label className="block text-sm font-medium text-gray-700 mb-1">Retention Period</label>
+//                   <select
+//                     name="retentionPeriod"
+//                     value={formData.retentionPeriod}
+//                     onChange={handleInputChange}
+//                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+//                     required
+//                   >
+//                     <option value="">Select...</option>
+//                     <option value="One Year">One Year</option>
+//                     <option value="Up to tool life">Up to tool life</option>
+//                     <option value="Daily">Daily</option>
+//                     <option value="Custom">Custom</option>
+//                   </select>
+//                   {formData.retentionPeriod === 'Custom' && (
+//                     <input
+//                       type="text"
+//                       name="customRetention"
+//                       placeholder="Enter custom period"
+//                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+//                         setFormData((prev) => ({ ...prev, retentionPeriod: e.target.value }))
+//                       }
+//                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 mt-2"
+//                     />
+//                   )}
+//                 </div>
+//                 <div>
+//                   <label className="block text-sm font-medium text-gray-700 mb-1">Disposal Authority</label>
+//                   <input
+//                     type="text"
+//                     name="disposalAuthority"
+//                     value={formData.disposalAuthority}
+//                     onChange={handleInputChange}
+//                     placeholder="e.g., Head quality/Prod."
+//                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+//                     required
+//                   />
+//                 </div>
+//                 <div className="md:col-span-2">
+//                   <label className="block text-sm font-medium text-gray-700 mb-1">Upload File (Optional)</label>
+//                   <input
+//                     type="file"
+//                     name="file"
+//                     onChange={handleFileChange}
+//                     accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png"
+//                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+//                   />
+//                   {formData.file && (
+//                     <div className="mt-2 p-2 bg-green-50 rounded-md text-sm">
+//                       <span className="font-medium">{formData.file.name}</span>
+//                       <span className="ml-2">({(formData.file.size / 1024).toFixed(2)} KB)</span>
+//                     </div>
+//                   )}
+//                 </div>
+//               </div>
+//               <div className="flex justify-end gap-3">
+//                 <button
+//                   onClick={handleCancel}
+//                   className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+//                 >
+//                   Cancel
+//                 </button>
+//                 <button
+//                   onClick={handleAdd}
+//                   className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+//                 >
+//                   {editingIndex === -1 ? 'Add Record' : 'Update Record'}
+//                 </button>
+//               </div>
+//             </div>
+//           </div>
+//         ) : (
+//           <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
+//             <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white flex justify-between items-center">
+//               <h2 className="text-xl font-semibold">Master List of Formats and Records</h2>
+//               <div className="flex gap-3">
+//                 <button
+//                   onClick={() => setShowForm(true)}
+//                   className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium"
+//                 >
+//                   Add New Record
+//                 </button>
+//                 <button
+//                   onClick={() => setRecords(demoData)}
+//                   className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md text-sm font-medium"
+//                 >
+//                   Reset to Demo Data
+//                 </button>
+//               </div>
+//             </div>
+
+//             <div className="p-6">
+//               <div className="overflow-x-auto">
+//                 <table className="min-w-full divide-y divide-gray-200">
+//                   <thead className="bg-gray-50">
+//                     <tr>
+//                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sr. No.</th>
+//                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Record No.</th>
+//                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rev. No.</th>
+//                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rev. Date</th>
+//                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Record Name</th>
+//                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Retention Period</th>
+//                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Disposal Authority</th>
+//                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File</th>
+//                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+//                     </tr>
+//                   </thead>
+//                   <tbody className="bg-white divide-y divide-gray-200">
+//                     {records.map((record, index) => (
+//                       <tr key={index} className="hover:bg-gray-50">
+//                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.srNo}</td>
+//                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.recordNo}</td>
+//                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.revNo}</td>
+//                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.revDate}</td>
+//                         <td className="px-6 py-4 text-sm text-gray-900 max-w-xs break-words">{record.recordName}</td>
+//                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.retentionPeriod}</td>
+//                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.disposalAuthority}</td>
+//                         <td className="px-6 py-4 whitespace-nowrap text-sm">
+//                           {record.file && (
+//                             <a
+//                               href={URL.createObjectURL(record.file)}
+//                               target="_blank"
+//                               rel="noopener noreferrer"
+//                               className="inline-flex items-center px-2 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
+//                             >
+//                               <FileText className="w-4 h-4 mr-2" />
+//                               {record.file.name}
+//                             </a>
+//                           )}
+//                         </td>
+//                         <td className="px-6 py-4 whitespace-nowrap text-sm">
+//                           <div className="flex gap-2">
+//                             <button
+//                               onClick={() => handleEdit(index)}
+//                               className="px-2 py-1 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 text-sm"
+//                             >
+//                               Edit
+//                             </button>
+//                             <button
+//                               onClick={() => handleDelete(index)}
+//                               className="px-2 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm"
+//                             >
+//                               Delete
+//                             </button>
+//                           </div>
+//                         </td>
+//                       </tr>
+//                     ))}
+//                   </tbody>
+//                 </table>
+//               </div>
+//             </div>
+//           </div>
+//         )}
+
+//         {/* Footer */}
+//         {/* <div className="bg-white shadow-xl rounded-2xl overflow-hidden mt-6">
+//           <div className="p-6 bg-gray-50">
+//             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+//               <div>
+//                 <span className="font-medium text-gray-700">Prepared By:</span> S.K Sharma
+//               </div>
+//               <div>
+//                 <span className="font-medium text-gray-700">Approved By:</span> _______________
+//               </div>
+//               <div>
+//                 <span className="font-medium text-gray-700">Issued By:</span> _______________
+//               </div>
+//             </div>
+//           </div>
+//         </div> */}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default FourMChangeProcedure;
+
+
+import { FileText, Edit2, Trash2, Download, Eye } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
-// Define the record interface
-interface Record {
-  srNo: number;
-  recordNo: string;
-  revNo: string;
-  revDate: string;
-  recordName: string;
-  retentionPeriod: string;
-  disposalAuthority: string;
-  file: File | null;
+// Define the interfaces
+interface ProcessInfo {
+  id?: number;
+  process_name: string;
+  purpose: string;
+  scope: string;
+  process_owner: string;
 }
 
-// Demo Data with placeholder files
-const demoData: Record[] = [
-  {
-    srNo: 1,
-    recordNo: 'MS-4M-WI-01',
-    revNo: '0.0',
-    revDate: '2017-04-01',
-    recordName: '4M change identification sheet (Planned/unplanned)',
-    retentionPeriod: 'One Year',
-    disposalAuthority: 'Head quality/Prod.',
-    file: new File(['sample content'], 'sample1.pdf', { type: 'application/pdf' }),
-  },
-  {
-    srNo: 2,
-    recordNo: 'MS-4M-WI-01a',
-    revNo: '0.0',
-    revDate: '2017-04-01',
-    recordName: 'Handling of abnormal situation',
-    retentionPeriod: 'One Year',
-    disposalAuthority: 'Head quality/Prod.',
-    file: new File(['sample content'], 'sample2.doc', { type: 'application/msword' }),
-  },
-  {
-    srNo: 3,
-    recordNo: 'MS-4M-02',
-    revNo: '0.0',
-    revDate: '2017-03-25',
-    recordName: 'List of break down',
-    retentionPeriod: 'One Year',
-    disposalAuthority: 'Head quality/Prod.',
-    file: null,
-  },
-  {
-    srNo: 4,
-    recordNo: 'MS-4M-03',
-    revNo: '0.0',
-    revDate: '2017-04-01',
-    recordName: '4M change information flow sheet',
-    retentionPeriod: 'Up to tool life',
-    disposalAuthority: 'Head quality/Prod.',
-    file: new File(['sample content'], 'sample3.png', { type: 'image/png' }),
-  },
-  {
-    srNo: 5,
-    recordNo: 'MS-4M-04',
-    revNo: '0.0',
-    revDate: '2017-04-01',
-    recordName: '4M change identification tag',
-    retentionPeriod: 'One Year',
-    disposalAuthority: 'Head quality/Prod.',
-    file: null,
-  },
-  {
-    srNo: 6,
-    recordNo: 'MS-4M-07',
-    revNo: '0.0',
-    revDate: '2017-04-01',
-    recordName: '4M change traceability record sheet',
-    retentionPeriod: 'One Year',
-    disposalAuthority: 'Head quality/Prod.',
-    file: new File(['sample content'], 'sample4.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
-  },
-  {
-    srNo: 7,
-    recordNo: 'MS-4M-06',
-    revNo: '0.0',
-    revDate: '2017-04-01',
-    recordName: '4M Change inspection report',
-    retentionPeriod: 'One Year',
-    disposalAuthority: 'Head quality',
-    file: null,
-  },
-  {
-    srNo: 8,
-    recordNo: 'MS-4M-05A',
-    revNo: '0.0',
-    revDate: '2017-04-10',
-    recordName: '4M Change summary sheet',
-    retentionPeriod: 'One Year',
-    disposalAuthority: 'Head quality',
-    file: new File(['sample content'], 'sample5.jpg', { type: 'image/jpeg' }),
-  },
-  {
-    srNo: 9,
-    recordNo: 'MS-4M-05',
-    revNo: '0.0',
-    revDate: '2017-04-01',
-    recordName: '4M Change record sheet',
-    retentionPeriod: 'One Year',
-    disposalAuthority: 'Quality Sup.',
-    file: null,
-  },
-  {
-    srNo: 10,
-    recordNo: 'MS-4M-08',
-    revNo: '0.0',
-    revDate: '2017-04-01',
-    recordName: '4M Change display board',
-    retentionPeriod: 'Daily',
-    disposalAuthority: 'Quality Sup.',
-    file: new File(['sample content'], 'sample6.pdf', { type: 'application/pdf' }),
-  },
-];
+interface Record {
+  id?: number;
+  sr_no: number;
+  record_no: string;
+  rev_no: string;
+  rev_date: string;
+  record_name: string;
+  retention_period: string;
+  disposal_authority: string;
+  file: File | string | null;
+}
+
+// API Configuration
+const API_BASE_URL = 'http://localhost:8000/api'; 
 
 // Header Info
 const headerInfo = {
   docNo: 'MS/4M/PR/05',
   revNo: '28.02.20',
   date: '2020-02-28',
-  processName: '4M Change Procedure',
-  purpose: 'To implement the system for control the 4M (Man, Machine, Material, Method) changes in process',
-  scope: 'Applicable to all manufacturing process',
-  processOwner: 'Head quality & Production',
 };
 
-// Component
 const FourMChangeProcedure: React.FC = () => {
-  const [records, setRecords] = useState<Record[]>(demoData);
+  const [processInfo, setProcessInfo] = useState<ProcessInfo | null>(null);
+  const [records, setRecords] = useState<Record[]>([]);
   const [showForm, setShowForm] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
   const [formData, setFormData] = useState<Record>({
-    srNo: 0,
-    recordNo: '',
-    revNo: '',
-    revDate: '',
-    recordName: '',
-    retentionPeriod: '',
-    disposalAuthority: '',
+    sr_no: 0,
+    record_no: '',
+    rev_no: '',
+    rev_date: '',
+    record_name: '',
+    retention_period: '',
+    disposal_authority: '',
     file: null,
   });
-  const [editingIndex, setEditingIndex] = useState<number>(-1);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
+  // Fetch Process Information
   useEffect(() => {
-    const updatedRecords = records.map((record, index) => ({
-      ...record,
-      srNo: index + 1,
-    }));
-    setRecords(updatedRecords);
+    fetchProcessInfo();
+    fetchRecords();
   }, []);
+
+  const fetchProcessInfo = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/process-info/`);
+      if (!response.ok) throw new Error('Failed to fetch process information');
+      const data = await response.json();
+      // Assuming the first record is the active one
+      if (data.length > 0) {
+        setProcessInfo(data[0]);
+      }
+    } catch (err) {
+      setError('Failed to load process information');
+      console.error(err);
+    }
+  };
+
+  const fetchRecords = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/format-records/`);
+      if (!response.ok) throw new Error('Failed to fetch records');
+      const data = await response.json();
+      setRecords(data);
+    } catch (err) {
+      setError('Failed to load records');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -723,130 +1185,180 @@ const FourMChangeProcedure: React.FC = () => {
     }));
   };
 
-  const handleAdd = () => {
-    if (editingIndex === -1) {
-      const newRecord: Record = {
-        ...formData,
-        srNo: records.length + 1,
-      };
-      setRecords([...records, newRecord]);
-    } else {
-      const updatedRecords = [...records];
-      updatedRecords[editingIndex] = { ...formData, srNo: records[editingIndex].srNo };
-      setRecords(updatedRecords);
-      setEditingIndex(-1);
-    }
+  const handleSubmit = async () => {
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('sr_no', formData.sr_no.toString());
+      formDataToSend.append('record_no', formData.record_no);
+      formDataToSend.append('rev_no', formData.rev_no);
+      formDataToSend.append('rev_date', formData.rev_date);
+      formDataToSend.append('record_name', formData.record_name);
+      formDataToSend.append('retention_period', formData.retention_period);
+      formDataToSend.append('disposal_authority', formData.disposal_authority);
+      
+      if (formData.file && formData.file instanceof File) {
+        formDataToSend.append('file', formData.file);
+      }
 
-    setFormData({
-      srNo: 0,
-      recordNo: '',
-      revNo: '',
-      revDate: '',
-      recordName: '',
-      retentionPeriod: '',
-      disposalAuthority: '',
-      file: null,
-    });
-    setShowForm(false);
+      const url = editingId 
+        ? `${API_BASE_URL}/format-records/${editingId}/`
+        : `${API_BASE_URL}/format-records/`;
+      
+      const method = editingId ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        body: formDataToSend,
+      });
+
+      if (!response.ok) throw new Error('Failed to save record');
+
+      await fetchRecords();
+      handleCancel();
+    } catch (err) {
+      setError('Failed to save record');
+      console.error(err);
+    }
   };
 
-  const handleEdit = (index: number) => {
-    const record = records[index];
-    setFormData(record);
-    setEditingIndex(index);
+  const handleEdit = (record: Record) => {
+    setFormData({
+      ...record,
+      file: null, // Reset file for editing
+    });
+    setEditingId(record.id || null);
     setShowForm(true);
   };
 
-  const handleDelete = (index: number) => {
+  const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this record?')) {
-      const updatedRecords = records.filter((_, i) => i !== index);
-      setRecords(updatedRecords);
+      try {
+        const response = await fetch(`${API_BASE_URL}/format-records/${id}/`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) throw new Error('Failed to delete record');
+
+        await fetchRecords();
+      } catch (err) {
+        setError('Failed to delete record');
+        console.error(err);
+      }
     }
   };
 
   const handleCancel = () => {
     setShowForm(false);
-    setEditingIndex(-1);
+    setEditingId(null);
     setFormData({
-      srNo: 0,
-      recordNo: '',
-      revNo: '',
-      revDate: '',
-      recordName: '',
-      retentionPeriod: '',
-      disposalAuthority: '',
+      sr_no: 0,
+      record_no: '',
+      rev_no: '',
+      rev_date: '',
+      record_name: '',
+      retention_period: '',
+      disposal_authority: '',
       file: null,
     });
   };
 
+  const handleViewFile = (fileUrl: string) => {
+    window.open(fileUrl, '_blank');
+  };
+
+  const handleDownloadFile = (fileUrl: string, fileName: string) => {
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const getFileName = (filePath: string | File | null): string => {
+    if (!filePath) return '';
+    if (filePath instanceof File) return filePath.name;
+    return filePath.split('/').pop() || '';
+  };
+
   return (
-    <div className="max-w-full p-6 ">
+    <div className="max-w-full p-6 bg-gray-100 min-h-screen">
       <div className="max-w-full mx-auto">
         {/* Header Section */}
-        <div className="mb-8 text-center">
-          <div className="flex justify-center items-center mb-4">
-            <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mr-3">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl shadow-xl mb-6 p-6">
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold text-white mb-2">4M Change Procedure</h1>
+              <p className="text-blue-100 text-sm">Quality control plan management and documentation</p>
             </div>
-            <h1 className="text-3xl font-bold text-blue-800">4M Change Procedure</h1>
-          </div>
-          <div className="flex justify-center gap-6 text-sm text-gray-700">
-            <div>
-              <span className="font-medium">Doc. No.:</span> {headerInfo.docNo}
-            </div>
-            <div>
-              <span className="font-medium">Rev. No.:</span> {headerInfo.revNo}
-            </div>
-            <div>
-              <span className="font-medium">Date:</span> {headerInfo.date}
+            <div className="text-right text-white">
+              <div className="text-sm mb-1">
+                <span className="font-medium">Doc. No.:</span> {headerInfo.docNo}
+              </div>
+              <div className="text-sm mb-1">
+                <span className="font-medium">Rev. No.:</span> {headerInfo.revNo}
+              </div>
+              <div className="text-sm">
+                <span className="font-medium">Date:</span> {headerInfo.date}
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
 
         {/* Process Information */}
-        <div className="bg-white shadow-xl rounded-2xl overflow-hidden mb-6">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white">
-            <h2 className="text-xl font-semibold">Process Information</h2>
-          </div>
-          <div className="p-6 bg-gray-50">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <span className="font-medium text-gray-700">Process Name:</span>
-                <p className="text-gray-900">{headerInfo.processName}</p>
-              </div>
-              <div>
-                <span className="font-medium text-gray-700">Purpose:</span>
-                <p className="text-gray-900">{headerInfo.purpose}</p>
-              </div>
-              <div>
-                <span className="font-medium text-gray-700">Scope:</span>
-                <p className="text-gray-900">{headerInfo.scope}</p>
-              </div>
-              <div>
-                <span className="font-medium text-gray-700">Process Owner:</span>
-                <p className="text-gray-900">{headerInfo.processOwner}</p>
+        {processInfo && (
+          <div className="bg-white shadow-xl rounded-2xl overflow-hidden mb-6">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white">
+              <h2 className="text-xl font-semibold">Process Information</h2>
+            </div>
+            <div className="p-6 bg-gray-50">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <span className="font-medium text-gray-700">Process Name:</span>
+                  <p className="text-gray-900">{processInfo.process_name}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Purpose:</span>
+                  <p className="text-gray-900">{processInfo.purpose}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Scope:</span>
+                  <p className="text-gray-900">{processInfo.scope}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Process Owner:</span>
+                  <p className="text-gray-900">{processInfo.process_owner}</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <p className="mt-4 text-gray-600">Loading records...</p>
+          </div>
+        )}
 
         {/* Action Buttons and Records Table */}
-        {showForm ? (
+        {!loading && (showForm ? (
           <div className="bg-white shadow-xl rounded-2xl overflow-hidden mb-6">
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white flex justify-between items-center">
               <h2 className="text-xl font-semibold">
-                {editingIndex === -1 ? 'Add New Record' : 'Edit Record'}
+                {editingId ? 'Edit Record' : 'Add New Record'}
               </h2>
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md text-sm font-medium"
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md text-sm font-medium transition-colors"
               >
                 Back to List
               </button>
@@ -854,11 +1366,23 @@ const FourMChangeProcedure: React.FC = () => {
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Sr. No.</label>
+                  <input
+                    type="number"
+                    name="sr_no"
+                    value={formData.sr_no}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 1"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Record No.</label>
                   <input
                     type="text"
-                    name="recordNo"
-                    value={formData.recordNo}
+                    name="record_no"
+                    value={formData.record_no}
                     onChange={handleInputChange}
                     placeholder="e.g., MS-4M-WI-01"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
@@ -869,8 +1393,8 @@ const FourMChangeProcedure: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Rev. No.</label>
                   <input
                     type="text"
-                    name="revNo"
-                    value={formData.revNo}
+                    name="rev_no"
+                    value={formData.rev_no}
                     onChange={handleInputChange}
                     placeholder="e.g., 0.0"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
@@ -881,8 +1405,8 @@ const FourMChangeProcedure: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Rev. Date</label>
                   <input
                     type="date"
-                    name="revDate"
-                    value={formData.revDate}
+                    name="rev_date"
+                    value={formData.rev_date}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     required
@@ -891,8 +1415,8 @@ const FourMChangeProcedure: React.FC = () => {
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Record Name</label>
                   <textarea
-                    name="recordName"
-                    value={formData.recordName}
+                    name="record_name"
+                    value={formData.record_name}
                     onChange={handleInputChange}
                     placeholder="Enter record name"
                     rows={3}
@@ -903,8 +1427,8 @@ const FourMChangeProcedure: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Retention Period</label>
                   <select
-                    name="retentionPeriod"
-                    value={formData.retentionPeriod}
+                    name="retention_period"
+                    value={formData.retention_period}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     required
@@ -915,24 +1439,13 @@ const FourMChangeProcedure: React.FC = () => {
                     <option value="Daily">Daily</option>
                     <option value="Custom">Custom</option>
                   </select>
-                  {formData.retentionPeriod === 'Custom' && (
-                    <input
-                      type="text"
-                      name="customRetention"
-                      placeholder="Enter custom period"
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setFormData((prev) => ({ ...prev, retentionPeriod: e.target.value }))
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 mt-2"
-                    />
-                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Disposal Authority</label>
                   <input
                     type="text"
-                    name="disposalAuthority"
-                    value={formData.disposalAuthority}
+                    name="disposal_authority"
+                    value={formData.disposal_authority}
                     onChange={handleInputChange}
                     placeholder="e.g., Head quality/Prod."
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
@@ -948,7 +1461,7 @@ const FourMChangeProcedure: React.FC = () => {
                     accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
                   />
-                  {formData.file && (
+                  {formData.file && formData.file instanceof File && (
                     <div className="mt-2 p-2 bg-green-50 rounded-md text-sm">
                       <span className="font-medium">{formData.file.name}</span>
                       <span className="ml-2">({(formData.file.size / 1024).toFixed(2)} KB)</span>
@@ -959,15 +1472,15 @@ const FourMChangeProcedure: React.FC = () => {
               <div className="flex justify-end gap-3">
                 <button
                   onClick={handleCancel}
-                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={handleAdd}
-                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  onClick={handleSubmit}
+                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                 >
-                  {editingIndex === -1 ? 'Add Record' : 'Update Record'}
+                  {editingId ? 'Update Record' : 'Add Record'}
                 </button>
               </div>
             </div>
@@ -976,20 +1489,12 @@ const FourMChangeProcedure: React.FC = () => {
           <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white flex justify-between items-center">
               <h2 className="text-xl font-semibold">Master List of Formats and Records</h2>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowForm(true)}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium"
-                >
-                  Add New Record
-                </button>
-                <button
-                  onClick={() => setRecords(demoData)}
-                  className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md text-sm font-medium"
-                >
-                  Reset to Demo Data
-                </button>
-              </div>
+              <button
+                onClick={() => setShowForm(true)}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium transition-colors"
+              >
+                + Add New Record
+              </button>
             </div>
 
             <div className="p-6">
@@ -997,53 +1502,70 @@ const FourMChangeProcedure: React.FC = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sr. No.</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Record No.</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rev. No.</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rev. Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Record Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Retention Period</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Disposal Authority</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sr. No.</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Record No.</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rev. No.</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rev. Date</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Record Name</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Retention Period</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Disposal Authority</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {records.map((record, index) => (
-                      <tr key={index} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.srNo}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.recordNo}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.revNo}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.revDate}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900 max-w-xs break-words">{record.recordName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.retentionPeriod}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.disposalAuthority}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          {record.file && (
-                            <a
-                              href={URL.createObjectURL(record.file)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center px-2 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
-                            >
+                    {records.map((record) => (
+                      <tr key={record.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{record.sr_no}</td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{record.record_no}</td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{record.rev_no}</td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{record.rev_date}</td>
+                        <td className="px-4 py-4 text-sm text-gray-900 max-w-xs break-words">{record.record_name}</td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{record.retention_period}</td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{record.disposal_authority}</td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm">
+                          {record.file && typeof record.file === 'string' ? (
+                            <div className="inline-flex items-center px-3 py-1.5 bg-green-600 text-white rounded-md text-xs font-medium">
                               <FileText className="w-4 h-4 mr-2" />
-                              {record.file.name}
-                            </a>
+                              {getFileName(record.file)}
+                            </div>
+                          ) : (
+                            <span className="text-gray-400 text-xs italic">-</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <td className="px-4 py-4 whitespace-nowrap text-sm">
                           <div className="flex gap-2">
+                            {record.file && typeof record.file === 'string' && (
+                              <>
+                                <button
+                                  onClick={() => handleViewFile(record.file as string)}
+                                  className="inline-flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                                  title="View"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDownloadFile(record.file as string, getFileName(record.file))}
+                                  className="inline-flex items-center justify-center w-8 h-8 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                                  title="Download"
+                                >
+                                  <Download className="w-4 h-4" />
+                                </button>
+                              </>
+                            )}
                             <button
-                              onClick={() => handleEdit(index)}
-                              className="px-2 py-1 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 text-sm"
+                              onClick={() => handleEdit(record)}
+                              className="inline-flex items-center justify-center w-8 h-8 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors"
+                              title="Edit"
                             >
-                              Edit
+                              <Edit2 className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => handleDelete(index)}
-                              className="px-2 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm"
+                              onClick={() => record.id && handleDelete(record.id)}
+                              className="inline-flex items-center justify-center w-8 h-8 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                              title="Delete"
                             >
-                              Delete
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </td>
@@ -1051,27 +1573,15 @@ const FourMChangeProcedure: React.FC = () => {
                     ))}
                   </tbody>
                 </table>
+                {records.length === 0 && (
+                  <div className="text-center py-12 text-gray-500">
+                    No records found. Click "Add New Record" to create one.
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        )}
-
-        {/* Footer */}
-        {/* <div className="bg-white shadow-xl rounded-2xl overflow-hidden mt-6">
-          <div className="p-6 bg-gray-50">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
-              <div>
-                <span className="font-medium text-gray-700">Prepared By:</span> S.K Sharma
-              </div>
-              <div>
-                <span className="font-medium text-gray-700">Approved By:</span> _______________
-              </div>
-              <div>
-                <span className="font-medium text-gray-700">Issued By:</span> _______________
-              </div>
-            </div>
-          </div>
-        </div> */}
+        ))}
       </div>
     </div>
   );

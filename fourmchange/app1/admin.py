@@ -45,3 +45,9 @@ class MaterialMovementRowAdmin(admin.ModelAdmin):
     search_fields = ['process_name', 'mc_no', 'card__item_description']
     list_filter = ['shift', 'date']
     autocomplete_fields = ['card']
+
+
+from .models import ProcessInformation, FormatRecord
+
+admin.site.register(ProcessInformation)
+admin.site.register(FormatRecord)
