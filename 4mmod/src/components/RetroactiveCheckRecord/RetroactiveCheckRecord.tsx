@@ -654,6 +654,11 @@
 import { useState, useEffect } from 'react';
 import { Plus, User, Hash, Calendar, Package, Settings, FileText, Eye, ArrowLeft, CheckCircle } from 'lucide-react';
 
+
+interface PageProps {
+  setSelectedModule: (id: string) => void;
+}
+
 interface RowData {
   date: string;
   partNameNo: string;
@@ -711,7 +716,8 @@ interface SubmittedRCR {
 
 const API_BASE = 'http://localhost:8000/api';
 
-export default function RetroactiveCheckRecord() {
+// export default function RetroactiveCheckRecord() {
+export default function RetroactiveCheckRecord({ setSelectedModule }: PageProps) {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     checkedBy: '',
@@ -725,11 +731,31 @@ export default function RetroactiveCheckRecord() {
   const [pendingChanges, setPendingChanges] = useState<ChangeRecord[]>([]);
   const [selectedChange, setSelectedChange] = useState<ChangeRecord | null>(null);
   const [loading, setLoading] = useState(false);
+  const [filterId, setFilterId] = useState<string>(''); // NEW
 
   useEffect(() => {
     fetchPendingChanges();
     fetchSubmittedRCRs();
   }, []);
+
+  // NEW: Catch ID from Detail Page
+  useEffect(() => {
+    const passedId = localStorage.getItem("filter_change_request_id");
+    if (passedId) {
+      setFilterId(passedId);
+      localStorage.removeItem("filter_change_request_id");
+    }
+  }, []);
+
+  // NEW: Auto-open form if filterId matches a pending change
+  useEffect(() => {
+    if (filterId && pendingChanges.length > 0) {
+      const targetChange = pendingChanges.find(c => c.record_id === filterId);
+      if (targetChange) {
+        handleSelectChange(targetChange);
+      }
+    }
+  }, [filterId, pendingChanges]);
 
   const fetchSubmittedRCRs = async () => {
     try {
@@ -755,6 +781,12 @@ export default function RetroactiveCheckRecord() {
       const pending = changes.filter((c: any) => 
         c.action_details?.retroactive_inspection && !submittedIds.has(c.id)
       );
+
+      // You can filter the display list:
+      // const displayPending = filterId 
+      //   ? pendingChanges.filter(c => c.record_id === filterId)
+      //   : pendingChanges;
+      
       setPendingChanges(pending);
     } catch (err) {
       console.error(err);
@@ -809,6 +841,18 @@ export default function RetroactiveCheckRecord() {
       if (!res.ok) return alert('Failed to save RCR');
 
       alert('RCR saved successfully!');
+
+      // --- NEW: RETURN LOGIC ---
+      const returnId = localStorage.getItem("return_to_detail_id");
+      // If the record we just saved matches the return ticket
+      if (returnId && selectedChange?.record_id === returnId) {
+          setTimeout(() => {
+              setSelectedModule("cm"); // Go back to Detail Page
+          }, 500);
+          return; // Stop here
+      }
+      // -------------------------
+
       setFormData({
         checkedBy: '',
         row: {
@@ -1033,8 +1077,23 @@ export default function RetroactiveCheckRecord() {
                   <span>Type: <strong>{selectedChange?.category_details?.category_type}</strong></span>
                 </div>
               </div>
-              <button
+              {/* <button
                 onClick={() => { setShowForm(false); setSelectedChange(null); }}
+                className="flex items-center gap-2 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </button> */}
+              <button
+                onClick={() => {
+                  const returnId = localStorage.getItem("return_to_detail_id");
+                  if (returnId) {
+                      setSelectedModule("cm");
+                  } else {
+                      setShowForm(false);
+                      setSelectedChange(null);
+                  }
+                }}
                 className="flex items-center gap-2 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
               >
                 <ArrowLeft className="w-4 h-4" />

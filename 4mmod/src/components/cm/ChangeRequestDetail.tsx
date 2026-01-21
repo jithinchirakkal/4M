@@ -20,29 +20,49 @@ import {
   UserCheck,
   Eye,
   Lock,
-  PlayCircle
+  PlayCircle,
+  Shield
 } from "lucide-react";
 
-// --- IMPORT AUTH CONTEXT ---
 import { useAuth } from "../../contexts/AuthContext"; 
 
 // --- HELPER: Render Main Record Status ---
 const renderMainStatus = (status: string) => {
-  if (status === "approved") 
+
+// 1. Normalize to uppercase to be safe
+  const s = status ? status.toUpperCase() : "";
+
+  if (s === "APPROVED") 
     return <span className="px-4 py-2 rounded-xl text-sm font-bold bg-green-100 text-green-700 flex items-center gap-2 border border-green-200"><CheckCircle className="w-5 h-5" /> APPROVED & CLOSED</span>;
-  if (status === "rejected")
+  if (s === "REJECTED")
     return <span className="px-4 py-2 rounded-xl text-sm font-bold bg-red-100 text-red-700 flex items-center gap-2 border border-red-200"><XCircle className="w-5 h-5" /> REJECTED</span>;
   return <span className="px-4 py-2 rounded-xl text-sm font-bold bg-yellow-100 text-yellow-700 flex items-center gap-2 border border-yellow-200 animate-pulse"><Clock className="w-5 h-5" /> APPROVAL PENDING</span>;
 };
 
-// --- HELPER: Render Requirement Tag ---
-const renderRequirementTag = (isRequired: boolean) => {
-    return isRequired 
-      ? <span className="text-green-700 font-extrabold text-xs bg-green-100 px-3 py-1 rounded-full shadow-sm border border-green-200">REQUIRED</span>
-      : <span className="text-gray-400 font-bold text-xs bg-gray-100 px-3 py-1 rounded-full border border-gray-200">N/A</span>;
+// --- HELPER: Render Setup Status (Matches your Table Logic) ---
+const renderSetupStatus = (record: any) => {
+    if (!record.action_details?.set_up_approval) return <span className="text-gray-400 font-bold text-xs bg-gray-100 px-3 py-1 rounded-full border border-gray-200">N/A</span>;
+
+    const nonCustomerApprovals = record.approvals?.filter((a: any) => a.role_code !== 'CUSTOMER') || [];
+
+    if (nonCustomerApprovals.length === 0) {
+        return <span className="text-yellow-700 font-bold text-xs bg-yellow-100 px-3 py-1 rounded-full border border-yellow-200 animate-pulse">PENDING</span>;
+    }
+
+    const hasRejected = nonCustomerApprovals.some((a: any) => a.status === 'rejected');
+    if (hasRejected) {
+        return <span className="text-red-700 font-bold text-xs bg-red-100 px-3 py-1 rounded-full border border-red-200">✗ REJECTED</span>;
+    }
+
+    const allApproved = nonCustomerApprovals.every((a: any) => a.status === 'approved');
+    if (allApproved) {
+        return <span className="text-green-700 font-bold text-xs bg-green-100 px-3 py-1 rounded-full border border-green-200">✓ APPROVED</span>;
+    }
+
+    return <span className="text-yellow-700 font-bold text-xs bg-yellow-100 px-3 py-1 rounded-full border border-yellow-200 animate-pulse">PENDING</span>;
 }
 
-// --- HELPER: Render Customer Status Badge ---
+// --- HELPER: Render Customer Status ---
 const renderCustomerStatus = (item: any) => {
     if (!item.action_details?.customer_approval) return <span className="text-gray-400 font-bold text-xs bg-gray-100 px-3 py-1 rounded-full border border-gray-200">N/A</span>;
     const approval = item.approvals?.find((a: any) => a.role_code === 'CUSTOMER');
@@ -52,7 +72,13 @@ const renderCustomerStatus = (item: any) => {
     return <span className="text-yellow-700 font-bold text-xs bg-yellow-100 px-3 py-1 rounded-full border border-yellow-200 animate-pulse">PENDING</span>;
 }
 
-// --- DEFINE TASK TYPE TO FIX ARRAY ERRORS ---
+// --- HELPER: Generic Requirement Tag ---
+const renderRequirementTag = (isRequired: boolean) => {
+    return isRequired 
+      ? <span className="text-green-700 font-extrabold text-xs bg-green-100 px-3 py-1 rounded-full shadow-sm border border-green-200">REQUIRED</span>
+      : <span className="text-gray-400 font-bold text-xs bg-gray-100 px-3 py-1 rounded-full border border-gray-200">N/A</span>;
+}
+
 interface WorkflowTask {
   id: string;
   label: string;
@@ -61,6 +87,7 @@ interface WorkflowTask {
   icon: any;
   priority: string;
   canResolve: boolean;
+  statusLabel?: string; // Optional label for specific status
 }
 
 interface DetailProps {
@@ -75,11 +102,16 @@ export default function ChangeRequestDetail({
   setSelectedModule,
 }: DetailProps) {
   
-  // --- GET LOGGED IN USER ---
+
+    // --- 🔴 INSERT DEBUGGING HERE 🔴 ---
+  console.log("=== DEBUGGING RECORD ID:", record.record_id, "===");
+  console.log("1. Main Status Field:", record.approval_status); // Check exact spelling/case
+  console.log("2. Approvals List:", record.approvals); // Check who is still pending
+  console.log("3. Action Details:", record.action_details);
+  // ------------------------------------
   const { user } = useAuth(); 
   
-  // FIX: Access role safely. If it's a string, compare directly. If object, access code.
-  // We treat 'user' as 'any' here to bypass the strict string constraint if the backend sends an object.
+  // Safe User Role Access
   const currentUser = user as any;
   const userRoleCode = typeof currentUser?.role === 'string' ? currentUser.role : currentUser?.role?.code;
 
@@ -87,20 +119,13 @@ export default function ChangeRequestDetail({
   const isAdmin = currentUser?.is_superuser || userRoleCode === 'ADMIN';
 
   // --- NAVIGATION ---
-//   const handleNavigate = (moduleId: string) => {
-//     if (record?.record_id) {
-//         localStorage.setItem("filter_change_request_id", record.record_id);
-//     }
-//     setSelectedModule(moduleId);
-//   };
-    // --- 1. NAVIGATION HANDLER ---
   const handleNavigate = (moduleId: string) => {
     if (record?.record_id) {
-        // 1. Tell the Next Page what to filter
+        // 1. Send ID to filter the next page
         localStorage.setItem("filter_change_request_id", record.record_id);
         
-        // 2. Tell the Next Page that we want to COME BACK here afterwards
-        localStorage.setItem("return_to_detail_id", record.record_id); 
+        // 2. THIS WAS MISSING: Set the flag to come back here later!
+        localStorage.setItem("return_to_detail_id", record.record_id);
     }
     setSelectedModule(moduleId);
   };
@@ -109,74 +134,95 @@ export default function ChangeRequestDetail({
   const { pending, completed } = useMemo(() => {
     if (!record) return { pending: [], completed: [] }; 
 
-    // FIX: Explicitly type the arrays
     const p: WorkflowTask[] = []; 
     const c: WorkflowTask[] = []; 
 
     // Helper to add tasks
-    const addTask = (id: string, label: string, desc: string, mod: string, icon: any, prio: string, isDone: boolean, restrictedToCustomer: boolean) => {
+    const addTask = (id: string, label: string, desc: string, mod: string, icon: any, prio: string, isDone: boolean, restrictedToCustomer: boolean, statusLabel?: string) => {
         let canResolve = true;
-        
-        // Restriction Logic
         if (restrictedToCustomer && !isCustomerUser && !isAdmin) canResolve = false; 
         if (!restrictedToCustomer && isCustomerUser && !isAdmin) canResolve = false;
 
-        const item = { id, label, description: desc, module: mod, icon, priority: prio, canResolve };
+        const item = { id, label, description: desc, module: mod, icon, priority: prio, canResolve, statusLabel };
         isDone ? c.push(item) : p.push(item);
     };
 
-    // 1. SETUP APPROVAL -> Goes to 'approvals'
+    // --- 1. SETUP APPROVAL (Updated Logic) ---
     if (record.action_details?.set_up_approval) {
-        const isDone = false; 
-        addTask("setup", "Setup Approval", "Machine/Process setup verification.", "approvals", Zap, "High", isDone, false);
+        const nonCustomerApprovals = record.approvals?.filter((a: any) => a.role_code !== 'CUSTOMER') || [];
+        
+        let isDone = false;
+        let desc = "Machine/Process setup verification required.";
+        let statusLabel = "PENDING";
+
+        // Logic matched from your table:
+        const hasRejected = nonCustomerApprovals.some((a: any) => a.status === 'rejected');
+        const allApproved = nonCustomerApprovals.length > 0 && nonCustomerApprovals.every((a: any) => a.status === 'approved');
+
+        if (allApproved) {
+            isDone = true;
+            desc = "Setup approved by all authorities.";
+        } else if (hasRejected) {
+            statusLabel = "REJECTED";
+            desc = "Setup approval was REJECTED.";
+        }
+
+        addTask("setup", "Setup Approval", desc, "approvals", Zap, "High", isDone, false, statusLabel);
     }
 
-    // 2. IDENTIFICATION -> Goes to 'identification'
-    if (record.action_details?.identification_psn_batch_no) {
-        addTask("batch", "ID / Batch No.", "Update Batch or PSN identification.", "identification", CheckSquare, "Medium", false, false);
-    }
-
-    // 3. RETRO INSPECTION -> Goes to 'rcr'
-    if (record.action_details?.retroactive_inspection) {
-        addTask("retro", "Retroactive Inspection", "Quality inspection for previous batches.", "rcr", ListChecks, "High", false, false);
-    }
-
-    // 4. CHANGE TRACKING -> Goes to '4m-cts'
-    if (record.action_details?.change_record) {
-        addTask("tracking", "Change Tracking Sheet", "Update 4M tracking sheet details.", "4m-cts", FileText, "Medium", false, false);
-    }
-
-    // 5. CONTAINMENT -> Goes to 'containment'
-    if (record.action_details?.containment_action) {
-        addTask("containment", "Containment Action", "Segregation of suspect parts.", "containment", Flag, "Critical", false, false);
-    }
-
-    // 6. OJT -> Goes to 'ojt'
-    if (record.action_details?.ojt) {
-        addTask("ojt", "On Job Training (OJT)", "Operator training records.", "ojt", Users, "Medium", false, false);
-    }
-
-    // 7. CUSTOMER APPROVAL -> Goes to 'customer-approvals'
+    // --- 2. CUSTOMER APPROVAL (Updated Logic) ---
     if (record.action_details?.customer_approval) {
         const custAppr = record.approvals?.find((a: any) => a.role_code === 'CUSTOMER');
         const isDone = custAppr?.status === 'approved';
         const isRejected = custAppr?.status === 'rejected';
         
         let desc = "Approval required from customer.";
-        if (isRejected) desc = "Request REJECTED by customer.";
+        let statusLabel = "PENDING";
 
-        addTask("customer", "Customer Approval", desc, "customer-approvals", UserCheck, "Critical", isDone, true);
+        if (isRejected) {
+            desc = "Request REJECTED by customer.";
+            statusLabel = "REJECTED";
+        } else if (isDone) {
+            desc = "Approved by customer.";
+        }
+
+        addTask("customer", "Customer Approval", desc, "customer-approvals", UserCheck, "Critical", isDone, true, statusLabel);
+    }
+
+    // --- 3. IDENTIFICATION ---
+    if (record.action_details?.identification_psn_batch_no) {
+        addTask("batch", "ID / Batch No.", "Update Batch or PSN identification.", "identification", CheckSquare, "Medium", false, false);
+    }
+
+    // --- 4. RETRO INSPECTION ---
+    if (record.action_details?.retroactive_inspection) {
+        addTask("retro", "Retroactive Inspection", "Quality inspection for previous batches.", "rcr", ListChecks, "High", false, false);
+    }
+
+    // --- 5. CHANGE TRACKING ---
+    if (record.action_details?.change_record) {
+        addTask("tracking", "Change Tracking Sheet", "Update 4M tracking sheet details.", "4m-cts", FileText, "Medium", false, false);
+    }
+
+    // --- 6. CONTAINMENT ---
+    if (record.action_details?.containment_action) {
+        addTask("containment", "Containment Action", "Segregation of suspect parts.", "containment", Flag, "Critical", false, false);
+    }
+
+    // --- 7. OJT ---
+    if (record.action_details?.ojt) {
+        addTask("ojt", "On Job Training (OJT)", "Operator training records.", "ojt", Users, "Medium", false, false);
     }
 
     return { pending: p, completed: c };
-  }, [record, user, isCustomerUser, isAdmin]); // Updated dependencies
+  }, [record, user, isCustomerUser, isAdmin]);
 
   const handlePrint = () => { window.print(); };
 
   if (!record) return null;
 
   return (
-    <div className="bg-gray-50/50 min-h-screen p-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+    <div className=" min-h-screen p-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
       
       {/* HEADER */}
       <div className="flex items-center justify-between pb-6 mb-6 border-b border-gray-200">
@@ -193,7 +239,7 @@ export default function ChangeRequestDetail({
         </div>
         <div className="flex items-center gap-3">
           {renderMainStatus(record.approval_status)}
-          <button onClick={handlePrint} className="p-3 bg-white text-gray-600 border border-gray-200 rounded-xl hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors shadow-sm"><Printer className="w-5 h-5" /></button>
+          {/* <button onClick={handlePrint} className="p-3 bg-white text-gray-600 border border-gray-200 rounded-xl hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors shadow-sm"><Printer className="w-5 h-5" /></button> */}
         </div>
       </div>
 
@@ -217,7 +263,7 @@ export default function ChangeRequestDetail({
             </div>
             <div className="p-6 space-y-4 bg-gray-50/50">
               <div><div className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2"><FileText className="w-4 h-4 text-gray-400" /> Description</div><p className="text-gray-800 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">{record.category_details?.description}</p></div>
-              <div><div className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2"><Flag className="w-4 h-4 text-gray-400" /> Action Taken</div><p className="text-gray-800 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">{record.action_details?.action_taken}</p></div>
+              <div><div className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2"><Shield className="w-4 h-4 text-gray-400" /> Action Taken</div><p className="text-gray-800 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">{record.action_details?.action_taken}</p></div>
               {record.action_details?.remarks && (<div><div className="text-sm font-bold text-gray-700 mb-2">Remarks</div><p className="text-gray-600 italic bg-yellow-50 p-3 rounded-lg border border-yellow-100">{record.action_details?.remarks}</p></div>)}
             </div>
              <div className="border-t border-gray-200 p-6 bg-white">
@@ -239,13 +285,22 @@ export default function ChangeRequestDetail({
               <h3 className="font-bold text-blue-900 flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-blue-600" /> Required Actions ({pending.length})</h3>
             </div>
 
-            {pending.length === 0 ? (
+            {pending.length === 0 && completed.length > 0 && (
                 <div className="p-8 text-center">
                     <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 text-green-600 mb-3"><CheckCircle className="w-6 h-6" /></div>
+                    <h3 className="text-gray-900 font-bold">All Actions Complete</h3>
+                    <p className="text-sm text-gray-500 mt-1">This record is fully compliant.</p>
+                </div>
+            )}
+
+            {pending.length === 0 && completed.length === 0 && (
+                <div className="p-8 text-center">
                     <h3 className="text-gray-900 font-bold">No Actions Required</h3>
                     <p className="text-sm text-gray-500 mt-1">This record has no pending requirements.</p>
                 </div>
-            ) : (
+            )}
+
+            {pending.length > 0 && (
                 <div className="p-5 space-y-4">
                     {pending.map((task: any) => (
                     <div key={task.id} className="flex flex-col gap-3 p-4 bg-white border border-gray-100 rounded-xl shadow-sm hover:border-blue-300 transition-all">
@@ -255,6 +310,7 @@ export default function ChangeRequestDetail({
                                 <div className="font-bold text-gray-900 text-sm flex items-center gap-2">
                                     {task.label}
                                     {task.priority === 'Critical' && <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-bold">CRITICAL</span>}
+                                    {task.statusLabel === 'REJECTED' && <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-bold">REJECTED</span>}
                                 </div>
                                 <div className="text-xs text-gray-500 mt-0.5">{task.description}</div>
                             </div>
@@ -275,10 +331,31 @@ export default function ChangeRequestDetail({
             )}
           </div>
 
+          {/* COMPLETED TASKS */}
+          {/* {completed.length > 0 && (
+            <div className="bg-white rounded-2xl border border-green-200 shadow-sm overflow-hidden">
+                <div className="p-4 border-b border-green-100 bg-green-50/50">
+                    <h3 className="font-bold text-green-900 flex items-center gap-2 text-sm"><CheckCircle className="w-4 h-4 text-green-600" /> Completed Steps ({completed.length})</h3>
+                </div>
+                <div className="p-4 space-y-2">
+                    {completed.map((task: any) => (
+                        <div key={task.id} className="flex items-center justify-between p-3 bg-gray-50/50 border border-gray-100 rounded-xl opacity-75 hover:opacity-100 transition-opacity">
+                            <div className="flex items-center gap-3">
+                                <div className="text-green-600"><CheckCircle className="w-4 h-4" /></div>
+                                <div className="text-sm font-medium text-gray-700">{task.label}</div>
+                            </div>
+                            <button onClick={() => handleNavigate(task.module)} className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1">VIEW <Eye className="w-3 h-3"/></button>
+                        </div>
+                    ))}
+                </div>
+            </div>
+          )} */}
+
+          {/* QUICK STATUS SUMMARY */}
           <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Quick Status Overview</h4>
             <div className="space-y-4">
-              <div className="flex items-center justify-between text-sm border-b border-gray-50 pb-2"><span className="text-gray-600 flex items-center gap-2"><PlayCircle className="w-4 h-4" /> Setup Approval</span>{renderRequirementTag(record.action_details?.set_up_approval)}</div>
+              <div className="flex items-center justify-between text-sm border-b border-gray-50 pb-2"><span className="text-gray-600 flex items-center gap-2"><PlayCircle className="w-4 h-4" /> Setup Approval</span>{renderSetupStatus(record)}</div>
               <div className="flex items-center justify-between text-sm border-b border-gray-50 pb-2"><span className="text-gray-600 flex items-center gap-2"><CheckSquare className="w-4 h-4" /> ID/Batch No.</span>{renderRequirementTag(record.action_details?.identification_psn_batch_no)}</div>
               <div className="flex items-center justify-between text-sm border-b border-gray-50 pb-2"><span className="text-gray-600 flex items-center gap-2"><Flag className="w-4 h-4" /> Containment</span>{renderRequirementTag(record.action_details?.containment_action)}</div>
               <div className="flex items-center justify-between text-sm"><span className="text-gray-600 flex items-center gap-2"><Users className="w-4 h-4" /> Customer Approval</span>{renderCustomerStatus(record)}</div>

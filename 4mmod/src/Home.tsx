@@ -74,13 +74,14 @@ const Home: React.FC<HomeProps> = ({
           {selectedModule === "dashboard" && <DashboardView />}
           {/* ... (all other module routes) ... */}
           {selectedModule === "mmc" && <MaterialMovementCard />}
-          {selectedModule === "4m-cts" && <FourMChangeTrackSheet />}
+          {/* {selectedModule === "4m-cts" && <FourMChangeTrackSheet />} */}
+          {selectedModule === "4m-cts" && <FourMChangeTrackSheet setSelectedModule={setSelectedModule} />}
           {selectedModule === "cpf" && <ControlPlanForm />}
           {selectedModule === "mcs" && <MachineCheckSheet />}
           {selectedModule === "pf" && (
             <ProcessFlowDiagram onNavigate={setSelectedModule} />
           )}
-          {selectedModule === "rcr" && <RetroactiveCheckRecord />}
+          {selectedModule === "rcr" && <RetroactiveCheckRecord setSelectedModule={setSelectedModule} />}
           {selectedModule === "iic-sar" && <InspectionForm />}
           {selectedModule === "mmm" && <ManMachineMatrix />}
           {/* {selectedModule === 'cm' && <ChangeManagementView />} */}
