@@ -19,10 +19,15 @@ import {
   Sun,
   ChevronDown,
   ChevronUp,
+  Filter, // <--- ADD THIS
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 
+// Add this at the top with your interfaces
+interface PageProps {
+  setSelectedModule: (id: string) => void;
+}
 interface CustomerApprovalRequest {
   id: number;
   change: number;
@@ -70,10 +75,15 @@ const categoryColors: { [key: string]: string } = {
   Method: 'from-orange-600 to-red-500',
 };
 
-const CustomerApprovalsPage: React.FC = () => {
+// const CustomerApprovalsPage: React.FC = () => {
+const CustomerApprovalsPage: React.FC<PageProps> = ({ setSelectedModule }) => {
   const { user } = useAuth();
   const [approvals, setApprovals] = useState<CustomerApprovalRequest[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // --- ADD THIS: State for the Filter ---
+  const [filterId, setFilterId] = useState<string>('');
+
   const [error, setError] = useState('');
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
@@ -89,6 +99,15 @@ const CustomerApprovalsPage: React.FC = () => {
     recordId: '',
   });
   const [remarks, setRemarks] = useState('');
+
+  // --- ADD THIS: Effect to catch the ID from the Detail Page ---
+  useEffect(() => {
+    const passedId = localStorage.getItem("filter_change_request_id");
+    if (passedId) {
+      setFilterId(passedId);
+      localStorage.removeItem("filter_change_request_id");
+    }
+  }, []);
 
   useEffect(() => {
     fetchCustomerApprovals();
@@ -130,6 +149,42 @@ const CustomerApprovalsPage: React.FC = () => {
     }
   };
 
+  // const handleApprovalAction = async (approvalId: number, action: 'approve' | 'reject', recordId: string) => {
+  //   try {
+  //     setActionLoading(approvalId);
+
+  //     const endpoint = `/customer-approvals/${approvalId}/${action}/`;
+  //     await api.post(endpoint, {
+  //       remarks: remarks.trim() || undefined,
+  //     });
+
+  //     setApprovals((prev) =>
+  //       prev.map((a) =>
+  //         a.id === approvalId
+  //           ? {
+  //               ...a,
+  //               status: action === 'approve' ? 'approved' : 'rejected',
+  //               approved_by_name: user?.name || null,
+  //               approved_at: new Date().toISOString(),
+  //               remarks: remarks.trim() || null,
+  //             }
+  //           : a
+  //       )
+  //     );
+
+  //     setRemarkModal({ show: false, approvalId: null, action: null, recordId: '' });
+  //     setRemarks('');
+
+  //     alert(`Successfully ${action === 'approve' ? 'approved' : 'rejected'} change ${recordId}!`);
+  //   } catch (err: any) {
+  //     console.error('Error processing approval:', err);
+  //     alert(err.response?.data?.error || `Failed to ${action} the request. Please try again.`);
+  //   } finally {
+  //     setActionLoading(null);
+  //   }
+  // };
+
+
   const handleApprovalAction = async (approvalId: number, action: 'approve' | 'reject', recordId: string) => {
     try {
       setActionLoading(approvalId);
@@ -139,6 +194,7 @@ const CustomerApprovalsPage: React.FC = () => {
         remarks: remarks.trim() || undefined,
       });
 
+      // Update local state to remove/update the item
       setApprovals((prev) =>
         prev.map((a) =>
           a.id === approvalId
@@ -153,10 +209,31 @@ const CustomerApprovalsPage: React.FC = () => {
         )
       );
 
+      // Close modal
       setRemarkModal({ show: false, approvalId: null, action: null, recordId: '' });
       setRemarks('');
 
+      // --- START: NEW RETURN LOGIC ---
+      // Check if we need to return to the detail page
+      const returnId = localStorage.getItem("return_to_detail_id");
+      
+      // If we have a return ID and it matches the record we just acted on
+      if (returnId && recordId === returnId) {
+          alert(`Successfully ${action}ed! Returning to Detail Page...`);
+          
+          // 1. Clear the return flag so it doesn't loop
+          // (We keep 'return_to_detail_id' in storage for one more split second 
+          // so the ChangeManagementView knows to open the detail view when it loads)
+          
+          // 2. Navigate back to the main module
+          setSelectedModule("cm"); 
+          return; // Stop here
+      }
+      // --- END: NEW RETURN LOGIC ---
+
+      // Standard alert if just browsing the list normally
       alert(`Successfully ${action === 'approve' ? 'approved' : 'rejected'} change ${recordId}!`);
+      
     } catch (err: any) {
       console.error('Error processing approval:', err);
       alert(err.response?.data?.error || `Failed to ${action} the request. Please try again.`);
@@ -199,6 +276,11 @@ const CustomerApprovalsPage: React.FC = () => {
   const pendingCount = approvals.filter((a) => a.status === 'pending').length;
   const approvedCount = approvals.filter((a) => a.status === 'approved').length;
   const rejectedCount = approvals.filter((a) => a.status === 'rejected').length;
+
+  // --- ADD THIS: Logic to filter the list ---
+  const displayApprovals = filterId 
+    ? approvals.filter(a => a.change_details?.record_id.toLowerCase().includes(filterId.toLowerCase()))
+    : approvals;
 
   if (loading) {
     return (
@@ -248,6 +330,27 @@ const CustomerApprovalsPage: React.FC = () => {
         </div>
       )}
 
+      {/* --- ADD THIS: Filter Banner --- */}
+      {filterId && (
+        <div className="mb-6 bg-blue-100 border border-blue-300 p-4 rounded-xl flex items-center justify-between shadow-sm">
+            <div className="flex items-center gap-3">
+                <div className="p-2 bg-white rounded-lg text-blue-600">
+                    <Filter className="w-5 h-5" />
+                </div>
+                <div>
+                    <p className="text-blue-900 font-bold text-sm">Filtering by Record ID</p>
+                    <p className="text-blue-700 text-xs">Showing results for: <span className="font-mono font-bold">{filterId}</span></p>
+                </div>
+            </div>
+            <button 
+                onClick={() => setFilterId('')}
+                className="text-sm bg-white text-blue-600 px-4 py-2 rounded-lg font-bold hover:bg-blue-50 border border-blue-200 shadow-sm transition-all"
+            >
+                Clear Filter
+            </button>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-2xl p-6 shadow-xl border border-yellow-100 hover:shadow-2xl transition-shadow">
           <div className="flex items-center gap-4">
@@ -293,7 +396,8 @@ const CustomerApprovalsPage: React.FC = () => {
         </button>
       </div>
 
-      {approvals.length === 0 ? (
+      {/* {approvals.length === 0 ? ( */}
+      {displayApprovals.length === 0 ? (
         <div className="bg-white rounded-3xl shadow-xl p-12 text-center border border-gray-100">
           <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-4 opacity-50" />
           <h3 className="text-2xl font-bold text-gray-900 mb-2">All Caught Up!</h3>
@@ -301,7 +405,8 @@ const CustomerApprovalsPage: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-6">
-          {approvals.map((approval) => {
+          {/* {approvals.map((approval) => { */}
+          {displayApprovals.map((approval) => {
             const change = approval.change_details;
             if (!change) return null;
 

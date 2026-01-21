@@ -87,7 +87,7 @@ const Home: React.FC<HomeProps> = ({
           {selectedModule === "cm" && (
             <ChangeManagementView setSelectedModule={setSelectedModule} />
           )}
-          {selectedModule === "approvals" && <ApprovalsPage />}
+          {selectedModule === "approvals" && <ApprovalsPage setSelectedModule={setSelectedModule} />}
           {selectedModule === "cdb" && <ChangeDisplayBoard />}
           {selectedModule === "4m-flow" && <FlowDiagram />}
           {selectedModule === "4m" && <FourMChangeResponsibility />}
@@ -103,7 +103,7 @@ const Home: React.FC<HomeProps> = ({
           {selectedModule === "pccs" && <ProductCharacteristicsSheet />}
           {selectedModule === 'paintshop-qualitychecksheet' && <PaintQualitySheet />}
           {selectedModule === 'users' && <UserManagement />}
-          {selectedModule === 'customer-approvals' && <CustomerApprovalsPage />}
+          {selectedModule === 'customer-approvals' && <CustomerApprovalsPage setSelectedModule={setSelectedModule} />}
 
         </main>
       </div>
