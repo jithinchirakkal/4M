@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 from django.contrib import admin
-from .models import FourMAction, FourMCategories, FourMChange,FourMCategory, Line, Shopfloor, Station
+from .models import RCR, FourMAction, FourMCategories, FourMChange,FourMCategory, Line, Shopfloor, Station
 
 
 admin.site.register(FourMChange)
@@ -12,6 +12,7 @@ admin.site.register(FourMCategories)
 admin.site.register(Station)
 admin.site.register(Line)
 admin.site.register(Shopfloor)
+admin.site.register(RCR)
 
 
 

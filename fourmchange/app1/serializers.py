@@ -212,7 +212,14 @@ class FourMApprovalSerializer(serializers.ModelSerializer):
         ]
 
 ############### set up approval  ###########
-
+from .models import (
+    FourMChange, 
+    FourMApproval, 
+    FourMCategories, 
+    FourMAction, 
+    RCR, 
+    FourMChangeDetail  # <--- IMPORT THIS
+)
 
 class FourMChangeSerializer(serializers.ModelSerializer):
     category_details = FourMCategoriesSerializer(source='category', read_only=True)
@@ -223,9 +230,48 @@ class FourMChangeSerializer(serializers.ModelSerializer):
     approval_status = serializers.SerializerMethodField()
     approval_status = serializers.SerializerMethodField()
     approvals = FourMApprovalSerializer(many=True, read_only=True)
+
+
+    # --- 1. NEW STATUS FLAGS ---
+    is_retro_done = serializers.SerializerMethodField()
+    is_ojt_done = serializers.SerializerMethodField()         # Placeholder
+    is_containment_done = serializers.SerializerMethodField() # Placeholder
+    is_batch_done = serializers.SerializerMethodField()       # Placeholder
+    is_tracking_done = serializers.SerializerMethodField()    # Placeholder
+
     class Meta:
         model = FourMChange
         fields = '__all__'
+
+    # --- 2. LOGIC FOR RETROACTIVE (Implemented Now) ---
+    def get_is_retro_done(self, obj):
+        # In your RCR model, you set related_name='rcrs'
+        # This checks if any RCR entry exists for this change
+        # return obj.rcrs.exists()
+        return RCR.objects.filter(change=obj).exists()
+    
+    def get_is_tracking_done(self, obj):
+        # Checks if Tracking Sheet exists by matching the 'record_id' string
+        if not obj.record_id:
+            return False
+        return FourMChangeDetail.objects.filter(record_id=obj.record_id).exists()
+
+    # --- 3. LOGIC FOR FUTURE MODULES (Placeholders) ---
+    
+    def get_is_ojt_done(self, obj):
+        # TODO: When you build OJT Model, uncomment this:
+        # return obj.ojt_records.exists() 
+        return False # Defaults to Pending
+
+    def get_is_containment_done(self, obj):
+        # TODO: When you build Containment/SuspectedLot Model, uncomment:
+        # return obj.suspected_lots.exists()
+        return False
+
+    def get_is_batch_done(self, obj):
+        # TODO: If you build a table for Batch/PSN tracking:
+        # return obj.batch_records.exists()
+        return False
 
     def get_approval_status(self, obj):
         action = obj.action

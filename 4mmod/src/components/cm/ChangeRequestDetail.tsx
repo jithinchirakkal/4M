@@ -131,13 +131,100 @@ export default function ChangeRequestDetail({
   };
 
   // --- SMART WORKFLOW LOGIC ---
+//   const { pending, completed } = useMemo(() => {
+//     if (!record) return { pending: [], completed: [] }; 
+
+//     const p: WorkflowTask[] = []; 
+//     const c: WorkflowTask[] = []; 
+
+//     // Helper to add tasks
+//     const addTask = (id: string, label: string, desc: string, mod: string, icon: any, prio: string, isDone: boolean, restrictedToCustomer: boolean, statusLabel?: string) => {
+//         let canResolve = true;
+//         if (restrictedToCustomer && !isCustomerUser && !isAdmin) canResolve = false; 
+//         if (!restrictedToCustomer && isCustomerUser && !isAdmin) canResolve = false;
+
+//         const item = { id, label, description: desc, module: mod, icon, priority: prio, canResolve, statusLabel };
+//         isDone ? c.push(item) : p.push(item);
+//     };
+
+//     // --- 1. SETUP APPROVAL (Updated Logic) ---
+//     if (record.action_details?.set_up_approval) {
+//         const nonCustomerApprovals = record.approvals?.filter((a: any) => a.role_code !== 'CUSTOMER') || [];
+        
+//         let isDone = false;
+//         let desc = "Machine/Process setup verification required.";
+//         let statusLabel = "PENDING";
+
+//         // Logic matched from your table:
+//         const hasRejected = nonCustomerApprovals.some((a: any) => a.status === 'rejected');
+//         const allApproved = nonCustomerApprovals.length > 0 && nonCustomerApprovals.every((a: any) => a.status === 'approved');
+
+//         if (allApproved) {
+//             isDone = true;
+//             desc = "Setup approved by all authorities.";
+//         } else if (hasRejected) {
+//             statusLabel = "REJECTED";
+//             desc = "Setup approval was REJECTED.";
+//         }
+
+//         addTask("setup", "Setup Approval", desc, "approvals", Zap, "High", isDone, false, statusLabel);
+//     }
+
+//     // --- 2. CUSTOMER APPROVAL (Updated Logic) ---
+//     if (record.action_details?.customer_approval) {
+//         const custAppr = record.approvals?.find((a: any) => a.role_code === 'CUSTOMER');
+//         const isDone = custAppr?.status === 'approved';
+//         const isRejected = custAppr?.status === 'rejected';
+        
+//         let desc = "Approval required from customer.";
+//         let statusLabel = "PENDING";
+
+//         if (isRejected) {
+//             desc = "Request REJECTED by customer.";
+//             statusLabel = "REJECTED";
+//         } else if (isDone) {
+//             desc = "Approved by customer.";
+//         }
+
+//         addTask("customer", "Customer Approval", desc, "customer-approvals", UserCheck, "Critical", isDone, true, statusLabel);
+//     }
+
+//     // --- 3. IDENTIFICATION ---
+//     if (record.action_details?.identification_psn_batch_no) {
+//         addTask("batch", "ID / Batch No.", "Update Batch or PSN identification.", "identification", CheckSquare, "Medium", false, false);
+//     }
+
+//     // --- 4. RETRO INSPECTION ---
+//     if (record.action_details?.retroactive_inspection) {
+//         addTask("retro", "Retroactive Inspection", "Quality inspection for previous batches.", "rcr", ListChecks, "High", false, false);
+//     }
+
+//     // --- 5. CHANGE TRACKING ---
+//     if (record.action_details?.change_record) {
+//         addTask("tracking", "Change Tracking Sheet", "Update 4M tracking sheet details.", "4m-cts", FileText, "Medium", false, false);
+//     }
+
+//     // --- 6. CONTAINMENT ---
+//     if (record.action_details?.containment_action) {
+//         addTask("containment", "Containment Action", "Segregation of suspect parts.", "containment", Flag, "Critical", false, false);
+//     }
+
+//     // --- 7. OJT ---
+//     if (record.action_details?.ojt) {
+//         addTask("ojt", "On Job Training (OJT)", "Operator training records.", "ojt", Users, "Medium", false, false);
+//     }
+
+//     return { pending: p, completed: c };
+//   }, [record, user, isCustomerUser, isAdmin]);
+
+// --- SMART WORKFLOW LOGIC ---
   const { pending, completed } = useMemo(() => {
     if (!record) return { pending: [], completed: [] }; 
 
     const p: WorkflowTask[] = []; 
     const c: WorkflowTask[] = []; 
 
-    // Helper to add tasks
+    // Helper to add tasks (Unchanged)
     const addTask = (id: string, label: string, desc: string, mod: string, icon: any, prio: string, isDone: boolean, restrictedToCustomer: boolean, statusLabel?: string) => {
         let canResolve = true;
         if (restrictedToCustomer && !isCustomerUser && !isAdmin) canResolve = false; 
@@ -147,7 +234,7 @@ export default function ChangeRequestDetail({
         isDone ? c.push(item) : p.push(item);
     };
 
-    // --- 1. SETUP APPROVAL (Updated Logic) ---
+    // 1. SETUP APPROVAL (Existing Logic)
     if (record.action_details?.set_up_approval) {
         const nonCustomerApprovals = record.approvals?.filter((a: any) => a.role_code !== 'CUSTOMER') || [];
         
@@ -170,8 +257,8 @@ export default function ChangeRequestDetail({
         addTask("setup", "Setup Approval", desc, "approvals", Zap, "High", isDone, false, statusLabel);
     }
 
-    // --- 2. CUSTOMER APPROVAL (Updated Logic) ---
-    if (record.action_details?.customer_approval) {
+    // 2. CUSTOMER APPROVAL (Existing Logic)
+      if (record.action_details?.customer_approval) {
         const custAppr = record.approvals?.find((a: any) => a.role_code === 'CUSTOMER');
         const isDone = custAppr?.status === 'approved';
         const isRejected = custAppr?.status === 'rejected';
@@ -189,29 +276,59 @@ export default function ChangeRequestDetail({
         addTask("customer", "Customer Approval", desc, "customer-approvals", UserCheck, "Critical", isDone, true, statusLabel);
     }
 
-    // --- 3. IDENTIFICATION ---
-    if (record.action_details?.identification_psn_batch_no) {
-        addTask("batch", "ID / Batch No.", "Update Batch or PSN identification.", "identification", CheckSquare, "Medium", false, false);
-    }
-
-    // --- 4. RETRO INSPECTION ---
+    // --- 3. RETRO INSPECTION (Updated for RCR) ---
     if (record.action_details?.retroactive_inspection) {
-        addTask("retro", "Retroactive Inspection", "Quality inspection for previous batches.", "rcr", ListChecks, "High", false, false);
+        // READ FROM BACKEND
+        const isDone = record.is_retro_done; 
+        
+        let desc = "Quality inspection for previous batches.";
+        if (isDone) desc = "Retroactive inspection data submitted successfully.";
+
+        addTask("retro", "Retroactive Inspection", desc, "rcr", ListChecks, "High", isDone, false);
     }
 
-    // --- 5. CHANGE TRACKING ---
-    if (record.action_details?.change_record) {
-        addTask("tracking", "Change Tracking Sheet", "Update 4M tracking sheet details.", "4m-cts", FileText, "Medium", false, false);
-    }
-
-    // --- 6. CONTAINMENT ---
-    if (record.action_details?.containment_action) {
-        addTask("containment", "Containment Action", "Segregation of suspect parts.", "containment", Flag, "Critical", false, false);
-    }
-
-    // --- 7. OJT ---
+    // --- 4. OJT (Placeholder Ready) ---
     if (record.action_details?.ojt) {
-        addTask("ojt", "On Job Training (OJT)", "Operator training records.", "ojt", Users, "Medium", false, false);
+        // READ FROM BACKEND
+        const isDone = record.is_ojt_done;
+
+        let desc = "Operator training records.";
+        if (isDone) desc = "OJT records submitted.";
+
+        addTask("ojt", "On Job Training (OJT)", desc, "ojt", Users, "Medium", isDone, false);
+    }
+
+    // --- 5. CONTAINMENT (Placeholder Ready) ---
+    if (record.action_details?.containment_action) {
+        // READ FROM BACKEND
+        const isDone = record.is_containment_done;
+        
+        let desc = "Segregation of suspect parts.";
+        if (isDone) desc = "Containment action recorded.";
+
+        addTask("containment", "Containment Action", desc, "containment", Flag, "Critical", isDone, false);
+    }
+
+    // --- 6. ID / BATCH NO (Placeholder Ready) ---
+    if (record.action_details?.identification_psn_batch_no) {
+        // READ FROM BACKEND
+        const isDone = record.is_batch_done;
+        
+        let desc = "Update Batch or PSN identification.";
+        if (isDone) desc = "Batch info updated.";
+
+        addTask("batch", "ID / Batch No.", desc, "identification", CheckSquare, "Medium", isDone, false);
+    }
+
+    // --- 7. CHANGE TRACKING (Placeholder Ready) ---
+    if (record.action_details?.change_record) {
+        // READ FROM BACKEND
+        const isDone = record.is_tracking_done;
+
+        let desc = "Update 4M tracking sheet details.";
+        if (isDone) desc = "Tracking sheet updated.";
+
+        addTask("tracking", "Change Tracking Sheet", desc, "4m-cts", FileText, "Medium", isDone, false);
     }
 
     return { pending: p, completed: c };
@@ -225,8 +342,8 @@ export default function ChangeRequestDetail({
     <div className=" min-h-screen p-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
       
       {/* HEADER */}
-      <div className="flex items-center justify-between pb-6 mb-6 border-b border-gray-200">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between p-6 mb-6 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="flex items-center gap-4 ">
           <button onClick={onBack} className="group flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-gray-700 font-bold hover:bg-gray-100 hover:border-gray-300 transition-all shadow-sm">
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" /> Back
           </button>
@@ -332,7 +449,7 @@ export default function ChangeRequestDetail({
           </div>
 
           {/* COMPLETED TASKS */}
-          {/* {completed.length > 0 && (
+          {completed.length > 0 && (
             <div className="bg-white rounded-2xl border border-green-200 shadow-sm overflow-hidden">
                 <div className="p-4 border-b border-green-100 bg-green-50/50">
                     <h3 className="font-bold text-green-900 flex items-center gap-2 text-sm"><CheckCircle className="w-4 h-4 text-green-600" /> Completed Steps ({completed.length})</h3>
@@ -349,16 +466,73 @@ export default function ChangeRequestDetail({
                     ))}
                 </div>
             </div>
-          )} */}
+          )}
 
           {/* QUICK STATUS SUMMARY */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+          {/* <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Quick Status Overview</h4>
             <div className="space-y-4">
               <div className="flex items-center justify-between text-sm border-b border-gray-50 pb-2"><span className="text-gray-600 flex items-center gap-2"><PlayCircle className="w-4 h-4" /> Setup Approval</span>{renderSetupStatus(record)}</div>
               <div className="flex items-center justify-between text-sm border-b border-gray-50 pb-2"><span className="text-gray-600 flex items-center gap-2"><CheckSquare className="w-4 h-4" /> ID/Batch No.</span>{renderRequirementTag(record.action_details?.identification_psn_batch_no)}</div>
               <div className="flex items-center justify-between text-sm border-b border-gray-50 pb-2"><span className="text-gray-600 flex items-center gap-2"><Flag className="w-4 h-4" /> Containment</span>{renderRequirementTag(record.action_details?.containment_action)}</div>
               <div className="flex items-center justify-between text-sm"><span className="text-gray-600 flex items-center gap-2"><Users className="w-4 h-4" /> Customer Approval</span>{renderCustomerStatus(record)}</div>
+            </div>
+          </div> */}
+          {/* ... (inside your component return) ... */}
+
+          {/* DYNAMIC QUICK STATUS SUMMARY */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Quick Status Overview</h4>
+            <div className="space-y-4">
+              
+              {/* 1. Combine Pending & Completed to show EVERYTHING required */}
+              {[...pending, ...completed].length === 0 ? (
+                 <p className="text-sm text-gray-400 italic text-center py-2">No requirements tracked.</p>
+              ) : (
+                 [...pending, ...completed]
+                 // Optional: Sort them so Completed items sink to the bottom, or keep specific order
+                 .sort((a, b) => {
+                    // Simple sort: Put 'setup' and 'customer' at the top, others below
+                    const priority = ['setup', 'customer', 'containment'];
+                    const idxA = priority.indexOf(a.id);
+                    const idxB = priority.indexOf(b.id);
+                    if (idxA > -1 && idxB > -1) return idxA - idxB;
+                    if (idxA > -1) return -1;
+                    if (idxB > -1) return 1;
+                    return 0; 
+                 })
+                 .map((task) => {
+                    // Determine Status Display
+                    const isCompleted = completed.find(t => t.id === task.id);
+                    const isRejected = task.statusLabel === 'REJECTED';
+
+                    return (
+                      <div key={task.id} className="flex items-center justify-between text-sm border-b border-gray-50 pb-2 last:border-0">
+                        <span className="text-gray-700 flex items-center gap-2 font-medium">
+                           {/* Use the specific icon for each task type */}
+                           <task.icon className="w-4 h-4 text-gray-400" /> 
+                           {task.label}
+                        </span>
+                        
+                        {/* Dynamic Status Badge */}
+                        {isCompleted ? (
+                            <span className="text-green-700 font-bold text-[10px] bg-green-100 px-2 py-1 rounded-full border border-green-200 flex items-center gap-1">
+                                <CheckCircle className="w-3 h-3" /> COMPLETED
+                            </span>
+                        ) : isRejected ? (
+                            <span className="text-red-700 font-bold text-[10px] bg-red-100 px-2 py-1 rounded-full border border-red-200 animate-pulse">
+                                ✗ REJECTED
+                            </span>
+                        ) : (
+                            <span className="text-yellow-700 font-bold text-[10px] bg-yellow-100 px-2 py-1 rounded-full border border-yellow-200">
+                                ⚠ PENDING
+                            </span>
+                        )}
+                      </div>
+                    );
+                 })
+              )}
+
             </div>
           </div>
 
