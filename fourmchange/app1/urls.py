@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import  CustomerApprovalViewSet, FourMApprovalViewSet, LogoutView, MaterialMovementCardViewSet, SuspectedLotViewSet
+from .views import  CustomerApprovalViewSet, FourMApprovalViewSet, IdentificationPSNViewSet, LogoutView, MaterialMovementCardViewSet, SuspectedLotViewSet
 from .views import (
     ShopfloorViewSet, LineViewSet, StationViewSet,
     FourMCategoriesViewSet, FourMActionViewSet, FourMChangeViewSet,FourMApprovalViewSet
@@ -75,7 +75,7 @@ router.register(r'process-info', ProcessInformationViewSet)
 router.register(r'format-records', FormatRecordViewSet)
 
 router.register(r'validation', ChangeValidationViewSet)
-
+router.register(r'identification', IdentificationPSNViewSet, basename='identification')
 
 urlpatterns = [
     path('', include(router.urls)),

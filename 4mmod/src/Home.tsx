@@ -28,6 +28,7 @@ import PaintQualitySheet from './components/PaintshopQualityChecksheet/Paintshop
 import UserManagement from './components/Usermanagement/Usermanagement'
 import ApprovalsPage from './components/Approvals/ApprovalsPage';
 import CustomerApprovalsPage from './components/CustomerApprovalsView/CustomerApprovalsView';
+import IdentificationPage from './components/IDPSN/IdentificationPage';
 // Define the Props interface for Home
 interface HomeProps {
   selectedModule: string;
@@ -105,6 +106,9 @@ const Home: React.FC<HomeProps> = ({
           {selectedModule === 'paintshop-qualitychecksheet' && <PaintQualitySheet />}
           {selectedModule === 'users' && <UserManagement />}
           {selectedModule === 'customer-approvals' && <CustomerApprovalsPage setSelectedModule={setSelectedModule} />}
+          {selectedModule === "identification" && (
+              <IdentificationPage setSelectedModule={setSelectedModule} />
+          )}
 
         </main>
       </div>

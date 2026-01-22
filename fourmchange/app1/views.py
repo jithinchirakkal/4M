@@ -820,3 +820,16 @@ class ChangeValidationViewSet(viewsets.ModelViewSet):
     serializer_class = ChangeValidationSerializer
 
  # 4M Validation
+
+
+# ID PSN / Batch
+
+# views.py
+from .models import IdentificationPSN
+from .serializers import IdentificationPSNSerializer
+
+class IdentificationPSNViewSet(viewsets.ModelViewSet):
+    queryset = IdentificationPSN.objects.all().order_by('-created_at')
+    serializer_class = IdentificationPSNSerializer
+
+# ID PSN Batch end

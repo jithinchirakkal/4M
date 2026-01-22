@@ -16,6 +16,7 @@ import {
 	Search,
 	Bell,
 	CheckSquare,
+	Tag,
 } from "lucide-react";
 
 interface NavModule {
@@ -267,4 +268,13 @@ export const navModules: NavModule[] = [
 		allowedRoles: ["CUSTOMER"],
 		
 	},
+	{
+        id: "identification", // This MUST match the ID used in ChangeRequestDetail.tsx
+        title: "Identification / Batch",
+        fullName: "Identification & Batch Control",
+        color: "from-cyan-500 to-cyan-600",
+        icon: Tag,
+        description: "Manage Batch Nos, PSN, and Identification methods",
+        status: "active",
+    },
 ];

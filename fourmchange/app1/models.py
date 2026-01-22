@@ -809,4 +809,38 @@ class ChangeValidationRow(models.Model):
 
 
 # 4M Validation
+
+
+# ID PSN /Batch 
+
+from datetime import date
+
+class IdentificationPSN(models.Model):
+    change = models.OneToOneField(FourMChange, on_delete=models.CASCADE, related_name='batch_info')
+    
+    # Auto-filled from Change Request
+    part_name = models.CharField(max_length=200, blank=True)
+    shopfloor_name = models.CharField(max_length=100, blank=True)
+    line_name = models.CharField(max_length=100, blank=True)
+    
+    # Identification Details
+    old_batch_no = models.CharField(max_length=100, blank=True, help_text="Last batch before change")
+    new_batch_no = models.CharField(max_length=100, help_text="First batch with change")
+    psn_start = models.CharField(max_length=100, blank=True, help_text="Starting Serial No.")
+    
+    # Method of Identification
+    identification_method = models.CharField(max_length=200, help_text="e.g., Green Sticker, Stamp, Tag")
+    # effective_date = models.DateField(default=timezone.now)
+    effective_date = models.DateField(default=date.today)
+    remarks = models.TextField(blank=True)
+    
+    updated_by = models.CharField(max_length=100) # User who filled this
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"ID-{self.change.record_id} | {self.new_batch_no}"
+    
+
+# ID PSN /Batch end
+
  

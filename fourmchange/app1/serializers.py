@@ -269,9 +269,8 @@ class FourMChangeSerializer(serializers.ModelSerializer):
         return False
 
     def get_is_batch_done(self, obj):
-        # TODO: If you build a table for Batch/PSN tracking:
-        # return obj.batch_records.exists()
-        return False
+        # Checks if 'batch_info' (related_name from model) exists
+        return hasattr(obj, 'batch_info')
 
     def get_approval_status(self, obj):
         action = obj.action
@@ -748,3 +747,17 @@ class ChangeValidationSerializer(serializers.ModelSerializer):
         
         return instance
  # 4M Validation
+
+#ID PSN /Batch
+
+from .models import IdentificationPSN  # <--- Import the new model
+
+# 1. New Serializer for the Form
+class IdentificationPSNSerializer(serializers.ModelSerializer):
+    record_id = serializers.CharField(source="change.record_id", read_only=True)
+    
+    class Meta:
+        model = IdentificationPSN
+        fields = '__all__'
+
+#ID PSN /Batch end
