@@ -277,4 +277,13 @@ export const navModules: NavModule[] = [
         description: "Manage Batch Nos, PSN, and Identification methods",
         status: "active",
     },
+	{
+        id: "containment-form",
+        title: "Containment Plan",
+        fullName: "4M Containment & Risk Assessment",
+        color: "from-orange-400 to-red-500", // A distinct warm gradient
+        icon: ClipboardList,
+        description: "Define containment actions, risk levels, and trial validations",
+        status: "active",
+    },
 ];
