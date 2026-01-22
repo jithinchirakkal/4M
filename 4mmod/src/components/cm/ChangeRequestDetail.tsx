@@ -342,7 +342,7 @@ export default function ChangeRequestDetail({
           </div>
 
           {/* COMPLETED TASKS */}
-          {/* {completed.length > 0 && (
+          {completed.length > 0 && (
             <div className="bg-white rounded-2xl border border-green-200 shadow-sm overflow-hidden">
                 <div className="p-4 border-b border-green-100 bg-green-50/50">
                     <h3 className="font-bold text-green-900 flex items-center gap-2 text-sm"><CheckCircle className="w-4 h-4 text-green-600" /> Completed Steps ({completed.length})</h3>
@@ -359,7 +359,7 @@ export default function ChangeRequestDetail({
                     ))}
                 </div>
             </div>
-          )} */}
+          )}
 
           {/* QUICK STATUS SUMMARY */}
           <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">

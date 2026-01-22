@@ -360,11 +360,17 @@ class FourMApprovalViewSet(viewsets.ModelViewSet):
         if user.role and user.role.code == 'CUSTOMER':
             return FourMApproval.objects.none()
 
-        # For Prod HOD and QA HOD - show only their pending approvals
-        # Exclude customer approvals
+        # # For Prod HOD and QA HOD - show only their pending approvals
+        # # Exclude customer approvals
+        # return FourMApproval.objects.filter(
+        #     role=user.role,
+        #     status='pending'
+        # ).exclude(role__code='CUSTOMER')
+        
+        # For Prod HOD and QA HOD
+        # CHANGE: Removed status='pending' so we get History too
         return FourMApproval.objects.filter(
-            role=user.role,
-            status='pending'
+            role=user.role
         ).exclude(role__code='CUSTOMER')
 
     @action(detail=True, methods=['post'])
