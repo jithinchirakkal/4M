@@ -30,6 +30,7 @@ import ApprovalsPage from './components/Approvals/ApprovalsPage';
 import CustomerApprovalsPage from './components/CustomerApprovalsView/CustomerApprovalsView';
 import IdentificationPage from './components/IDPSN/IdentificationPage';
 import Containment from "./components/Containment/Containment";
+import FourMChangeHistory from "./components/FourMChangeHistory/FourMChangeHistory";
 // Define the Props interface for Home
 interface HomeProps {
   selectedModule: string;
@@ -106,6 +107,7 @@ const Home: React.FC<HomeProps> = ({
           {selectedModule === "pccs" && <ProductCharacteristicsSheet />}
           {selectedModule === 'paintshop-qualitychecksheet' && <PaintQualitySheet />}
           {selectedModule === 'users' && <UserManagement />}
+          {selectedModule === 'FourMChangeHistory' && <FourMChangeHistory />}
           {/* {selectedModule === "containment-form" && <Containment />} */}
           {selectedModule === "containment-form" && (
           <Containment
