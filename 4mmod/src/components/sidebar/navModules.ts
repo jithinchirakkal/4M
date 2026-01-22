@@ -286,4 +286,13 @@ export const navModules: NavModule[] = [
         description: "Define containment actions, risk levels, and trial validations",
         status: "active",
     },
+	{
+        id: "FourMChangeHistory",
+        title: "FourMChangeHistory",
+        fullName: "FourMChangeHistory",
+        color: "from-orange-400 to-red-500", // A distinct warm gradient
+        icon: ClipboardList,
+        description: "Define containment actions, risk levels, and trial validations",
+        status: "active",
+    },
 ];

@@ -140,12 +140,13 @@ export default function ChangeRequestDetail({
 
     // 5. CONTAINMENT
     if (record.action_details?.containment_action) {
-        const isDone = record.is_containment_done;
-        let desc = "Suspect part segregation.";
-        if (isDone) desc = "Containment action recorded.";
-        addTask("containment", "Containment", desc, "containment-form", Flag, "Critical", isDone, false);
-    }
-
+    const isDone = record.is_containment_done;
+    let desc = "Segregation of suspect parts.";
+    if (isDone) desc = "Containment action recorded.";
+    
+    // Ensure the 4th parameter is "containment-form"
+    addTask("containment", "Containment Action", desc, "containment-form", Flag, "Critical", isDone, false);
+}
     // 6. ID / BATCH NO
     if (record.action_details?.identification_psn_batch_no) {
         const isDone = record.is_batch_done;
@@ -183,7 +184,19 @@ export default function ChangeRequestDetail({
     if (record?.record_id) {
         localStorage.setItem("filter_change_request_id", record.record_id);
         localStorage.setItem("return_to_detail_id", record.record_id);
-        
+
+        if (moduleId === "containment-form") {
+        const prefillData = {
+        record_id: record.record_id,
+        department: record.shopfloor_name || "",
+        line: record.line_name || "",
+        process: record.station_name || "",
+        change_type: record.four_m || "",
+        reason: record.category_details?.description || ""
+      };
+      
+      localStorage.setItem("containment_prefill_data", JSON.stringify(prefillData));
+    }
         if (moduleId === "ojt") {
             const ojtData: OJTRecordData = {
                 changeId: record.record_id,
