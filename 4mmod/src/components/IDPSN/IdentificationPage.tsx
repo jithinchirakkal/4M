@@ -189,6 +189,8 @@ const IdentificationPage: React.FC<PageProps> = ({ setSelectedModule }) => {
 
       if (!res.ok) throw new Error("Failed to save");
 
+      alert('Identification Record Saved Successfully!');
+
       // Success Logic
       const returnId = localStorage.getItem("return_to_detail_id");
       if (returnId && selectedChange.record_id === returnId) {
