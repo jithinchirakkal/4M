@@ -269,9 +269,20 @@ class FourMChangeSerializer(serializers.ModelSerializer):
         return obj.ojt_records.filter(status__in=['pass', 'fail']).exists()
 
     def get_is_containment_done(self, obj):
-        # TODO: When you build Containment/SuspectedLot Model, uncomment:
-        # return obj.suspected_lots.exists()
-        return False
+        """
+        Returns True only if:
+        1. containment record exists
+        2. AND is_complete == True
+        """
+        try:
+            sheet = obj.tracking_sheet   # uses related_name='tracking_sheet'
+            return sheet.is_complete
+        except containment.DoesNotExist:
+            return False
+
+    # Optional: if you still want the old existence-only check (less strict)
+    def get_is_tracking_done(self, obj):
+        return hasattr(obj, 'tracking_sheet')
 
     def get_is_batch_done(self, obj):
         # Checks if 'batch_info' (related_name from model) exists
@@ -854,3 +865,43 @@ class IdentificationPSNSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 #ID PSN /Batch end
+
+
+# serializers.py
+from .models import containment
+
+class containmentSerializer(serializers.ModelSerializer):
+    # Read-only computed fields
+    change_info = serializers.SerializerMethodField()
+    completion_percentage = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = containment
+        fields = '__all__'
+        read_only_fields = ['record_id', 'is_complete', 'completed_at']
+    
+    def get_change_info(self, obj):
+        """Return basic info about linked FourMChange"""
+        if obj.change:
+            return {
+                'record_id': obj.change.record_id,
+                'four_m': obj.change.four_m,
+                'date': obj.change.date,
+                'shopfloor': obj.change.shopfloor.name if obj.change.shopfloor else None,
+                'line': obj.change.line.name if obj.change.line else None,
+                'station': obj.change.station.name if obj.change.station else None,
+            }
+        return None
+    
+    def get_completion_percentage(self, obj):
+        """Calculate form completion percentage"""
+        total_fields = 13  # Number of required fields
+        filled_fields = sum([
+            1 for field in [
+                obj.potential_risk, obj.impact, obj.containment_action,
+                obj.area_affected, obj.responsibility, obj.inspection_method,
+                obj.acceptance_criteria, obj.trial_quantity, obj.defects_observed,
+                obj.observations, obj.prepared_by, obj.reviewed_by, obj.approved_by
+            ] if field and field.strip()
+        ])
+        return round((filled_fields / total_fields) * 100, 2)

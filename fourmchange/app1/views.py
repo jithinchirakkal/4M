@@ -990,3 +990,87 @@ class IdentificationPSNViewSet(viewsets.ModelViewSet):
     serializer_class = IdentificationPSNSerializer
 
 # ID PSN Batch end
+
+
+# views.py
+from .models import containment
+from .serializers import containmentSerializer
+
+class containmentViewSet(viewsets.ModelViewSet):
+    queryset = containment.objects.all()
+    serializer_class = containmentSerializer
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        # Filter by record_id
+        record_id = self.request.query_params.get('record_id', None)
+        if record_id:
+            queryset = queryset.filter(record_id=record_id)
+        
+        # Filter by completion status
+        is_complete = self.request.query_params.get('is_complete', None)
+        if is_complete is not None:
+            queryset = queryset.filter(is_complete=is_complete.lower() == 'true')
+        
+        return queryset
+    
+    @action(detail=False, methods=['post'])
+    def create_or_update(self, request):
+        """
+        Create or update tracking sheet by record_id.
+        Frontend sends record_id + form data.
+        """
+        record_id = request.data.get('record_id')
+        
+        if not record_id:
+            return Response(
+                {'error': 'record_id is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            # Get the parent FourMChange
+            change = FourMChange.objects.get(record_id=record_id)
+        except FourMChange.DoesNotExist:
+            return Response(
+                {'error': f'FourMChange with record_id {record_id} not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Get or create tracking sheet
+        tracking_sheet, created = containment.objects.get_or_create(
+            change=change,
+            defaults={'record_id': record_id}
+        )
+        
+        # Update with request data
+        serializer = self.get_serializer(tracking_sheet, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        return Response({
+            'message': 'Created' if created else 'Updated',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK if not created else status.HTTP_201_CREATED)
+    
+    @action(detail=False, methods=['get'])
+    def by_record_id(self, request):
+        """Get tracking sheet by record_id"""
+        record_id = request.query_params.get('record_id')
+        
+        if not record_id:
+            return Response(
+                {'error': 'record_id parameter is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            sheet = containment.objects.get(record_id=record_id)
+            serializer = self.get_serializer(sheet)
+            return Response(serializer.data)
+        except containment.DoesNotExist:
+            return Response(
+                {'error': f'Tracking sheet for {record_id} not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )

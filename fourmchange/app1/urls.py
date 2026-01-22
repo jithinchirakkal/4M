@@ -18,7 +18,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import  CustomerApprovalViewSet, FourMApprovalViewSet, IdentificationPSNViewSet, LogoutView, MaterialMovementCardViewSet, SuspectedLotViewSet
 from .views import (
-    ShopfloorViewSet, LineViewSet, StationViewSet,
+    ShopfloorViewSet, LineViewSet, StationViewSet,containmentViewSet,
     FourMCategoriesViewSet, FourMActionViewSet, FourMChangeViewSet,FourMApprovalViewSet
 )
 
@@ -77,6 +77,8 @@ router.register(r'format-records', FormatRecordViewSet)
 router.register(r'validation', ChangeValidationViewSet)
 router.register(r'ojt-records', OJTRecordViewSet, basename='ojt-record')
 router.register(r'ojt-daily-scores', OJTDailyScoreViewSet, basename='ojt-daily-score')
+router.register(r'fourm-change-details', containmentViewSet, basename='fourm-change-detail')
+
 
 router.register(r'identification', IdentificationPSNViewSet, basename='identification')
 

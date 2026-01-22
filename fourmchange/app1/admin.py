@@ -54,6 +54,19 @@ admin.site.register(ProcessInformation)
 admin.site.register(FormatRecord)
 
 
+
+
+from django.contrib import admin
+from .models import containment
+
+
+@admin.register(containment)
+class ContainmentAdmin(admin.ModelAdmin):
+    list_display = ('record_id', 'department', 'risk_level', 'is_complete')
+    search_fields = ('record_id', 'department')
+    list_filter = ('risk_level', 'is_complete')
+
+
 from django.contrib import admin
 from .models import OJTRecord, OJTDailyScore
 
