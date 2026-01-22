@@ -913,7 +913,7 @@ export default function ChangeManagementView({
           <div className="overflow-x-auto border border-gray-200 rounded-xl shadow-inner">
             <table
               className="w-full bg-white border-collapse"
-              style={{ minWidth: "2000px" }}
+              // style={{ minWidth: "2000px" }}
             >
               <thead className="bg-gray-50/80 sticky top-0">
                 <tr className="text-left">
@@ -928,16 +928,16 @@ export default function ChangeManagementView({
                     // "Line",
                     // "Station",
                     "Category",
-                    "Description",
-                    "Action",
-                    "Change Record",
-                    "ID PSN / Batch",
-                    "OJT",
-                    "Set-Up Approval",
-                    "Retro Inspection",
-                    "Containment",
-                    "Customer Approval",
-                    "Approving Authority",
+                    // "Description",
+                    // "Action",
+                    // "Change Record",
+                    // "ID PSN / Batch",
+                    // "OJT",
+                    // "Set-Up Approval",
+                    // "Retro Inspection",
+                    // "Containment",
+                    // "Customer Approval",
+                    // "Approving Authority",
                     // "Remarks",
                   ].map((header) => (
                     <th
@@ -1033,71 +1033,57 @@ export default function ChangeManagementView({
                         {item.category_details?.category_type || "-"}
                       </span>
                     </td>
-                    <td
+                    {/* <td
                       className="p-3 text-sm text-gray-700"
                       style={{ minWidth: "300px" }}
                     >
                       {item.category_details?.description || "-"}
-                    </td>
-                    <td
+                    </td> */}
+                    {/* <td
                       className="p-3 text-sm text-gray-700"
                       style={{ minWidth: "300px" }}
                     >
                       {item.action_details?.action_taken || "-"}
-                    </td>
-                    {/* <td className="p-3 whitespace-nowrap">
-                      {renderStatusTag(item.action_details?.change_record)}
                     </td> */}
-                    <td className="p-3 whitespace-nowrap">
+                    {/* <td className="p-3 whitespace-nowrap">
                       {renderClickableStatusTag(
                         item.action_details?.change_record,
                         () => setSelectedModule("4m-cts")
                       )}
-                    </td>
+                    </td> */}
 
-                    <td className="p-3 whitespace-nowrap">
+                    {/* <td className="p-3 whitespace-nowrap">
                       {renderStatusTag(
                         item.action_details?.identification_psn_batch_no
                       )}
-                    </td>
+                    </td> */}
 
-                    <td className="p-3 whitespace-nowrap">
+                    {/* <td className="p-3 whitespace-nowrap">
                       {renderStatusTag(item.action_details?.ojt)}
-                    </td>
+                    </td> */}
 
                     {/* <td className="p-3 whitespace-nowrap">
-                      {renderStatusTag(item.action_details?.set_up_approval)}
-                    </td> */}
-                    <td className="p-3 whitespace-nowrap">
                       {renderApprovalStatus(item)}
-                    </td>
-
-                    {/* <td className="p-3 whitespace-nowrap">
-                      {renderStatusTag(
-                        item.action_details?.retroactive_inspection
-                      )}
                     </td> */}
-                    <td className="p-3 whitespace-nowrap">
+                    {/* <td className="p-3 whitespace-nowrap">
                       {renderClickableStatusTag(
                         item.action_details?.retroactive_inspection,
                         () => setSelectedModule("rcr") 
                       )}
-                    </td>
-
-                    <td className="p-3 whitespace-nowrap">
-                      {renderStatusTag(item.action_details?.containment_action)}
-                    </td>
+                    </td> */}
 
                     {/* <td className="p-3 whitespace-nowrap">
-                      {renderStatusTag(item.action_details?.customer_approval)}
+                      {renderStatusTag(item.action_details?.containment_action)}
                     </td> */}
-                    <td className="p-3 whitespace-nowrap">
+
+
+                    {/* <td className="p-3 whitespace-nowrap">
                       {renderCustomerApprovalStatus(item)}
-                    </td>
+                    </td> */}
                 
-                    <td className="p-3 whitespace-nowrap text-sm font-medium">
+                    {/* <td className="p-3 whitespace-nowrap text-sm font-medium">
                       {item.action_details?.approving_authority || "-"}
-                    </td>
+                    </td> */}
 
                     {/* <td
                       className="p-3 text-sm text-gray-700"
