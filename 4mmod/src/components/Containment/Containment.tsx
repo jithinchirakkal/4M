@@ -1,192 +1,224 @@
-import React, { useState, useEffect } from 'react';
 
-// Define the form data shape once
+
+import React, { useState, useEffect } from 'react';
+import { AlertCircle, CheckCircle, Loader, ArrowLeft, X } from 'lucide-react';
+
+// API Configuration
+const API_BASE_URL = 'http://localhost:8000/api';
+
 interface ChangeFormData {
-  requestNo: string;
-  date: string;
+  record_id: string;
   department: string;
   process: string;
-  changeType: string;
+  line: string;
+  change_type: string;
   reason: string;
-  potentialRisk: string;
+  potential_risk: string;
   impact: string;
-  riskLevel: 'L' | 'M' | 'H';
-  containmentAction: string;
-  areaAffected: string;
+  risk_level: 'L' | 'M' | 'H';
+  containment_action: string;
+  area_affected: string;
   duration: string;
   responsibility: string;
-  inspectionMethod: string;
-  acceptanceCriteria: string;
-  trialQuantity: string;
-  defectsObserved: string;
+  inspection_method: string;
+  acceptance_criteria: string;
+  trial_quantity: string;
+  defects_observed: string;
   observations: string;
-  preparedBy: string;
-  reviewedBy: string;
-  approvedBy: string;
+  prepared_by: string;
+  reviewed_by: string;
+  approved_by: string;
 }
 
-const Containment: React.FC = () => {
+interface ApiResponse {
+  message: string;
+  data: ChangeFormData & {
+    id: number;
+    is_complete: boolean;
+    completion_percentage: number;
+  };
+}
+
+interface ContainmentProps {
+  onReturnToDetail?: () => void;
+}
+
+const Containment: React.FC<ContainmentProps> = ({ onReturnToDetail }) => {
   const [formData, setFormData] = useState<ChangeFormData>({
-    requestNo: '',
-    date: '2026-01-22',
+    record_id: '',
     department: '',
     process: '',
-    changeType: '',
+    line: '',
+    change_type: '',
     reason: '',
-    potentialRisk: '',
+    potential_risk: '',
     impact: '',
-    riskLevel: 'L',
-    containmentAction: '',
-    areaAffected: '',
+    risk_level: 'L',
+    containment_action: '',
+    area_affected: '',
     duration: '',
     responsibility: '',
-    inspectionMethod: '',
-    acceptanceCriteria: '',
-    trialQuantity: '',
-    defectsObserved: '',
+    inspection_method: '',
+    acceptance_criteria: '',
+    trial_quantity: '',
+    defects_observed: '',
     observations: '',
-    preparedBy: '',
-    reviewedBy: '',
-    approvedBy: '',
+    prepared_by: '',
+    reviewed_by: '',
+    approved_by: '',
   });
 
-  // Mock data with proper typing
-  const mockData: Record<string, ChangeFormData> = {
-    'REQ-001': {
-      requestNo: 'REQ-001',
-      date: '2026-01-22',
-      department: 'Engineering',
-      process: 'Assembly Line',
-      changeType: 'Machine',
-      reason: 'Upgrade to new machinery for efficiency',
-      potentialRisk: 'Downtime during installation',
-      impact: 'Production delay',
-      riskLevel: 'M',
-      containmentAction: 'Temporary manual assembly',
-      areaAffected: 'Production Floor',
-      duration: '2 days',
-      responsibility: 'Team Lead',
-      inspectionMethod: 'Visual check',
-      acceptanceCriteria: 'No defects in output',
-      trialQuantity: '100 units',
-      defectsObserved: 'No',
-      observations: 'Trial ran smoothly with minor adjustments',
-      preparedBy: 'John Doe',
-      reviewedBy: 'Jane Smith',
-      approvedBy: 'Manager X',
-    },
-    'REQ-002': {
-      requestNo: 'REQ-002',
-      date: '2026-01-25',
-      department: 'Quality Control',
-      process: 'Inspection',
-      changeType: 'Method',
-      reason: 'Implement AI-based defect detection',
-      potentialRisk: 'False positives in detection',
-      impact: 'Increased rework',
-      riskLevel: 'H',
-      containmentAction: 'Fallback to manual inspection',
-      areaAffected: 'QC Station',
-      duration: '1 week',
-      responsibility: 'QC Supervisor',
-      inspectionMethod: 'AI scan + human verify',
-      acceptanceCriteria: 'Accuracy > 95%',
-      trialQuantity: '500 units',
-      defectsObserved: 'Yes (minor)',
-      observations: 'AI improved speed but needs calibration',
-      preparedBy: 'Alice Johnson',
-      reviewedBy: 'Bob Lee',
-      approvedBy: 'Director Y',
-    },
-  };
+  const [loading, setLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [completionPercentage, setCompletionPercentage] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // Default values for reset
-  const defaultFormValues: Omit<ChangeFormData, 'requestNo'> = {
-    date: '2026-01-22',
-    department: '',
-    process: '',
-    changeType: '',
-    reason: '',
-    potentialRisk: '',
-    impact: '',
-    riskLevel: 'L',
-    containmentAction: '',
-    areaAffected: '',
-    duration: '',
-    responsibility: '',
-    inspectionMethod: '',
-    acceptanceCriteria: '',
-    trialQuantity: '',
-    defectsObserved: '',
-    observations: '',
-    preparedBy: '',
-    reviewedBy: '',
-    approvedBy: '',
-  };
+  // Prefill & Fetch logic
+  useEffect(() => {
+    const savedPrefill = localStorage.getItem("containment_prefill_data");
 
-  const loadDemoData = (reqNo: string) => {
-    const data = mockData[reqNo];
-    if (data) {
-      setFormData(data);
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        ...defaultFormValues,
-      }));
+    if (savedPrefill) {
+      try {
+        const data = JSON.parse(savedPrefill);
+
+        setFormData(prev => ({
+          ...prev,
+          record_id: data.record_id || '',
+          department: data.department || '',
+          line: data.line || '',
+          process: data.process || '',
+          change_type: data.change_type || '',
+          reason: data.reason || '',
+        }));
+
+        if (data.record_id) {
+          fetchTrackingSheet(data.record_id);
+        }
+
+        localStorage.removeItem("containment_prefill_data");
+      } catch (e) {
+        console.error("Failed to parse prefill data", e);
+      }
+    }
+  }, []);
+
+  const fetchTrackingSheet = async (recordId: string) => {
+    if (!recordId.trim()) return;
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/fourm-change-details/by_record_id/?record_id=${recordId}`
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setFormData(data);
+        setCompletionPercentage(data.completion_percentage || 0);
+        setIsComplete(data.is_complete || false);
+        setSuccess('Data loaded successfully');
+        setTimeout(() => setSuccess(null), 3000);
+      } else if (response.status === 404) {
+        setError('New tracking sheet initialized for this record.');
+        setTimeout(() => setError(null), 3000);
+      }
+    } catch (err) {
+      setError('Failed to sync with server');
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadDemoData('REQ-001');
-  }, []);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleRequestNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const reqNo = e.target.value;
-    setFormData((prev) => ({ ...prev, requestNo: reqNo }));
-    loadDemoData(reqNo);
-  };
+  const handleSave = async () => {
+    if (!formData.record_id.trim()) {
+      setError('Record ID is required');
+      return;
+    }
 
-  const handleSave = () => {
-    console.log('Saved data:', formData);
-    alert('Form data saved! (Check console for details)');
+    setSaveLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/fourm-change-details/create_or_update/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) throw new Error('Failed to save data');
+
+      const result: ApiResponse = await response.json();
+
+      setSuccess('Details saved successfully!');
+      setCompletionPercentage(result.data.completion_percentage || 0);
+      setIsComplete(result.data.is_complete || false);
+
+      setShowSuccessModal(true);
+
+      setTimeout(() => setSuccess(null), 5000);
+    } catch (err) {
+      setError('Failed to save data');
+    } finally {
+      setSaveLoading(false);
+    }
   };
 
   const getRiskBadge = (level: string) => {
     switch (level) {
-      case 'L':
-        return 'bg-green-100 text-green-800 border-green-300';
-      case 'M':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'H':
-        return 'bg-red-100 text-red-800 border-red-300';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-300';
+      case 'L': return 'bg-green-100 text-green-800 border-green-300';
+      case 'M': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'H': return 'bg-red-100 text-red-800 border-red-300';
+      default: return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
+
+  // Handle return to detail view
+  const handleReturnToDetail = () => {
+    if (onReturnToDetail) {
+      onReturnToDetail();
+    }
+    setShowSuccessModal(false);
+  };
+
+  // Optional: Auto-return to detail view after 7 seconds
+  useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+    if (showSuccessModal && onReturnToDetail) {
+      timer = setTimeout(() => {
+        handleReturnToDetail();
+      }, 7000);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [showSuccessModal, onReturnToDetail]);
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-5xl mx-auto px-6 py-4">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg">
               <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
               </svg>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">4M Change Management</h1>
-              <p className="text-sm text-gray-500">Man • Machine • Material • Method</p>
+              <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Containment Plan</h1>
+              <p className="text-sm text-gray-500 font-medium">Man • Machine • Material • Method</p>
             </div>
           </div>
+          {loading && <div className="flex items-center gap-2 text-blue-600 font-bold animate-pulse"><Loader className="w-5 h-5 animate-spin"/> SYNCING...</div>}
         </div>
       </header>
 
@@ -195,479 +227,270 @@ const Containment: React.FC = () => {
         <div className="max-w-5xl mx-auto px-6 py-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-4">
-              {formData.requestNo && (
-                <span className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-medium border border-blue-200">
-                  📋 {formData.requestNo}
+              {formData.record_id && (
+                <span className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-bold border border-blue-200">
+                  📋 {formData.record_id}
                 </span>
               )}
-              <span className={`px-3 py-1.5 rounded-full text-sm font-medium border ${getRiskBadge(formData.riskLevel)}`}>
-                Risk: {formData.riskLevel === 'L' ? 'Low' : formData.riskLevel === 'M' ? 'Medium' : 'High'}
+              <span className={`px-3 py-1.5 rounded-full text-sm font-bold border ${getRiskBadge(formData.risk_level)}`}>
+                Risk: {formData.risk_level === 'L' ? 'Low' : formData.risk_level === 'M' ? 'Medium' : 'High'}
               </span>
+              {completionPercentage > 0 && (
+                <span className={`px-3 py-1.5 rounded-full text-sm font-bold border ${isComplete ? 'bg-green-100 text-green-800 border-green-300' : 'bg-orange-100 text-orange-800 border-orange-300'}`}>
+                  {isComplete ? '✓ Complete' : `${completionPercentage}% Form Progress`}
+                </span>
+              )}
             </div>
-            <span className="text-sm text-gray-500">
-              📅 {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-            </span>
+            <span className="text-sm text-gray-500 font-medium">📅 {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Messages */}
+      {(error || success) && (
+        <div className="max-w-5xl mx-auto px-6 pt-4">
+          {error && <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 font-medium"><AlertCircle className="w-5 h-5" /> <span>{error}</span></div>}
+          {success && <div className="flex items-center gap-2 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 font-medium"><CheckCircle className="w-5 h-5" /> <span>{success}</span></div>}
+        </div>
+      )}
+
+      {/* Main Form Content */}
       <main className="max-w-5xl mx-auto px-6 py-8">
         <div className="space-y-8">
-          
+
           {/* Change Details Section */}
           <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="bg-blue-600 px-6 py-4">
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Change Details
-              </h3>
+            <div className="bg-blue-600 px-6 py-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2 uppercase tracking-wider">Change Details</h3>
+              {/* <span className="text-xs bg-white/20 text-white px-2 py-1 rounded font-bold">SECTION 01</span> */}
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Change Request No <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="requestNo"
-                    value={formData.requestNo}
-                    onChange={handleRequestNoChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    placeholder="e.g. REQ-001"
-                  />
+                  <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-tighter">Change Request No</label>
+                  <input type="text" value={formData.record_id} readOnly className="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-lg text-gray-500 font-bold" />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Date <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  />
+                  <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-tighter">Department (Shopfloor)</label>
+                  <input type="text" name="department" value={formData.department} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
-                  <input
-                    type="text"
-                    name="department"
-                    value={formData.department}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    placeholder="Enter department"
-                  />
+                  <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-tighter">Line / Station</label>
+                  <input type="text" value={`${formData.line} Station: ${formData.process}`} readOnly className="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-lg text-gray-500" />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Product / Process</label>
-                  <input
-                    type="text"
-                    name="process"
-                    value={formData.process}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    placeholder="Enter product or process"
-                  />
+                  <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-tighter">Type of Change</label>
+                  <div className="px-4 py-2.5 bg-blue-50 border border-blue-100 rounded-lg text-blue-700 font-bold">{formData.change_type || 'N/A'}</div>
                 </div>
-
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Type of Change</label>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {['Man', 'Machine', 'Material', 'Method'].map((type) => (
-                      <button
-                        key={type}
-                        type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, changeType: type }))}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                          formData.changeType === type
-                            ? 'bg-blue-600 text-white shadow-sm'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
-                        }`}
-                      >
-                        {type === 'Man' && '👤 '}
-                        {type === 'Machine' && '⚙️ '}
-                        {type === 'Material' && '📦 '}
-                        {type === 'Method' && '📋 '}
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-                  <input
-                    type="text"
-                    name="changeType"
-                    value={formData.changeType}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    placeholder="Or enter custom type"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Reason for Change</label>
-                  <textarea
-                    name="reason"
-                    value={formData.reason}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg h-28 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    placeholder="Describe the reason for this change..."
-                  />
+                  <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-tighter">Reason for Change</label>
+                  <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg text-gray-600 italic text-sm">{formData.reason || 'No description available.'}</div>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* Risk Assessment Section */}
+          {/* Risk Assessment */}
           <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="bg-orange-500 px-6 py-4">
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                Risk Assessment
-              </h3>
+            <div className="bg-orange-500 px-6 py-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white uppercase tracking-wider">Risk Assessment</h3>
+              {/* <span className="text-xs bg-white/20 text-white px-2 py-1 rounded font-bold">SECTION 02</span> */}
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Potential Risk</label>
-                  <input
-                    type="text"
-                    name="potentialRisk"
-                    value={formData.potentialRisk}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                    placeholder="Identify risks"
-                  />
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Potential Risk</label>
+                  <input type="text" name="potential_risk" value={formData.potential_risk} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Impact</label>
-                  <input
-                    type="text"
-                    name="impact"
-                    value={formData.impact}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                    placeholder="Describe impact"
-                  />
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Impact</label>
+                  <input type="text" name="impact" value={formData.impact} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Risk Level</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Risk Level</label>
                   <div className="flex gap-2">
-                    {[
-                      { value: 'L', label: 'Low', color: 'bg-green-500 hover:bg-green-600' },
-                      { value: 'M', label: 'Medium', color: 'bg-yellow-500 hover:bg-yellow-600' },
-                      { value: 'H', label: 'High', color: 'bg-red-500 hover:bg-red-600' },
-                    ].map((level) => (
-                      <button
-                        key={level.value}
-                        type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, riskLevel: level.value as 'L' | 'M' | 'H' }))}
-                        className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-bold transition-all ${
-                          formData.riskLevel === level.value
-                            ? `${level.color} text-white shadow-md`
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-300'
-                        }`}
-                      >
-                        {level.label}
+                    {['L', 'M', 'H'].map((level) => (
+                      <button key={level} type="button" onClick={() => setFormData(p => ({ ...p, risk_level: level as any }))}
+                        className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all border ${formData.risk_level === level ? 'bg-orange-500 text-white border-orange-600 shadow-md' : 'bg-gray-100 text-gray-500'}`}>
+                        {level === 'L' ? 'LOW' : level === 'M' ? 'MED' : 'HIGH'}
                       </button>
                     ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Risk Alert Box */}
-              <div className={`mt-6 p-4 rounded-lg border-l-4 ${
-                formData.riskLevel === 'L' ? 'bg-green-50 border-green-500' :
-                formData.riskLevel === 'M' ? 'bg-yellow-50 border-yellow-500' :
-                'bg-red-50 border-red-500'
-              }`}>
-                <div className="flex items-start gap-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
-                    formData.riskLevel === 'L' ? 'bg-green-500' :
-                    formData.riskLevel === 'M' ? 'bg-yellow-500' :
-                    'bg-red-500'
-                  }`}>
-                    {formData.riskLevel}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-800">
-                      {formData.riskLevel === 'L' && '✅ Low Risk - Standard controls apply'}
-                      {formData.riskLevel === 'M' && '⚠️ Medium Risk - Additional monitoring required'}
-                      {formData.riskLevel === 'H' && '🚨 High Risk - Immediate action needed'}
-                    </p>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {formData.riskLevel === 'L' && 'Proceed with standard procedures and documentation.'}
-                      {formData.riskLevel === 'M' && 'Implement enhanced monitoring and obtain supervisor approval.'}
-                      {formData.riskLevel === 'H' && 'Stop work if unsafe. Obtain management approval before proceeding.'}
-                    </p>
                   </div>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* Containment Plan Section */}
+          {/* Containment Plan */}
           <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="bg-purple-600 px-6 py-4">
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                Containment Plan
-              </h3>
+            <div className="bg-purple-600 px-6 py-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white uppercase tracking-wider">Containment Plan</h3>
+              {/* <span className="text-xs bg-white/20 text-white px-2 py-1 rounded font-bold">SECTION 03</span> */}
             </div>
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <span className="inline-flex items-center justify-center w-6 h-6 bg-purple-100 text-purple-600 rounded-full text-xs font-bold mr-2">1</span>
-                    Containment Action
-                  </label>
-                  <textarea
-                    name="containmentAction"
-                    value={formData.containmentAction}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg h-32 resize-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                    placeholder="Describe containment actions..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <span className="inline-flex items-center justify-center w-6 h-6 bg-purple-100 text-purple-600 rounded-full text-xs font-bold mr-2">2</span>
-                    Area Affected
-                  </label>
-                  <textarea
-                    name="areaAffected"
-                    value={formData.areaAffected}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg h-32 resize-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                    placeholder="List affected areas..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <span className="inline-flex items-center justify-center w-6 h-6 bg-purple-100 text-purple-600 rounded-full text-xs font-bold mr-2">3</span>
-                    Duration
-                  </label>
-                  <textarea
-                    name="duration"
-                    value={formData.duration}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg h-32 resize-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                    placeholder="Expected duration..."
-                  />
-                </div>
-              </div>
-
+            <div className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <span className="inline-flex items-center justify-center w-6 h-6 bg-purple-100 text-purple-600 rounded-full text-xs font-bold mr-2">4</span>
-                    Responsibility
-                  </label>
-                  <textarea
-                    name="responsibility"
-                    value={formData.responsibility}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg h-32 resize-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                    placeholder="Assign responsibilities..."
-                  />
+                  <label className="block text-sm font-bold text-gray-700 mb-2">1. Containment Action</label>
+                  <textarea name="containment_action" value={formData.containment_action} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg h-24" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <span className="inline-flex items-center justify-center w-6 h-6 bg-purple-100 text-purple-600 rounded-full text-xs font-bold mr-2">5</span>
-                    Inspection Method
-                  </label>
-                  <textarea
-                    name="inspectionMethod"
-                    value={formData.inspectionMethod}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg h-32 resize-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                    placeholder="Define inspection methods..."
-                  />
+                  <label className="block text-sm font-bold text-gray-700 mb-2">2. Area Affected</label>
+                  <textarea name="area_affected" value={formData.area_affected} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg h-24" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <span className="inline-flex items-center justify-center w-6 h-6 bg-purple-100 text-purple-600 rounded-full text-xs font-bold mr-2">6</span>
-                    Acceptance Criteria
-                  </label>
-                  <textarea
-                    name="acceptanceCriteria"
-                    value={formData.acceptanceCriteria}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg h-32 resize-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                    placeholder="Set acceptance criteria..."
-                  />
+                  <label className="block text-sm font-bold text-gray-700 mb-2">3. Duration</label>
+                  <textarea name="duration" value={formData.duration} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg h-24" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">4. Responsibility</label>
+                  <input type="text" name="responsibility" value={formData.responsibility} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">5. Inspection Method</label>
+                  <input type="text" name="inspection_method" value={formData.inspection_method} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">6. Acceptance Criteria</label>
+                  <input type="text" name="acceptance_criteria" value={formData.acceptance_criteria} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg" />
                 </div>
               </div>
             </div>
           </section>
 
-          {/* Trial & Validation Section */}
+          {/* Trial & Validation */}
           <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="bg-teal-600 px-6 py-4">
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                </svg>
-                Trial & Validation
-              </h3>
+            <div className="bg-teal-600 px-6 py-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white uppercase tracking-wider">Trial & Validation</h3>
+              {/* <span className="text-xs bg-white/20 text-white px-2 py-1 rounded font-bold">SECTION 04</span> */}
             </div>
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Trial Quantity</label>
-                  <input
-                    type="text"
-                    name="trialQuantity"
-                    value={formData.trialQuantity}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
-                    placeholder="e.g., 100 units"
-                  />
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Trial Quantity</label>
+                  <input type="text" name="trial_quantity" value={formData.trial_quantity} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Defects Observed</label>
-                  <div className="flex gap-3 mb-2">
-                    {['Yes', 'No'].map((option) => (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, defectsObserved: option }))}
-                        className={`flex-1 px-4 py-2.5 rounded-lg font-medium transition-all ${
-                          formData.defectsObserved.toLowerCase() === option.toLowerCase()
-                            ? option === 'Yes'
-                              ? 'bg-red-500 text-white shadow-md'
-                              : 'bg-green-500 text-white shadow-md'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-300'
-                        }`}
-                      >
-                        {option === 'Yes' ? '⚠️ ' : '✅ '}{option}
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Defects Observed?</label>
+                  <div className="flex gap-3">
+                    {['Yes', 'No'].map(opt => (
+                      <button key={opt} type="button" onClick={() => setFormData(p => ({ ...p, defects_observed: opt }))}
+                        className={`flex-1 py-2 rounded-lg font-bold border transition-all ${formData.defects_observed === opt ? 'bg-teal-600 text-white border-teal-700 shadow-sm' : 'bg-gray-100 text-gray-500'}`}>
+                        {opt}
                       </button>
                     ))}
                   </div>
-                  <input
-                    type="text"
-                    name="defectsObserved"
-                    value={formData.defectsObserved}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
-                    placeholder="Add details..."
-                  />
                 </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Observations</label>
-                <textarea
-                  name="observations"
-                  value={formData.observations}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg h-36 resize-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
-                  placeholder="Document trial observations and findings..."
-                />
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Observations</label>
+                  <textarea name="observations" value={formData.observations} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg h-24" />
+                </div>
               </div>
             </div>
           </section>
 
-          {/* Approval Section */}
+          {/* Approval Progress */}
           <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="bg-green-600 px-6 py-4">
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                </svg>
-                Approval
-              </h3>
+            <div className="bg-green-600 px-6 py-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white uppercase tracking-wider">Approval & Closure</h3>
+              {/* <span className="text-xs bg-white/20 text-white px-2 py-1 rounded font-bold">SECTION 05</span> */}
             </div>
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  { label: 'Prepared By', name: 'preparedBy', icon: '✍️', bgColor: 'bg-blue-50', borderColor: 'border-blue-200' },
-                  { label: 'Reviewed By (Quality)', name: 'reviewedBy', icon: '🔍', bgColor: 'bg-amber-50', borderColor: 'border-amber-200' },
-                  { label: 'Approved By (Management)', name: 'approvedBy', icon: '✅', bgColor: 'bg-green-50', borderColor: 'border-green-200' },
-                ].map(({ label, name, icon, bgColor, borderColor }) => (
-                  <div key={name} className={`p-4 rounded-lg ${bgColor} border ${borderColor}`}>
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-xl">{icon}</span>
-                      <span className="font-semibold text-gray-800 text-sm">{label}</span>
-                    </div>
-                    <input
-                      type="text"
-                      name={name}
-                      value={formData[name as keyof ChangeFormData]}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                      placeholder="Enter name"
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* Approval Progress */}
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-600">Approval Progress</span>
-                  <div className="flex items-center gap-2">
-                    <div className={`w-8 h-2 rounded-full ${formData.preparedBy ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
-                    <div className={`w-8 h-2 rounded-full ${formData.reviewedBy ? 'bg-amber-500' : 'bg-gray-300'}`}></div>
-                    <div className={`w-8 h-2 rounded-full ${formData.approvedBy ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                  </div>
+            <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { label: 'Prepared By', name: 'prepared_by', color: 'blue' },
+                { label: 'Quality Review', name: 'reviewed_by', color: 'amber' },
+                { label: 'Management Approval', name: 'approved_by', color: 'green' }
+              ].map(field => (
+                <div key={field.name} className={`p-4 bg-${field.color}-50 border border-${field.color}-200 rounded-lg`}>
+                  <label className="block text-xs font-bold text-gray-600 mb-2 uppercase">{field.label}</label>
+                  <input type="text" name={field.name} value={formData[field.name as keyof ChangeFormData]} onChange={handleChange} className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white" placeholder="Sign Name" />
                 </div>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {formData.preparedBy && (
-                    <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                      ✓ Prepared by {formData.preparedBy}
-                    </span>
-                  )}
-                  {formData.reviewedBy && (
-                    <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
-                      ✓ Reviewed by {formData.reviewedBy}
-                    </span>
-                  )}
-                  {formData.approvedBy && (
-                    <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                      ✓ Approved by {formData.approvedBy}
-                    </span>
-                  )}
-                  {!formData.preparedBy && !formData.reviewedBy && !formData.approvedBy && (
-                    <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
-                      ⏳ Pending
-                    </span>
-                  )}
-                </div>
-              </div>
+              ))}
             </div>
           </section>
 
-          {/* Save Button at Bottom */}
+          {/* Save Button */}
           <div className="flex justify-center pt-4">
-            <button
-              onClick={handleSave}
-              className="flex items-center gap-3 px-10 py-4 bg-green-600 text-white rounded-xl font-semibold text-lg hover:bg-green-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              Save Details
+            <button onClick={handleSave} disabled={saveLoading || !formData.record_id}
+              className={`flex items-center gap-3 px-12 py-4 rounded-xl font-bold text-xl transition-all shadow-xl hover:scale-105 active:scale-95 ${saveLoading || !formData.record_id ? 'bg-gray-400 cursor-not-allowed text-white' : 'bg-green-600 text-white hover:bg-green-700 shadow-green-200'}`}>
+              {saveLoading ? <><Loader className="w-6 h-6 animate-spin" /> SAVING...</> : 'SAVE FINAL DETAILS'}
             </button>
           </div>
         </div>
-
-        {/* Footer */}
-        <footer className="mt-8 text-center">
-          <p className="text-sm text-gray-500">
-            4M Change Management System • Last Updated: {new Date().toLocaleString()}
-          </p>
-        </footer>
       </main>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden">
+            <div className="bg-green-600 px-6 py-5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-7 h-7 text-white" />
+                <h2 className="text-xl font-bold text-white">Containment Plan Completed</h2>
+              </div>
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="text-white hover:text-green-100 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-600 mb-4">
+                  <CheckCircle className="w-10 h-10" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800">Success!</h3>
+                <p className="text-gray-600 mt-2">
+                  Containment actions have been successfully recorded.
+                </p>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600 font-medium">Record ID:</span>
+                  <span className="font-bold text-gray-900">{formData.record_id || '—'}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600 font-medium">Risk Level:</span>
+                  <span className={`font-bold px-3 py-1 rounded-full text-xs ${getRiskBadge(formData.risk_level)}`}>
+                    {formData.risk_level === 'L' ? 'Low' : formData.risk_level === 'M' ? 'Medium' : 'High'}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600 font-medium">Completion:</span>
+                  <span className={`font-bold ${isComplete ? 'text-green-700' : 'text-amber-700'}`}>
+                    {isComplete ? '100% – Complete' : `${completionPercentage}%`}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 mt-6">
+                <button
+                  onClick={handleReturnToDetail}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 px-6 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold rounded-xl transition-colors border border-gray-300"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  Back to Change Details
+                </button>
+
+                <button
+                  onClick={() => setShowSuccessModal(false)}
+                  className="flex-1 py-3 px-6 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-colors shadow-md"
+                >
+                  Continue Editing
+                </button>
+              </div>
+
+              {onReturnToDetail && (
+                <div className="text-center text-sm text-gray-500 mt-4 pt-2 border-t border-gray-200">
+                  Redirecting to change details in 7 seconds...
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

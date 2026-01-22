@@ -1071,4 +1071,108 @@ class IdentificationPSN(models.Model):
 
  
 
- 
+ # models.py
+
+class containment(models.Model):
+    """
+    Complete tracking sheet for a 4M Change Request.
+    Links to FourMChange via record_id.
+    """
+    # Link to main change record
+    change = models.OneToOneField(
+        FourMChange, 
+        on_delete=models.CASCADE, 
+        related_name='tracking_sheet'
+    )
+    record_id = models.CharField(max_length=30, unique=True)  # Same as FourMChange.record_id
+    
+    # CHANGE DETAILS (Already in FourMChange, but frontend needs these)
+    department = models.CharField(max_length=100, blank=True)  # Maps to shopfloor
+    process = models.CharField(max_length=100, blank=True)     # Maps to station
+    line = models.CharField(max_length=100, blank=True)        # Line info
+    change_type = models.CharField(max_length=50, blank=True)  # Man/Machine/Material/Method
+    reason = models.TextField(blank=True)
+    
+    # RISK ASSESSMENT
+    potential_risk = models.TextField(blank=True)
+    impact = models.TextField(blank=True)
+    risk_level = models.CharField(
+        max_length=1, 
+        choices=[('L', 'Low'), ('M', 'Medium'), ('H', 'High')],
+        default='L'
+    )
+    
+    # CONTAINMENT PLAN
+    containment_action = models.TextField(blank=True)
+    area_affected = models.TextField(blank=True)
+    duration = models.TextField(blank=True)
+    responsibility = models.TextField(blank=True)
+    inspection_method = models.TextField(blank=True)
+    acceptance_criteria = models.TextField(blank=True)
+    
+    # TRIAL & VALIDATION
+    trial_quantity = models.CharField(max_length=100, blank=True)
+    defects_observed = models.CharField(max_length=100, blank=True)  # Yes/No + details
+    observations = models.TextField(blank=True)
+    
+    # APPROVAL
+    prepared_by = models.CharField(max_length=100, blank=True)
+    reviewed_by = models.CharField(max_length=100, blank=True)
+    approved_by = models.CharField(max_length=100, blank=True)
+    
+    # STATUS TRACKING
+    is_complete = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    
+    # METADATA
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "4M Change Detail"
+        verbose_name_plural = "4M Change Details"
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.record_id} - {'Complete' if self.is_complete else 'Incomplete'}"
+    
+    def save(self, *args, **kwargs):
+        # Auto-populate record_id from linked change
+        if self.change and not self.record_id:
+            self.record_id = self.change.record_id
+        
+        # Auto-mark complete if all critical fields filled
+        if self.check_completeness():
+            self.is_complete = True
+            if not self.completed_at:
+                self.completed_at = timezone.now()
+        else:
+            self.is_complete = False
+            self.completed_at = None
+            
+        super().save(*args, **kwargs)
+    
+    def check_completeness(self):
+        """
+        Business logic: form is complete when:
+        - Risk assessment done
+        - Containment plan filled
+        - Trial validation done
+        - All approvals present
+        """
+        required_fields = [
+            self.potential_risk,
+            self.impact,
+            self.containment_action,
+            self.area_affected,
+            self.responsibility,
+            self.inspection_method,
+            self.acceptance_criteria,
+            self.trial_quantity,
+            self.defects_observed,
+            self.observations,
+            self.prepared_by,
+            self.reviewed_by,
+            self.approved_by,
+        ]
+        return all(field.strip() for field in required_fields if isinstance(field, str))

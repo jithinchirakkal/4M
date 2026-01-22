@@ -106,11 +106,17 @@ const Home: React.FC<HomeProps> = ({
           {selectedModule === "pccs" && <ProductCharacteristicsSheet />}
           {selectedModule === 'paintshop-qualitychecksheet' && <PaintQualitySheet />}
           {selectedModule === 'users' && <UserManagement />}
-          {selectedModule === "containment-form" && <Containment />}
+          {/* {selectedModule === "containment-form" && <Containment />} */}
+          {selectedModule === "containment-form" && (
+          <Containment
+          onReturnToDetail={() => setSelectedModule("cm")}   // ← important change
+            />)}
           {selectedModule === 'customer-approvals' && <CustomerApprovalsPage setSelectedModule={setSelectedModule} />}
           {selectedModule === "identification" && (
               <IdentificationPage setSelectedModule={setSelectedModule} />
+
           )}
+          
 
         </main>
       </div>
