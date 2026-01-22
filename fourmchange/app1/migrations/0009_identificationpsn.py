@@ -8,7 +8,7 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app1', '0007_changevalidation_change_point'),
+        ('app1', '0008_ojtrecord_ojtdailyscore'),
     ]
 
     operations = [
