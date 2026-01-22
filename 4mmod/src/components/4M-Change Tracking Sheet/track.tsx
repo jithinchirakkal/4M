@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import SuccessModal from '../Common/SuccessModal';
 
 type TrackingStatus = "noplan" | "nochange" | "change";
 
@@ -136,7 +137,7 @@ const FourMChangeTrackingSheet: React.FC<PageProps> = ({ setSelectedModule }) =>
   const [shopfloors, setShopfloors] = useState<any[]>([]);
   const [lines, setLines] = useState<any[]>([]);
   const [stations, setStations] = useState<any[]>([]);
-
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // NEW EFFECT: Catch ID from Detail Page
   useEffect(() => {
@@ -451,25 +452,43 @@ const FourMChangeTrackingSheet: React.FC<PageProps> = ({ setSelectedModule }) =>
     }
     setChangeDetailRows([...changeDetailRows]);
 
-    if (errorCount === 0) {
-        // CHECK FOR RETURN FLAG
-        const returnId = localStorage.getItem("return_to_detail_id");
-        
-        // If we are filtering by the specific ID that we need to return to
-        if (returnId && filterId === returnId) {
-             setTimeout(() => {
-                 // Navigate back to Main View (which will auto-open the detail)
-                 setSelectedModule("cm"); 
-             }, 1000); // Small delay so user sees "Success" message first
-        }
-    }
-    
     if (errorCount > 0) {
-      setMessage({ text: `Submission completed with ${errorCount} errors. Check console for details.`, type: 'error' });
+      setMessage({ text: `Submission completed with ${errorCount} errors...`, type: 'error' });
+    } else if (successCount > 0) {
+      setShowSuccessModal(true);
     } else {
-      setMessage({ text: "Change details submitted successfully!", type: 'success' });
+       // No changes made or no rows to submit
+       setMessage({ text: "No changes to submit.", type: 'error' });
+       setTimeout(() => setMessage(null), 3000);
     }
-    setTimeout(() => setMessage(null), 5000);
+    // if (errorCount === 0) {
+    //     // CHECK FOR RETURN FLAG
+    //     const returnId = localStorage.getItem("return_to_detail_id");
+        
+    //     // If we are filtering by the specific ID that we need to return to
+    //     if (returnId && filterId === returnId) {
+    //          setTimeout(() => {
+    //              // Navigate back to Main View (which will auto-open the detail)
+    //              setSelectedModule("cm"); 
+    //          }, 1000); // Small delay so user sees "Success" message first
+    //     }
+    // }
+    
+    // if (errorCount > 0) {
+    //   setMessage({ text: `Submission completed with ${errorCount} errors. Check console for details.`, type: 'error' });
+    // } else {
+    //   setMessage({ text: "Change details submitted successfully!", type: 'success' });
+    // }
+    // setTimeout(() => setMessage(null), 5000);
+  };
+
+  const handleReturn = () => {
+      setShowSuccessModal(false);
+      const returnId = localStorage.getItem("return_to_detail_id");
+      if (returnId && filterId === returnId) {
+          setSelectedModule("cm");
+      }
+      // If not returning, just stay on page (modal closed)
   };
 
   const getStatusBg = (status: TrackingStatus) =>
@@ -561,6 +580,19 @@ const FourMChangeTrackingSheet: React.FC<PageProps> = ({ setSelectedModule }) =>
 
   return (
     <div className="max-w-full min-h-screen p-6 relative">
+
+      {/* ✅ ADD THIS MODAL BLOCK */}
+      <SuccessModal 
+        isOpen={showSuccessModal}
+        onClose={handleReturn}
+        title="Tracking Sheet Saved"
+        message={
+          <span>
+            The 4M Change Tracking Sheet details have been successfully updated.
+            {filterId && <span> Returning to main view...</span>}
+          </span>
+        }
+      />
       <div className="max-w-full">
         <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-xl shadow-xl mb-6">
           <div className="p-4">

@@ -251,12 +251,24 @@ class FourMChangeSerializer(serializers.ModelSerializer):
         # return obj.rcrs.exists()
         return RCR.objects.filter(change=obj).exists()
     
+    # def get_is_tracking_done(self, obj):
+    #     # Checks if Tracking Sheet exists by matching the 'record_id' string
+    #     if not obj.record_id:
+    #         return False
+    #     return FourMChangeDetail.objects.filter(record_id=obj.record_id).exists()
+    
     def get_is_tracking_done(self, obj):
-        # Checks if Tracking Sheet exists by matching the 'record_id' string
-        if not obj.record_id:
-            return False
-        return FourMChangeDetail.objects.filter(record_id=obj.record_id).exists()
+        # 1. NEW WAY: Check the reliable database link (For new records)
+        if hasattr(obj, 'tracking_details') and obj.tracking_details.exists():
+            return True
 
+        # 2. OLD WAY (FALLBACK): Check by string ID (For existing/old records)
+        # This ensures your old data still shows as "Done" if the text ID matches.
+        if obj.record_id:
+            return FourMChangeDetail.objects.filter(record_id=obj.record_id).exists()
+            
+        return False
+    
     # --- 3. LOGIC FOR FUTURE MODULES (Placeholders) ---
     
     def get_is_ojt_done(self, obj):

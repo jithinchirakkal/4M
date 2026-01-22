@@ -338,6 +338,16 @@ class FourMTracking(models.Model):
 # models.py - Updated FourMChangeDetail model
 # changed FourMchangeDetail model
 class FourMChangeDetail(models.Model):
+    # --- ADD THIS LINK ---
+    change = models.ForeignKey(
+        FourMChange, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True, 
+        related_name='tracking_details' # This name allows the serializer to find it
+    )
+    # ---------------------
+    
     SHIFT_CHOICES = [
         ('A', 'Shift A'),
         ('B', 'Shift B'),

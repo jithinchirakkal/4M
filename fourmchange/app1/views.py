@@ -599,11 +599,41 @@ class FourMChangeDetailViewSet(viewsets.ModelViewSet):
     queryset = FourMChangeDetail.objects.all()
     serializer_class = FourMChangeDetailSerializer
 
+    # def create(self, request, *args, **kwargs):
+    #     try:
+    #         return super().create(request, *args, **kwargs)
+    #     except ValidationError as exc:
+    #         return Response({'error': exc.detail}, status=status.HTTP_400_BAD_REQUEST)
     def create(self, request, *args, **kwargs):
         try:
-            return super().create(request, *args, **kwargs)
+            # 1. Grab the ID text from your frontend form
+            record_id = request.data.get('record_id')
+            
+            # 2. Find the "Parent" Change Request
+            # We use filter().last() to be safe against duplicates
+            parent_change = FourMChange.objects.filter(record_id=record_id).last()
+            
+            # 3. Prepare the data
+            data = request.data.copy()
+            
+            # If we found the parent, save the link! 
+            # If not (maybe a typo?), we just skip the link, but still save the record.
+            if parent_change:
+                data['change'] = parent_change.id
+            
+            # 4. Save normally
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
         except ValidationError as exc:
             return Response({'error': exc.detail}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 
     def update(self, request, *args, **kwargs):
         try:
