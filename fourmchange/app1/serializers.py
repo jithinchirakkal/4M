@@ -280,9 +280,6 @@ class FourMChangeSerializer(serializers.ModelSerializer):
         except containment.DoesNotExist:
             return False
 
-    # Optional: if you still want the old existence-only check (less strict)
-    def get_is_tracking_done(self, obj):
-        return hasattr(obj, 'tracking_sheet')
 
     def get_is_batch_done(self, obj):
         # Checks if 'batch_info' (related_name from model) exists

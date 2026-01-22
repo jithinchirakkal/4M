@@ -143,7 +143,7 @@ export default function ChangeRequestDetail({
         const isDone = record.is_containment_done;
         let desc = "Suspect part segregation.";
         if (isDone) desc = "Containment action recorded.";
-        addTask("containment", "Containment", desc, "containment", Flag, "Critical", isDone, false);
+        addTask("containment", "Containment", desc, "containment-form", Flag, "Critical", isDone, false);
     }
 
     // 6. ID / BATCH NO
