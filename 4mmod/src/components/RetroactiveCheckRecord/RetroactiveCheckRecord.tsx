@@ -15,6 +15,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 
+import SuccessModal from '../Common/SuccessModal';
 // --- Interfaces ---
 
 interface PageProps {
@@ -89,8 +90,9 @@ export default function RetroactiveCheckRecord({ setSelectedModule }: PageProps)
   const [loading, setLoading] = useState(false);
   const [pendingChanges, setPendingChanges] = useState<ChangeRecord[]>([]);
   const [selectedChange, setSelectedChange] = useState<ChangeRecord | null>(null);
-  const [isViewMode, setIsViewMode] = useState(false); // Controls Read-Only state
-
+  const [isViewMode, setIsViewMode] = useState(false); // Controls Read-Only state  
+  // Custom Modal State
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     checkedBy: '',
     row: {
@@ -216,18 +218,82 @@ export default function RetroactiveCheckRecord({ setSelectedModule }: PageProps)
     setFormData({ ...formData, row: { ...formData.row, observations: obs } });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+    
+  //   // IF VIEW MODE: Just close or return
+  //   if (isViewMode) {
+  //     const returnId = localStorage.getItem("return_to_detail_id");
+  //     if (returnId) {
+  //       setSelectedModule("cm");
+  //     } else {
+  //       setSelectedChange(null);
+  //       setIsViewMode(false);
+  //     }
+  //     return;
+  //   }
+
+  //   if (!selectedChange) return;
+
+  //   try {
+  //     setLoading(true);
+  //     const row = formData.row;
+  //     const payload = {
+  //       change: selectedChange.id, 
+  //       date: row.date, 
+  //       part_name_number: row.partNameNo,
+  //       type_of_change: row.typeOfChange, 
+  //       lot_qty: Number(row.lotQty) || 0,
+  //       ok_qty: Number(row.okQty) || 0, 
+  //       reject_qty: Number(row.rejQty) || 0,
+  //       rework_qty: Number(row.reworkQty) || 0, 
+  //       parameter: row.parameter,
+  //       specification: row.specification, 
+  //       inspection_method: row.inspectionMethod,
+  //       observation1: row.observations[0], 
+  //       observation2: row.observations[1],
+  //       observation3: row.observations[2], 
+  //       observation4: row.observations[3],
+  //       observation5: row.observations[4], 
+  //       inspected_by: row.inspectedBy,
+  //       remarks: row.remarks, 
+  //       checked_by: formData.checkedBy,
+  //     };
+
+  //     const res = await fetch(API_BASE + '/rcr/', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify(payload),
+  //     });
+
+  //     if (!res.ok) throw new Error('Failed to save RCR');
+
+  //     alert('RCR saved successfully!');
+
+  //     // --- RETURN LOGIC ---
+  //     const returnId = localStorage.getItem("return_to_detail_id");
+  //     if (returnId && selectedChange.record_id === returnId) {
+  //         setSelectedModule("cm"); 
+  //     } else {
+  //         // Reset and Refresh
+  //         setSelectedChange(null);
+  //         fetchData(); 
+  //     }
+
+  //   } catch (error) {
+  //     alert('Error saving record. Please check console.');
+  //     console.error(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // IF VIEW MODE: Just close or return
-    if (isViewMode) {
-      const returnId = localStorage.getItem("return_to_detail_id");
-      if (returnId) {
-        setSelectedModule("cm");
-      } else {
-        setSelectedChange(null);
-        setIsViewMode(false);
-      }
+ if (isViewMode) {
+      handleReturn();
       return;
     }
 
@@ -266,17 +332,19 @@ export default function RetroactiveCheckRecord({ setSelectedModule }: PageProps)
 
       if (!res.ok) throw new Error('Failed to save RCR');
 
-      alert('RCR saved successfully!');
+      // alert('RCR saved successfully!');
+      // ✅ OPEN THE REUSABLE MODAL
+      setShowSuccessModal(true);
 
-      // --- RETURN LOGIC ---
-      const returnId = localStorage.getItem("return_to_detail_id");
-      if (returnId && selectedChange.record_id === returnId) {
-          setSelectedModule("cm"); 
-      } else {
-          // Reset and Refresh
-          setSelectedChange(null);
-          fetchData(); 
-      }
+      // // --- RETURN LOGIC ---
+      // const returnId = localStorage.getItem("return_to_detail_id");
+      // if (returnId && selectedChange.record_id === returnId) {
+      //     setSelectedModule("cm"); 
+      // } else {
+      //     // Reset and Refresh
+      //     setSelectedChange(null);
+      //     fetchData(); 
+      // }
 
     } catch (error) {
       alert('Error saving record. Please check console.');
@@ -284,6 +352,19 @@ export default function RetroactiveCheckRecord({ setSelectedModule }: PageProps)
     } finally {
       setLoading(false);
     }
+  };
+
+
+  const handleReturn = () => {
+      setShowSuccessModal(false);
+      const returnId = localStorage.getItem("return_to_detail_id");
+      if (returnId) { 
+          setSelectedModule("cm"); 
+      } else {
+          setSelectedChange(null);
+          setIsViewMode(false);
+          fetchData(); 
+      }
   };
 
   // --- UI Components ---
@@ -302,7 +383,17 @@ export default function RetroactiveCheckRecord({ setSelectedModule }: PageProps)
 
   return (
     <div className="min-h-screen bg-gray-100 p-6 font-sans text-gray-900 flex flex-col">
-      
+      {/* ✅ USE THE REUSABLE MODAL HERE */}
+      <SuccessModal 
+        isOpen={showSuccessModal}
+        onClose={handleReturn}
+        title="RCR Saved!"
+        message={
+          <>
+            Retroactive Check Record for <span className="font-bold text-gray-900">{selectedChange?.record_id}</span> has been submitted successfully.
+          </>
+        }
+      />
       {/* ── Page Header ────────────────────────────────────── */}
       <header className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 mb-6 flex items-center justify-between">
         <div className="flex items-center gap-5">

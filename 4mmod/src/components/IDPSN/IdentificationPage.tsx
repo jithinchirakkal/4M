@@ -14,7 +14,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-
+import SuccessModal from '../Common/SuccessModal';
 // --- Interfaces ---
 
 interface PageProps {
@@ -63,7 +63,7 @@ const IdentificationPage: React.FC<PageProps> = ({ setSelectedModule }) => {
   const [pendingChanges, setPendingChanges] = useState<ChangeRecord[]>([]);
   const [selectedChange, setSelectedChange] = useState<ChangeRecord | null>(null);
   const [isViewMode, setIsViewMode] = useState(false); 
-  
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [form, setForm] = useState<BatchFormData>({
     old_batch_no: '',
     new_batch_no: '',
@@ -153,22 +153,33 @@ const IdentificationPage: React.FC<PageProps> = ({ setSelectedModule }) => {
     });
   };
 
+  const handleReturn = () => {
+      setShowSuccessModal(false); // Close modal
+      
+      const returnId = localStorage.getItem("return_to_detail_id");
+      if (returnId) {
+          // If we came from the Detail page, go back there
+          setSelectedModule("cm");
+      } else {
+          // Otherwise, just reset the form and refresh the list
+          setSelectedChange(null);
+          setForm({ old_batch_no: '', new_batch_no: '', psn_start: '', identification_method: 'Green Tag', part_name: '', remarks: '' });
+          setIsViewMode(false);
+          fetchData();
+      }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedChange) return;
 
     // View Mode: Close or Return
     if (isViewMode) {
-        const returnId = localStorage.getItem("return_to_detail_id");
-        if (returnId) {
-            setSelectedModule("cm");
-        } else {
-            setSelectedChange(null);
-            setForm({ old_batch_no: '', new_batch_no: '', psn_start: '', identification_method: 'Green Tag', part_name: '', remarks: '' });
-            setIsViewMode(false);
-        }
+        handleReturn();
         return;
     }
+
+    if (!selectedChange) return;
 
     try {
       setLoading(true);
@@ -189,17 +200,10 @@ const IdentificationPage: React.FC<PageProps> = ({ setSelectedModule }) => {
 
       if (!res.ok) throw new Error("Failed to save");
 
-      alert('Identification Record Saved Successfully!');
-
-      // Success Logic
-      const returnId = localStorage.getItem("return_to_detail_id");
-      if (returnId && selectedChange.record_id === returnId) {
-         setSelectedModule("cm"); 
-      } else {
-         setSelectedChange(null);
-         fetchData();
-         alert("Batch Identification Record Saved!");
-      }
+      // alert('Identification Record Saved Successfully!');
+      setShowSuccessModal(true);
+      
+      
 
     } catch (error) {
       alert("Error saving record. Check console.");
@@ -225,7 +229,15 @@ const IdentificationPage: React.FC<PageProps> = ({ setSelectedModule }) => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6 font-sans text-gray-900 flex flex-col">
-      
+      {/* ✅ Use Reusable Modal */}
+      <SuccessModal 
+        isOpen={showSuccessModal}
+        onClose={handleReturn}
+        title="Identification Saved!"
+        message={
+          <span>Batch and identification details for <strong className="text-gray-900">{selectedChange?.record_id}</strong> have been successfully updated.</span>
+        }
+      />
       {/* ── Page Header ────────────────────────────────────── */}
       <header className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 mb-6 flex items-center justify-between">
         <div className="flex items-center gap-5">
