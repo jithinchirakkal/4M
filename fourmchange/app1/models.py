@@ -810,3 +810,228 @@ class ChangeValidationRow(models.Model):
 
 # 4M Validation
  
+
+
+
+
+
+
+
+
+from django.db import models
+from django.utils import timezone
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class OJTRecord(models.Model):
+    """
+    Main OJT Record linked to a FourMChange
+    """
+    STATUS_CHOICES = [
+        ('in_progress', 'In Progress'),
+        ('pass', 'Pass'),
+        ('fail', 'Fail'),
+    ]
+    
+    four_m_change = models.ForeignKey(
+        'FourMChange', 
+        on_delete=models.CASCADE, 
+        related_name='ojt_records'
+    )
+    # trainee_name = models.CharField(max_length=200)
+    # trainee_employee_id = models.CharField(max_length=50, blank=True, null=True)
+    
+    # Auto-populated from FourMChange
+    change_record_id = models.CharField(max_length=30)
+    shopfloor_name = models.CharField(max_length=100)
+    line_name = models.CharField(max_length=100)
+    station_name = models.CharField(max_length=100, blank=True, null=True)
+    department_name = models.CharField(max_length=100, blank=True, null=True)
+    process_name = models.CharField(max_length=200, blank=True, null=True)
+    
+    # Status tracking
+    status = models.CharField(
+        max_length=20, 
+        choices=STATUS_CHOICES, 
+        default='in_progress'
+    )
+    total_production_marks = models.IntegerField(default=0)
+    total_quality_marks = models.IntegerField(default=0)
+    overall_marks = models.IntegerField(default=0)
+    
+    # Metadata
+    created_by = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='ojt_records_created'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        
+    
+    def __str__(self):
+        return f"OJT-{self.change_record_id}"
+
+
+    def calculate_status(self):
+        """
+        Determine final OJT status only when all 6 days are completed.
+        Requires BOTH production AND quality to meet minimum thresholds.
+        """
+        daily_scores = self.daily_scores.all()
+        
+        completed_days = daily_scores.filter(actual__isnull=False).count()
+        
+        if completed_days < 6:
+            self.status = 'in_progress'
+            self.completed_at = None
+        else:
+            # Minimum thresholds — adjust numbers if your company policy is different
+            MIN_PRODUCTION = 12   # e.g. average ~2 marks/day or better
+            MIN_QUALITY    = 12   # e.g. mostly low/zero rejections
+            
+            production_ok = self.total_production_marks >= MIN_PRODUCTION
+            quality_ok    = self.total_quality_marks    >= MIN_QUALITY
+            
+            if production_ok and quality_ok:
+                self.status = 'pass'
+            else:
+                self.status = 'fail'
+            
+            if not self.completed_at:
+                self.completed_at = timezone.now()
+        
+        self.save(update_fields=['status', 'completed_at'])
+        return self.status
+
+    def update_totals(self):
+        # Force fresh query — very important!
+        self.refresh_from_db()                           # ← add this line
+
+        daily_scores = self.daily_scores.all().select_related()  # even better
+
+        prod = sum(s.production_marks for s in daily_scores)
+        qual = sum(s.quality_marks for s in daily_scores)
+
+        # Update & save
+        self.total_production_marks = prod
+        self.total_quality_marks = qual
+        self.overall_marks = prod + qual
+
+        self.save(update_fields=[
+            'total_production_marks',
+            'total_quality_marks',
+            'overall_marks',
+            'updated_at'
+        ])
+
+        # Make sure status sees the latest saved values
+        self.refresh_from_db()
+
+        return self.calculate_status()
+    # def update_totals(self):
+    #     daily_scores = self.daily_scores.all()  # fresh queryset
+
+    #     prod = sum(s.production_marks for s in daily_scores)
+    #     qual = sum(s.quality_marks for s in daily_scores)
+
+    #     # Update fields
+    #     self.total_production_marks = prod
+    #     self.total_quality_marks = qual
+    #     self.overall_marks = prod + qual
+
+    #     self.save(update_fields=[
+    #         'total_production_marks',
+    #         'total_quality_marks',
+    #         'overall_marks',
+    #         'updated_at'  # optional
+    #     ])
+
+    #     # Refresh from db so calculate_status sees the just-saved values
+    #     self.refresh_from_db()
+
+    #     return self.calculate_status()
+    
+
+class OJTDailyScore(models.Model):
+    """
+    Daily performance tracking for each trainee
+    """
+    ojt_record = models.ForeignKey(
+        OJTRecord, 
+        on_delete=models.CASCADE, 
+        related_name='daily_scores'
+    )
+    day = models.IntegerField()  # 1-6
+    date = models.DateField(null=True, blank=True)
+    
+    # Production metrics
+    plan = models.IntegerField(null=True, blank=True)
+    actual = models.IntegerField(null=True, blank=True)
+    production_marks = models.IntegerField(default=0)
+    
+    # Quality metrics
+    rejections = models.IntegerField(null=True, blank=True)
+    quality_marks = models.IntegerField(default=0)
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['day']
+        unique_together = ('ojt_record', 'day')
+    
+    # def __str__(self):
+    #     return f"Day {self.day} - {self.ojt_record.trainee_name}"
+    
+    def calculate_marks(self):
+        """
+        Calculate marks based on performance
+        Production: 4 marks if actual is filled
+        Quality: 4 marks if rejections is filled
+        """
+        # Production marks
+        if self.actual is not None:
+            if self.plan and self.actual >= self.plan:
+                self.production_marks = 4
+            elif self.actual:
+                # Partial marks based on percentage
+                percentage = (self.actual / self.plan * 100) if self.plan else 0
+                if percentage >= 90:
+                    self.production_marks = 4
+                elif percentage >= 75:
+                    self.production_marks = 3
+                elif percentage >= 60:
+                    self.production_marks = 2
+                else:
+                    self.production_marks = 1
+        else:
+            self.production_marks = 0
+        
+        # Quality marks
+        if self.rejections is not None:
+            if self.rejections == 0:
+                self.quality_marks = 4
+            elif self.rejections <= 2:
+                self.quality_marks = 3
+            elif self.rejections <= 5:
+                self.quality_marks = 2
+            else:
+                self.quality_marks = 1
+        else:
+            self.quality_marks = 0
+        
+        self.save()
+        
+        # Update parent record totals
+        self.ojt_record.update_totals()
+
+
+

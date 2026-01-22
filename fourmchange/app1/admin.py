@@ -52,3 +52,37 @@ from .models import ProcessInformation, FormatRecord
 
 admin.site.register(ProcessInformation)
 admin.site.register(FormatRecord)
+
+
+from django.contrib import admin
+from .models import OJTRecord, OJTDailyScore
+
+
+@admin.register(OJTRecord)
+class OJTRecordAdmin(admin.ModelAdmin):
+    list_display = (
+        'change_record_id',
+        'shopfloor_name',
+        'line_name',
+        'status',
+        'total_production_marks',
+        'overall_marks',
+        'created_at',
+    )
+
+    list_filter = ('status', 'shopfloor_name', 'line_name')
+    search_fields = ('change_record_id',)
+
+
+@admin.register(OJTDailyScore)
+class OJTDailyScoreAdmin(admin.ModelAdmin):
+    list_display = (
+        'ojt_record',
+        'day',
+        'date',
+        'actual',
+        'production_marks',
+        'quality_marks',
+    )
+
+    list_filter = ('day',)
