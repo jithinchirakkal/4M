@@ -820,3 +820,133 @@ class ChangeValidationViewSet(viewsets.ModelViewSet):
     serializer_class = ChangeValidationSerializer
 
  # 4M Validation
+
+
+ # views.py
+
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from .models import OJTRecord, OJTDailyScore, FourMChange
+from .serializers import (
+    OJTRecordSerializer, 
+    OJTRecordListSerializer,
+    OJTDailyScoreSerializer
+)
+class OJTRecordViewSet(viewsets.ModelViewSet):
+    queryset = OJTRecord.objects.all()
+    serializer_class = OJTRecordSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        change_id = self.request.query_params.get('change_id')     # ← string like REC-20250115-003
+        if change_id:
+            qs = qs.filter(change_record_id=change_id)
+        return qs
+    @action(detail=False, methods=['post'])
+    def create_from_change(self, request):
+        record_id = request.data.get('four_m_change_record_id')
+        
+        # 1. Find the 4M Change record
+        change = get_object_or_404(FourMChange, record_id=record_id)
+
+        # 2. Search for an EXISTING OJT record for this change
+        existing_ojt = OJTRecord.objects.filter(four_m_change=change).first()
+        
+        if existing_ojt:
+            # Return the existing data (with your scores!) instead of creating new
+            serializer = self.get_serializer(existing_ojt)
+            return Response(serializer.data, status=200)
+
+        # 3. If no existing record, create it
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(four_m_change=change, created_by=request.user if request.user.is_authenticated else None)
+        
+        return Response(serializer.data, status=201)
+
+
+
+
+
+    @action(detail=True, methods=['patch'])
+    def update_daily_score(self, request, pk=None):
+        """
+        Update a specific day's score
+        PATCH /api/ojt-records/{id}/update_daily_score/
+        Body: {
+            "day": 1,
+            "date": "2024-01-15",
+            "plan": 100,
+            "actual": 95,
+            "rejections": 2
+        }
+        """
+        ojt_record = self.get_object()
+        day = request.data.get('day')
+        
+        if not day or day < 1 or day > 6:
+            return Response(
+                {'error': 'Day must be between 1 and 6'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            daily_score = OJTDailyScore.objects.get(
+                ojt_record=ojt_record,
+                day=day
+            )
+        except OJTDailyScore.DoesNotExist:
+            return Response(
+                {'error': 'Daily score not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = OJTDailyScoreSerializer(
+            daily_score,
+            data=request.data,
+            partial=True
+        )
+        
+        if serializer.is_valid():
+            serializer.save()
+            
+            # Return updated OJT record
+            ojt_serializer = OJTRecordSerializer(ojt_record)
+            return Response(ojt_serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    # @action(detail=True, methods=['post'])
+    # def submit(self, request, pk=None):
+    #     """
+    #     Submit OJT record and finalize status
+    #     POST /api/ojt-records/{id}/submit/
+    #     """
+    #     ojt_record = self.get_object()
+        
+    #     # Recalculate totals and status
+    #     ojt_record.update_totals()
+    #     final_status = ojt_record.calculate_status()
+        
+    #     serializer = OJTRecordSerializer(ojt_record)
+    #     return Response({
+    #         'message': f'OJT record submitted with status: {final_status}',
+    #         'data': serializer.data
+    #     })
+
+
+class OJTDailyScoreViewSet(viewsets.ModelViewSet):
+    queryset = OJTDailyScore.objects.all()
+    serializer_class = OJTDailyScoreSerializer
+    
+    def get_queryset(self):
+        queryset = OJTDailyScore.objects.all()
+        
+        # Filter by OJT record
+        ojt_record_id = self.request.query_params.get('ojt_record', None)
+        if ojt_record_id:
+            queryset = queryset.filter(ojt_record_id=ojt_record_id)
+        
+        return queryset

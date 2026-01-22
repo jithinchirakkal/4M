@@ -702,3 +702,80 @@ class ChangeValidationSerializer(serializers.ModelSerializer):
         
         return instance
  # 4M Validation
+
+
+
+ # serializers.py
+
+from rest_framework import serializers
+from .models import OJTRecord, OJTDailyScore, FourMChange
+
+class OJTDailyScoreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OJTDailyScore
+        fields = [
+            'id', 'day', 'date', 'plan', 'actual', 
+            'production_marks', 'rejections', 'quality_marks',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['production_marks', 'quality_marks']
+    
+    def update(self, instance, validated_data):
+        # Update fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        # Recalculate marks
+        instance.calculate_marks()
+        return instance
+
+
+class OJTRecordSerializer(serializers.ModelSerializer):
+    daily_scores = OJTDailyScoreSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = OJTRecord
+        fields = [
+            'id', 'four_m_change', 'change_record_id',
+            'shopfloor_name', 'line_name', 'station_name',
+            'department_name', 'process_name',
+            'status', 'total_production_marks', 'total_quality_marks',
+            'overall_marks', 'daily_scores',
+            'created_at', 'updated_at', 'completed_at'
+        ]
+        read_only_fields = [
+            'four_m_change',
+            'change_record_id', 'shopfloor_name', 'line_name', 'station_name',
+            'status', 'total_production_marks', 'total_quality_marks',
+            'overall_marks', 'completed_at'
+        ]
+
+    def create(self, validated_data):
+        four_m_change = validated_data.pop('four_m_change')
+
+        obj = OJTRecord.objects.create(
+            four_m_change=four_m_change,
+            change_record_id = four_m_change.record_id,
+            shopfloor_name   = four_m_change.shopfloor.name   if four_m_change.shopfloor   else "",
+            line_name        = four_m_change.line.name        if four_m_change.line        else "",
+            station_name     = four_m_change.station.name     if four_m_change.station     else "",
+            department_name  = validated_data.get('department_name', 'Production'),
+            process_name     = validated_data.get('process_name',   'OJT Process'),
+            **validated_data
+        )
+
+        # Auto-create 6 empty daily rows
+        for day in range(1, 7):
+            OJTDailyScore.objects.create(ojt_record=obj, day=day)
+
+        return obj
+
+class OJTRecordListSerializer(serializers.ModelSerializer):
+    """Lighter serializer for list views"""
+    class Meta:
+        model = OJTRecord
+        fields = [
+            'id', 'change_record_id', 'status',
+            'total_production_marks', 'total_quality_marks',
+            'shopfloor_name', 'line_name', 'created_at'
+        ]

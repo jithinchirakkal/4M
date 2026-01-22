@@ -36,7 +36,7 @@ from .views import InspectionReportViewSet, ProcessParameterViewSet, InProcessPa
 from .views import ProcessFlowViewSet, ProcessViewSet, RevisionViewSet
 from .views import ProcessInformationViewSet, FormatRecordViewSet
 from .views import ChangeValidationViewSet
-
+from .views import OJTRecordViewSet, OJTDailyScoreViewSet
 
 
 
@@ -75,6 +75,9 @@ router.register(r'process-info', ProcessInformationViewSet)
 router.register(r'format-records', FormatRecordViewSet)
 
 router.register(r'validation', ChangeValidationViewSet)
+router.register(r'ojt-records', OJTRecordViewSet, basename='ojt-record')
+router.register(r'ojt-daily-scores', OJTDailyScoreViewSet, basename='ojt-daily-score')
+
 
 
 urlpatterns = [
