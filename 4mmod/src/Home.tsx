@@ -23,7 +23,7 @@ import FourMMethodPage from './components/cm/method';
 import Ojtform from './components/Level2OjtTable/Level2OjtTable';
 import PerishableToolSheet from './components/PerishableToolChangeFrequencyCheckSheet/PerishableToolChangeFrequencyCheckSheet';
 import ProductCharacteristicsSheet from './components/ProductCharacteristicCheckSheet/ProductCharacteristicCheckSheet';
-import ProcessCheckSheet from './components/ProductCharcteristics/ProductCharacteristics';
+import ProcessCheckSheet from './components/ProcessCheckSheet/ProcessCheckSheet';
 import PaintQualitySheet from './components/PaintshopQualityChecksheet/PaintshopQualitychecksheet'
 import UserManagement from './components/Usermanagement/Usermanagement'
 import ApprovalsPage from './components/Approvals/ApprovalsPage';
@@ -100,26 +100,26 @@ const Home: React.FC<HomeProps> = ({
           {selectedModule === "CIN" && <ChangeInformationNote />}
           {selectedModule === "4m-method" && <FourMMethodPage />}
           {selectedModule === "ojt" && <Ojtform />}
-          {selectedModule === "process-sheet" && <ProcessCheckSheet />}
+          {/* {selectedModule === "process-sheet" && <ProcessCheckSheet />} */}
 
-          {selectedModule === "tool-sheet" && <PerishableToolSheet />}
+          {/* {selectedModule === "tool-sheet" && <PerishableToolSheet />} */}
           {/* {selectedModule === "product-sheet" && <ProductCharacteristicsSheet />} */}
-          {selectedModule === 'paint-sheet' && <PaintQualitySheet />}
-          {/* {selectedModule === "process-sheet" && (
+          {/* {selectedModule === 'paint-sheet' && <PaintQualitySheet />} */}
+          {selectedModule === "process-sheet" && (
              <ProcessCheckSheet onBack={() => setSelectedModule("cm")} />
-          )} */}
+          )}
 
-          {/* {selectedModule === "tool-sheet" && (
+          {selectedModule === "tool-sheet" && (
              <PerishableToolSheet onBack={() => setSelectedModule("cm")} />
-          )} */}
+          )}
 
           {selectedModule === "product-sheet" && (
              <ProductCharacteristicsSheet onBack={() => setSelectedModule("cm")} />
           )}
 
-          {/* {selectedModule === 'paint-sheet' && (
+          {selectedModule === 'paint-sheet' && (
              <PaintQualitySheet onBack={() => setSelectedModule("cm")} />
-          )} */}
+          )}
           {selectedModule === 'users' && <UserManagement />}
           {/* {selectedModule === "containment-form" && <Containment />} */}
           {selectedModule === "containment-form" && (

@@ -28,7 +28,7 @@ interface ProductCheck {
 // --- PROPS ---
 interface SheetProps {
   onBack?: () => void;
-  embedded?: boolean; // Support for embedding in Approval Page
+  embedded?: boolean; 
 }
 
 export default function ProductCharacteristicsSheet({ onBack, embedded = false }: SheetProps) {
@@ -39,9 +39,10 @@ export default function ProductCharacteristicsSheet({ onBack, embedded = false }
   const [record, setRecord] = useState<any>(null);
   const [readOnly, setReadOnly] = useState(false);
   
-  // ✅ NEW: Edit Mode & Context Error State
+  // ✅ NEW: Edit Mode, Context Error, and Sheet Entry ID
   const [isEditing, setIsEditing] = useState(false);
   const [hasContextError, setHasContextError] = useState(false);
+  const [sheetEntryId, setSheetEntryId] = useState<number | null>(null);
 
   const [markData, setMarkData] = useState<MarkData>({});
   
@@ -53,37 +54,62 @@ export default function ProductCharacteristicsSheet({ onBack, embedded = false }
 
   // --- 1. LOAD DATA & CHECK CONTEXT ---
   useEffect(() => {
-    const storedRecord = localStorage.getItem("setup_sheet_record");
-    const storedReadOnly = localStorage.getItem("setup_sheet_readonly");
+    const loadData = async () => {
+        const storedRecord = localStorage.getItem("setup_sheet_record");
+        const storedReadOnly = localStorage.getItem("setup_sheet_readonly");
 
-    if (storedRecord) {
+        if (!storedRecord) {
+            setHasContextError(true);
+            return;
+        }
+
         const parsedRecord = JSON.parse(storedRecord);
         setRecord(parsedRecord);
         setReadOnly(JSON.parse(storedReadOnly || "false"));
 
-        // Load existing data if available
-        if (parsedRecord.setup_sheet_data) {
-            const saved = parsedRecord.setup_sheet_data;
-            if (saved.formData) setFormData(prev => ({ ...prev, ...saved.formData }));
-            if (saved.markData) setMarkData(saved.markData);
-        } else {
-            // Auto-fill defaults
-            const dateObj = parsedRecord.date ? new Date(parsedRecord.date) : new Date();
-            const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+        // 1. Set Defaults from Record Context
+        const dateObj = parsedRecord.date ? new Date(parsedRecord.date) : new Date();
+        const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+        
+        setFormData(prev => ({
+            ...prev,
+            processName: parsedRecord.shopfloor_name ? `${parsedRecord.shopfloor_name} - ${parsedRecord.line_name || ''}` : '',
+            model: parsedRecord.model || 'YG8 RC25',
+            shift: parsedRecord.shift || 'A',
+            month: months[dateObj.getMonth()],
+            year: dateObj.getFullYear().toString(),
+        }));
+
+        // 2. ✅ FETCH FROM API TO CHECK FOR EXISTING DATA & ID
+        try {
+            const response = await api.get(`setup-sheet/?change=${parsedRecord.id}`);
             
-            setFormData(prev => ({
-                ...prev,
-                processName: parsedRecord.shopfloor_name ? `${parsedRecord.shopfloor_name} - ${parsedRecord.line_name || ''}` : '',
-                model: parsedRecord.model || 'YG8 RC25',
-                shift: parsedRecord.shift || 'A',
-                month: months[dateObj.getMonth()],
-                year: dateObj.getFullYear().toString(),
-            }));
+            // ✅ CRITICAL FIX: Match BOTH Sheet Type AND Change ID
+            const existingSheet = response.data.find((s: any) => 
+                s.sheet_type === 'PRODUCT' && s.change === parsedRecord.id
+            );
+            
+            if (existingSheet) {
+                console.log("Found existing sheet:", existingSheet);
+                setSheetEntryId(existingSheet.id); // Save ID for PATCH
+                
+                // Load the saved data into the form
+                if (existingSheet.data) {
+                    if (existingSheet.data.formData) setFormData(prev => ({ ...prev, ...existingSheet.data.formData }));
+                    if (existingSheet.data.markData) setMarkData(existingSheet.data.markData);
+                }
+            } else if (parsedRecord.setup_sheet_data) {
+                // Fallback to LocalStorage if API didn't return (e.g., just saved but not synced)
+                const saved = parsedRecord.setup_sheet_data;
+                if (saved.formData) setFormData(prev => ({ ...prev, ...saved.formData }));
+                if (saved.markData) setMarkData(saved.markData);
+            }
+        } catch (err) {
+            console.warn("Could not fetch existing sheet ID, defaulting to Create mode.");
         }
-    } else {
-        // ❌ Direct Access Detected (No record in storage)
-        setHasContextError(true);
-    }
+    };
+
+    loadData();
   }, []);
 
   // --- CONSTANTS & CHECKLIST DATA ---
@@ -158,8 +184,14 @@ export default function ProductCharacteristicsSheet({ onBack, embedded = false }
     };
 
     try {
-        // ✅ Uses the 'api' interceptor for tokens/refresh
-        await api.post('setup-sheet/', payload);
+        if (sheetEntryId) {
+            // ✅ CASE 1: UPDATE (PATCH)
+            await api.patch(`setup-sheet/${sheetEntryId}/`, payload);
+        } else {
+            // ✅ CASE 2: CREATE (POST)
+            const response = await api.post('setup-sheet/', payload);
+            setSheetEntryId(response.data.id); // Save ID for next time
+        }
 
         alert('Product characteristics check sheet saved successfully!');
         
@@ -168,7 +200,7 @@ export default function ProductCharacteristicsSheet({ onBack, embedded = false }
         
         // Turn off edit mode after successful save
         setIsEditing(false);
-        setReadOnly(true); // Ensure it stays read-only locally
+        setReadOnly(true); 
         
         if (onBack) onBack();
 
@@ -588,6 +620,7 @@ export default function ProductCharacteristicsSheet({ onBack, embedded = false }
     </div>
   );
 }
+
 // import React, { useState } from 'react';
 // import { Check, X, Upload, Download, RotateCcw, Save, ChevronDown, ChevronUp, FileImage, AlertCircle } from 'lucide-react';
 

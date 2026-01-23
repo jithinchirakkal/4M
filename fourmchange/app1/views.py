@@ -1108,13 +1108,16 @@ class containmentViewSet(viewsets.ModelViewSet):
 #Sheet data
 from .models import SetupSheetEntry
 from .serializers import SetupSheetSerializer
+from django_filters.rest_framework import DjangoFilterBackend 
 
 class SetupSheetViewSet(viewsets.ModelViewSet):
     queryset = SetupSheetEntry.objects.all()
     serializer_class = SetupSheetSerializer
     
     # Allow filtering so we can find sheets by Change ID
-    filterset_fields = ['change']
+    # filterset_fields = ['change']
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['change', 'sheet_type']
 
     def perform_create(self, serializer):
         serializer.save(filled_by=self.request.user)
