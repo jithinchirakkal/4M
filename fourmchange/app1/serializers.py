@@ -240,6 +240,15 @@ class FourMChangeSerializer(serializers.ModelSerializer):
     is_batch_done = serializers.SerializerMethodField()       # Placeholder
     is_tracking_done = serializers.SerializerMethodField()    # Placeholder
 
+
+    # ✅ Add this line to send the sheet type to React
+    shopfloor_sheet_type = serializers.CharField(source='shopfloor.sheet_type', read_only=True)
+    # ✅ Send the Status (Is it filled?)
+    is_setup_sheet_filled = serializers.SerializerMethodField()
+
+    # ✅ Send the Data (If it exists, so we can view it)
+    setup_sheet_data = serializers.SerializerMethodField()
+
     class Meta:
         model = FourMChange
         fields = '__all__'
@@ -250,12 +259,6 @@ class FourMChangeSerializer(serializers.ModelSerializer):
         # This checks if any RCR entry exists for this change
         # return obj.rcrs.exists()
         return RCR.objects.filter(change=obj).exists()
-    
-    # def get_is_tracking_done(self, obj):
-    #     # Checks if Tracking Sheet exists by matching the 'record_id' string
-    #     if not obj.record_id:
-    #         return False
-    #     return FourMChangeDetail.objects.filter(record_id=obj.record_id).exists()
     
     def get_is_tracking_done(self, obj):
         # 1. NEW WAY: Check the reliable database link (For new records)
@@ -320,6 +323,16 @@ class FourMChangeSerializer(serializers.ModelSerializer):
 
         # All approved
         return "APPROVED"
+    
+
+    def get_is_setup_sheet_filled(self, obj):
+        return hasattr(obj, 'setup_sheet') and obj.setup_sheet.exists()
+
+    def get_setup_sheet_data(self, obj):
+        if hasattr(obj, 'setup_sheet') and obj.setup_sheet.exists():
+            # Return the JSON data from the first related sheet
+            return obj.setup_sheet.first().data
+        return None
         
 
 
@@ -914,3 +927,17 @@ class containmentSerializer(serializers.ModelSerializer):
             ] if field and field.strip()
         ])
         return round((filled_fields / total_fields) * 100, 2)
+    
+# Serializer for the Sheet Data
+
+from .models import SetupSheetEntry
+
+class SetupSheetSerializer(serializers.ModelSerializer):
+    filled_by_name = serializers.CharField(source='filled_by.name', read_only=True)
+
+    class Meta:
+        model = SetupSheetEntry
+        fields = '__all__'
+        read_only_fields = ['filled_by', 'created_at']
+
+# Serializer for the Sheet Data end

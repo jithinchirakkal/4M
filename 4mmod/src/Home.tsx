@@ -100,11 +100,26 @@ const Home: React.FC<HomeProps> = ({
           {selectedModule === "CIN" && <ChangeInformationNote />}
           {selectedModule === "4m-method" && <FourMMethodPage />}
           {selectedModule === "ojt" && <Ojtform />}
-          {selectedModule === "process-characteritics" && <ProcessCheckSheet />}
+          {selectedModule === "process-sheet" && <ProcessCheckSheet />}
 
-          {selectedModule === "ptcf" && <PerishableToolSheet />}
-          {selectedModule === "pccs" && <ProductCharacteristicsSheet />}
-          {selectedModule === 'paintshop-qualitychecksheet' && <PaintQualitySheet />}
+          {selectedModule === "tool-sheet" && <PerishableToolSheet />}
+          {/* {selectedModule === "product-sheet" && <ProductCharacteristicsSheet />} */}
+          {selectedModule === 'paint-sheet' && <PaintQualitySheet />}
+          {/* {selectedModule === "process-sheet" && (
+             <ProcessCheckSheet onBack={() => setSelectedModule("cm")} />
+          )} */}
+
+          {/* {selectedModule === "tool-sheet" && (
+             <PerishableToolSheet onBack={() => setSelectedModule("cm")} />
+          )} */}
+
+          {selectedModule === "product-sheet" && (
+             <ProductCharacteristicsSheet onBack={() => setSelectedModule("cm")} />
+          )}
+
+          {/* {selectedModule === 'paint-sheet' && (
+             <PaintQualitySheet onBack={() => setSelectedModule("cm")} />
+          )} */}
           {selectedModule === 'users' && <UserManagement />}
           {/* {selectedModule === "containment-form" && <Containment />} */}
           {selectedModule === "containment-form" && (

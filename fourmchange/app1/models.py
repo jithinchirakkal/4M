@@ -82,7 +82,24 @@ class User(AbstractUser):
 
 
 class Shopfloor(models.Model):
+    # Define the available sheet types
+    SHEET_TYPE_CHOICES = [
+        ('PRODUCT', 'Product Characteristics (Assembly)'),
+        ('PROCESS', 'Process Check (Oven/Molding)'),
+        ('PAINT', 'Paint Quality Sheet'),
+        ('TOOLING', 'Perishable Tooling Sheet'),
+    ]
+
     name = models.CharField(max_length=100, unique=True)
+
+    # ✅ NEW CONFIGURATION FIELD
+    # This lets the Admin choose which sheet triggers for this shopfloor
+    sheet_type = models.CharField(
+        max_length=20, 
+        choices=SHEET_TYPE_CHOICES, 
+        default='PRODUCT',
+        help_text="Which Setup Verification sheet should be used for this shopfloor?"
+    )
 
     def __str__(self):
         return self.name
@@ -1186,3 +1203,33 @@ class containment(models.Model):
             self.approved_by,
         ]
         return all(field.strip() for field in required_fields if isinstance(field, str))
+
+#Process charecteristc checksheet.product charecteristc checksheet,perishable tool, paint shop quality   
+
+# 2. Create the Universal Storage Model
+# This stores the data from ALL sheets (Paint, Product, Process) in one place.
+class SetupSheetEntry(models.Model):
+    # Link to the 4M Change
+    change = models.ForeignKey(FourMChange, on_delete=models.CASCADE, related_name='setup_sheet')
+    
+    # Stores the type (e.g., 'PAINT') so we know how to display it later
+    sheet_type = models.CharField(max_length=20) 
+    
+    # ✅ THE MAGIC FIELD: Stores the entire React State (Rows, Checkboxes, etc.)
+    data = models.JSONField(default=dict) 
+    
+    # Summary Result (for Dashboards)
+    overall_result = models.CharField(max_length=10, choices=[('OK', 'OK'), ('NG', 'NG')], default='OK')
+    
+    # Traceability
+    filled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('change', 'sheet_type') # One sheet per change
+
+    def __str__(self):
+        return f"{self.change.record_id} - {self.sheet_type}"
+    
+#Process charecteristc checksheet.product charecteristc checksheet,perishable tool, paint shop quality   

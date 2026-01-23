@@ -74,7 +74,8 @@ api.interceptors.response.use(
 // Auth API
 export const authAPI = {
   login: async (email: string, password: string) => {
-    const response = await api.post('/auth/login/', { email, password });
+    // const response = await api.post('/auth/login/', { email, password });
+    const response = await axios.post(`${API_BASE_URL}/auth/login/`, { email, password });
     return response.data;
   },
 
@@ -85,7 +86,8 @@ export const authAPI = {
   },
 
   refreshToken: async (refresh: string) => {
-    const response = await api.post('/auth/refresh/', { refresh });
+    // const response = await api.post('/auth/refresh/', { refresh });
+    const response = await axios.post(`${API_BASE_URL}/auth/refresh/`, { refresh });
     return response.data;
   },
 };

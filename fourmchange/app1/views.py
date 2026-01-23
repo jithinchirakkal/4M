@@ -1104,3 +1104,19 @@ class containmentViewSet(viewsets.ModelViewSet):
                 {'error': f'Tracking sheet for {record_id} not found'},
                 status=status.HTTP_404_NOT_FOUND
             )
+        
+#Sheet data
+from .models import SetupSheetEntry
+from .serializers import SetupSheetSerializer
+
+class SetupSheetViewSet(viewsets.ModelViewSet):
+    queryset = SetupSheetEntry.objects.all()
+    serializer_class = SetupSheetSerializer
+    
+    # Allow filtering so we can find sheets by Change ID
+    filterset_fields = ['change']
+
+    def perform_create(self, serializer):
+        serializer.save(filled_by=self.request.user)
+
+#Sheet data end
