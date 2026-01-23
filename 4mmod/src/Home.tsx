@@ -30,6 +30,7 @@ import ApprovalsPage from './components/Approvals/ApprovalsPage';
 import CustomerApprovalsPage from './components/CustomerApprovalsView/CustomerApprovalsView';
 import IdentificationPage from './components/IDPSN/IdentificationPage';
 import Containment from "./components/Containment/Containment";
+import CustomerApprovalSheet from "./components/CustomerApprovalsView/CustomerApprovalSheet";
 // Define the Props interface for Home
 interface HomeProps {
   selectedModule: string;
@@ -130,6 +131,12 @@ const Home: React.FC<HomeProps> = ({
           {selectedModule === "identification" && (
               <IdentificationPage setSelectedModule={setSelectedModule} />
 
+          )}
+
+          {selectedModule === 'customer-sheet' && (
+              <CustomerApprovalSheet 
+                  onBack={() => setSelectedModule('cm')} 
+              />
           )}
           
 

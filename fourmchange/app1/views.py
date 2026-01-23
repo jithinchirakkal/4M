@@ -1123,3 +1123,40 @@ class SetupSheetViewSet(viewsets.ModelViewSet):
         serializer.save(filled_by=self.request.user)
 
 #Sheet data end
+
+
+#CustomerApprovalSheet start
+
+from .models import CustomerApprovalSheet
+from .serializers import CustomerApprovalSheetSerializer
+from django_filters.rest_framework import DjangoFilterBackend
+
+class CustomerApprovalSheetViewSet(viewsets.ModelViewSet):
+    """
+    API for the DATA inside the Customer Approval Sheet.
+    - Internal Teams (QA/Prod): Create & Update data.
+    - Customer: Read-only access (to view before approving).
+    """
+    queryset = CustomerApprovalSheet.objects.all()
+    serializer_class = CustomerApprovalSheetSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    # Enable filtering by the Change ID
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['change_request']
+
+    def get_queryset(self):
+        user = self.request.user
+        
+        # Admin/Internal can see everything
+        if user.is_superuser or user.role.code in ['ADMIN', 'QA_HOD', 'PROD_HOD', 'QA_ENG', 'PROD_ENG']:
+            return CustomerApprovalSheet.objects.all()
+            
+        # Customers can only see sheets relevant to them (Add logic if needed)
+        # For now, allowing Customers to view sheets they are assigned to approve
+        if user.role.code == 'CUSTOMER':
+            return CustomerApprovalSheet.objects.all()
+            
+        return CustomerApprovalSheet.objects.none()
+    
+#CustomerApprovalSheet end

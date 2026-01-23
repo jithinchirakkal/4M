@@ -941,3 +941,15 @@ class SetupSheetSerializer(serializers.ModelSerializer):
         read_only_fields = ['filled_by', 'created_at']
 
 # Serializer for the Sheet Data end
+
+
+#CustomerApprovalSheet start
+
+from .models import CustomerApprovalSheet
+
+class CustomerApprovalSheetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomerApprovalSheet
+        fields = '__all__'
+
+#CustomerApprovalSheet end

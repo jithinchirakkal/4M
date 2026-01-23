@@ -23,7 +23,8 @@ import {
   Shield,
   Activity,
   Layers,
-  User
+  User,
+  Edit,
 } from "lucide-react";
 
 import { useAuth } from "../../contexts/AuthContext"; 
@@ -149,7 +150,17 @@ export default function ChangeRequestDetail({
         let statusLabel = "PENDING";
         if (isRejected) { desc = "Rejected by customer."; statusLabel = "REJECTED"; } 
         else if (isDone) { desc = "Approved by customer."; }
-        addTask("customer", "Customer Approval", desc, "customer-approvals", UserCheck, "Critical", isDone, true, statusLabel);
+        // ✅ DYNAMIC BUTTON LOGIC
+        // If Customer -> "VIEW SHEET" (Eye Icon)
+        // If Internal -> "FILL SHEET" (Edit Icon)
+        const sheetActionLabel = isCustomerUser ? "VIEW SHEET" : "FILL SHEET";
+        const sheetActionIcon = isCustomerUser ? Eye : Edit;
+        
+        addTask("customer", "Customer Approval", desc, "customer-approvals", UserCheck, "Critical", isDone, true, statusLabel,{ 
+                label: sheetActionLabel, 
+                module: "customer-sheet", // This opens your new Sheet Component
+                icon: FileText 
+            });
     }
 
     // 3. RETRO INSPECTION
@@ -232,6 +243,21 @@ export default function ChangeRequestDetail({
             case 'TOOLING': setSelectedModule("tool-sheet"); break;
             case 'PRODUCT': default: setSelectedModule("product-sheet"); break;
         }
+        return;
+    }
+
+    // 3. ✅ NEW: CUSTOMER SHEET LOGIC
+    if (moduleId === "customer-sheet") {
+        // We use the SAME storage key "setup_sheet_record" because your 
+        // CustomerApprovalSheet.tsx is coded to look for this specific key.
+        localStorage.setItem("setup_sheet_record", JSON.stringify(record));
+        
+        // We usually don't force read-only here because the sheet has its own 
+        // internal logic (Internal users = Edit, Customer = View), 
+        // but you can set a hint if you want.
+        localStorage.setItem("setup_sheet_readonly", "false"); 
+
+        setSelectedModule("customer-sheet");
         return;
     }
     setSelectedModule(moduleId);
@@ -414,9 +440,11 @@ export default function ChangeRequestDetail({
                                 <button 
                                     onClick={() => handleNavigate(task.secondaryModule!)} 
                                     className="px-4 py-2 bg-indigo-50 text-indigo-600 border border-indigo-200 text-xs font-bold rounded-lg hover:bg-indigo-100 flex items-center justify-center gap-2 transition-all"
-                                    title="View Details"
+                                    title={task.secondaryLabel}
                                 >
-                                    {task.secondaryIcon && <task.secondaryIcon className="w-3.5 h-3.5" />} {task.secondaryLabel}
+                                    {task.secondaryIcon && <task.secondaryIcon className="w-3.5 h-3.5" />}
+                                    <span className="hidden xl:inline">{task.secondaryLabel}</span>
+                                    <span className="xl:hidden"><Eye className="w-3.5 h-3.5" /></span>
                                 </button>
                             )}
                         </div>
