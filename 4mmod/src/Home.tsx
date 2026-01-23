@@ -32,6 +32,7 @@ import IdentificationPage from './components/IDPSN/IdentificationPage';
 import Containment from "./components/Containment/Containment";
 import FourMChangeHistory from "./components/FourMChangeHistory/FourMChangeHistory";
 import CustomerApprovalSheet from "./components/CustomerApprovalsView/CustomerApprovalSheet";
+import OnJobTraining from "./components/Level2OjtTable/Level2OjtTable";
 // Define the Props interface for Home
 interface HomeProps {
   selectedModule: string;
@@ -101,9 +102,13 @@ const Home: React.FC<HomeProps> = ({
           {selectedModule === "sps" && <Suspected />}
           {selectedModule === "CIN" && <ChangeInformationNote />}
           {selectedModule === "4m-method" && <FourMMethodPage />}
-          {selectedModule === "ojt" && <Ojtform />}
-          {/* {selectedModule === "process-sheet" && <ProcessCheckSheet />} */}
-
+          {/* {selectedModule === "ojt" && <Ojtform />} */}
+          {selectedModule === "ojt" && (
+            <OnJobTraining
+              onBack={() => setSelectedModule("cm")}     // ← returns to main detail / change management view
+            />
+          )}
+          {/* {selectedModule === "process-characteritics" && <ProcessCheckSheet />} */}
           {/* {selectedModule === "tool-sheet" && <PerishableToolSheet />} */}
           {/* {selectedModule === "product-sheet" && <ProductCharacteristicsSheet />} */}
           {/* {selectedModule === 'paint-sheet' && <PaintQualitySheet />} */}

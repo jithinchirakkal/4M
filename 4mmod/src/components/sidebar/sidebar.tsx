@@ -244,7 +244,7 @@ const Sidebar: React.FC<NavModuleProps> = ({
         {!collapsed && (
           <div className="text-gray-500 text-center">
               <p className="font-semibold text-lg text-gray-600">NL Technologies Pvt. Ltd.</p>
-              <p className="text-xs mt-1">© 2025 All rights reserved</p>
+              {/* <p className="text-xs mt-1">© 2025 All rights reserved</p> */}
           </div>
         )}
       </div>
