@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 from django.contrib import admin
-from .models import RCR, FourMAction, FourMCategories, FourMChange,FourMCategory, Line, Shopfloor, Station
+from .models import RCR, FourMAction, FourMCategories, FourMChange,FourMCategory, Line, Role, Shopfloor, Station, User
 
 
 admin.site.register(FourMChange)
@@ -99,3 +99,7 @@ class OJTDailyScoreAdmin(admin.ModelAdmin):
     )
 
     list_filter = ('day',)
+
+
+admin.site.register(User)
+admin.site.register(Role)

@@ -210,7 +210,7 @@ export const navModules: NavModule[] = [
 	
 		
 	{
-	id: "pccs",
+	id: "product-sheet",
 	title: "Product Characteristics",
 	fullName: "Product Characteristics Check Sheet",
 	color: "from-fuchsia-500 to-pink-600",
@@ -219,7 +219,7 @@ export const navModules: NavModule[] = [
 	status: "active",
     }, 
 	{
-	id: "ptcf",
+	id: "tool-sheet",
 	title: "Perishable Tool",
 	fullName: "Perishable Tool Change Frequency Check Sheet",
 	color: "from-rose-500 to-rose-600",
@@ -229,7 +229,7 @@ export const navModules: NavModule[] = [
     }  
 	,
 	{
-		id: "process-characteritics",
+		id: "process-sheet",
 		title: "process-characteritics",
 		fullName: "process-characteritics",
 		color: "from-gray-500 to-gray-600", // CHANGED: Unique color
@@ -239,7 +239,7 @@ export const navModules: NavModule[] = [
 		
 	},
 	{
-		id: "paintshop-qualitychecksheet",
+		id: "paint-sheet",
 		title: "Paintshop Quality Checksheet",
 		fullName: "process-characteritics",
 		color: "from-gray-500 to-gray-600", // CHANGED: Unique color

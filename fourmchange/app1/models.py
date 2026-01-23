@@ -82,7 +82,24 @@ class User(AbstractUser):
 
 
 class Shopfloor(models.Model):
+    # Define the available sheet types
+    SHEET_TYPE_CHOICES = [
+        ('PRODUCT', 'Product Characteristics (Assembly)'),
+        ('PROCESS', 'Process Check (Oven/Molding)'),
+        ('PAINT', 'Paint Quality Sheet'),
+        ('TOOLING', 'Perishable Tooling Sheet'),
+    ]
+
     name = models.CharField(max_length=100, unique=True)
+
+    # ✅ NEW CONFIGURATION FIELD
+    # This lets the Admin choose which sheet triggers for this shopfloor
+    sheet_type = models.CharField(
+        max_length=20, 
+        choices=SHEET_TYPE_CHOICES, 
+        default='PRODUCT',
+        help_text="Which Setup Verification sheet should be used for this shopfloor?"
+    )
 
     def __str__(self):
         return self.name
@@ -1186,3 +1203,88 @@ class containment(models.Model):
             self.approved_by,
         ]
         return all(field.strip() for field in required_fields if isinstance(field, str))
+
+#Process charecteristc checksheet.product charecteristc checksheet,perishable tool, paint shop quality   
+
+# 2. Create the Universal Storage Model
+# This stores the data from ALL sheets (Paint, Product, Process) in one place.
+class SetupSheetEntry(models.Model):
+    # Link to the 4M Change
+    change = models.ForeignKey(FourMChange, on_delete=models.CASCADE, related_name='setup_sheet')
+    
+    # Stores the type (e.g., 'PAINT') so we know how to display it later
+    sheet_type = models.CharField(max_length=20) 
+    
+    # ✅ THE MAGIC FIELD: Stores the entire React State (Rows, Checkboxes, etc.)
+    data = models.JSONField(default=dict) 
+    
+    # Summary Result (for Dashboards)
+    overall_result = models.CharField(max_length=10, choices=[('OK', 'OK'), ('NG', 'NG')], default='OK')
+    
+    # Traceability
+    filled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('change', 'sheet_type') # One sheet per change
+
+    def __str__(self):
+        return f"{self.change.record_id} - {self.sheet_type}"
+    
+#Process charecteristc checksheet.product charecteristc checksheet,perishable tool, paint shop quality   
+
+
+#customer aproval sheet start
+
+
+class CustomerApprovalSheet(models.Model):
+    # Link 1-to-1 with the Change Request
+    change_request = models.OneToOneField(
+        FourMChange, 
+        on_delete=models.CASCADE, 
+        related_name='customer_approval_sheet_data' # Distinct name
+    )
+
+    # --- Section 1: Header Info ---
+    date = models.DateField(null=True, blank=True)
+    reason_for_fpp = models.CharField(max_length=50, blank=True) # Stores "1", "2", etc.
+    
+    # --- Section 2: Part Details ---
+    part_no = models.CharField(max_length=100, blank=True)
+    part_name = models.CharField(max_length=150, blank=True)
+    vendor_name = models.CharField(max_length=150, blank=True)
+    model_name = models.CharField(max_length=100, blank=True)
+    quantity = models.CharField(max_length=50, blank=True)
+    
+    modification_details = models.TextField(blank=True)
+    
+    # Signatures (Text names for now, or URLs if you upload images)
+    prepared_by_sign = models.CharField(max_length=100, blank=True)
+    approved_by_sign = models.CharField(max_length=100, blank=True)
+
+    # --- Section 3: Dynamic Data (JSON) ---
+    # We use JSONField because rows can vary
+    
+    # Stores: { "dept1": "QA", "item1": "Dim Check", "dept2": "Prod", "item2": "Fitment" }
+    inspection_data = models.JSONField(default=dict, blank=True)
+
+    # Stores List: [{ "chassis": "123", "comment": "OK", "sign": "John" }, ...]
+    comments_data = models.JSONField(default=list, blank=True)
+
+    # --- Section 4: Routing Info ---
+    insp_date = models.DateField(null=True, blank=True)
+    feeding_date = models.DateField(null=True, blank=True)
+    feeding_time = models.TimeField(null=True, blank=True)
+    
+    person_incharge = models.CharField(max_length=100, blank=True)
+    sec_mgr = models.CharField(max_length=100, blank=True)
+    person_incharge_prod = models.CharField(max_length=100, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Sheet Data for {self.change_request.record_id}"
+    
+#customer aproval sheet end
