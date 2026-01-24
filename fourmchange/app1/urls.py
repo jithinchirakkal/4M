@@ -18,7 +18,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import  CustomerApprovalSheetViewSet, CustomerApprovalViewSet, FourMApprovalViewSet, IdentificationPSNViewSet, LogoutView, MaterialMovementCardViewSet, SetupSheetViewSet, SuspectedLotViewSet
 from .views import (
-    ShopfloorViewSet, LineViewSet, StationViewSet,containmentViewSet,
+    ShopfloorViewSet, LineViewSet, StationViewSet,containmentViewSet,PersonnelViewSet,
     FourMCategoriesViewSet, FourMActionViewSet, FourMChangeViewSet,FourMApprovalViewSet
 )
 
@@ -84,6 +84,7 @@ router.register(r'identification', IdentificationPSNViewSet, basename='identific
 
 router.register(r'setup-sheet', SetupSheetViewSet)
 router.register(r'customer-approval-sheets', CustomerApprovalSheetViewSet, basename='customer-approval-sheets')
+router.register(r'personnel', PersonnelViewSet, basename='personnel')
 
 urlpatterns = [
     path('', include(router.urls)),

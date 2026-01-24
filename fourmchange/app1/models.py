@@ -1288,3 +1288,59 @@ class CustomerApprovalSheet(models.Model):
         return f"Sheet Data for {self.change_request.record_id}"
     
 #customer aproval sheet end
+
+
+
+class Personnel(models.Model):
+    """
+    Simple model for people in 4M responsibility matrix
+    """
+    name = models.CharField(max_length=100)
+    photo = models.ImageField(
+        upload_to='personnel_photos/',
+        blank=True,
+        null=True
+    )
+    phone_number = models.CharField(max_length=20, blank=True)
+    
+    # Simple designation choices
+    DESIGNATION_CHOICES = [
+        ('Engineer', 'Engineer'),
+        ('Supervisor', 'Supervisor'),
+        ('Manager', 'Manager'),
+        ('Technician', 'Technician'),
+    ]
+    designation = models.CharField(
+        max_length=30,
+        choices=DESIGNATION_CHOICES,
+        default='Supervisor'
+    )
+    
+    # Shopfloor / Department
+    shopfloor = models.ForeignKey(
+        Shopfloor,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='personnel'
+    )
+    
+    # Responsibilities (simple text field – easy to edit)
+    responsibilities = models.TextField(
+        blank=True,
+        help_text="Write main responsibilities (one per line is good)"
+    )
+    
+    # Optional but very useful fields
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        if self.shopfloor:
+            return f"{self.name} – {self.designation} – {self.shopfloor}"
+        return f"{self.name} – {self.designation}"
+    
+    class Meta:
+        verbose_name_plural = "Personnel"
+        ordering = ['shopfloor', 'name']

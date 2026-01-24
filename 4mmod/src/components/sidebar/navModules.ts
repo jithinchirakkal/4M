@@ -189,24 +189,16 @@ export const navModules: NavModule[] = [
 		description: "Notify stakeholders of changes via intimation notes",
 		status: "active",
 	},
-	{
-		id: "4m-method",
-		title: "Methods",
-		fullName: "Method Module",
-		color: "from-gray-500 to-gray-600", // CHANGED: Unique color
-		icon: Settings,
-		description: "Manage categories, actions, and activities",
-		status: "active",
-	},
-		{
-		id: "ojt",
-		title: "OJT",
-		fullName: "OJT Sheet",
-		color: "from-gray-500 to-gray-600", // CHANGED: Unique color
-		icon: Settings,
-		description: "On Job Training",
-		status: "active",
-	},
+
+	// 	{
+	// 	id: "ojt",
+	// 	title: "OJT",
+	// 	fullName: "OJT Sheet",
+	// 	color: "from-gray-500 to-gray-600", // CHANGED: Unique color
+	// 	icon: Settings,
+	// 	description: "On Job Training",
+	// 	status: "active",
+	// },
 	
 		
 	// {
@@ -277,15 +269,15 @@ export const navModules: NavModule[] = [
         description: "Manage Batch Nos, PSN, and Identification methods",
         status: "active",
     },
-	{
-        id: "containment-form",
-        title: "Containment Plan",
-        fullName: "4M Containment & Risk Assessment",
-        color: "from-orange-400 to-red-500", // A distinct warm gradient
-        icon: ClipboardList,
-        description: "Define containment actions, risk levels, and trial validations",
-        status: "active",
-    },
+	// {
+    //     id: "containment-form",
+    //     title: "Containment Plan",
+    //     fullName: "4M Containment & Risk Assessment",
+    //     color: "from-orange-400 to-red-500", // A distinct warm gradient
+    //     icon: ClipboardList,
+    //     description: "Define containment actions, risk levels, and trial validations",
+    //     status: "active",
+    // },
 	{
         id: "FourMChangeHistory",
         title: "FourMChangeHistory",
@@ -295,4 +287,13 @@ export const navModules: NavModule[] = [
         description: "Define containment actions, risk levels, and trial validations",
         status: "active",
     },
+		{
+		id: "4m-method",
+		title: "Methods",
+		fullName: "Method Module",
+		color: "from-gray-500 to-gray-600", // CHANGED: Unique color
+		icon: Settings,
+		description: "Manage categories, actions, and activities",
+		status: "active",
+	},
 ];

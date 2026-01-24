@@ -953,3 +953,27 @@ class CustomerApprovalSheetSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 #CustomerApprovalSheet end
+
+from .models import Shopfloor, Personnel
+
+class PersonnelSerializer(serializers.ModelSerializer):
+    shopfloor_details = ShopfloorSerializer(source='shopfloor', read_only=True)
+
+    photo_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Personnel
+        fields = [
+            'id', 'name', 'photo', 'photo_url', 'phone_number',
+            'designation', 'shopfloor','shopfloor_details',
+            'responsibilities', 'is_active', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+    
+    def get_photo_url(self, obj):
+        if obj.photo:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.photo.url)
+            return obj.photo.url
+        return None

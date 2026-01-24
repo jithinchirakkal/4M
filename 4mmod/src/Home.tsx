@@ -33,6 +33,7 @@ import Containment from "./components/Containment/Containment";
 import FourMChangeHistory from "./components/FourMChangeHistory/FourMChangeHistory";
 import CustomerApprovalSheet from "./components/CustomerApprovalsView/CustomerApprovalSheet";
 import OnJobTraining from "./components/Level2OjtTable/Level2OjtTable";
+import StationConfiguration from "./components/StationConfiguration/StationConfiguration";
 // Define the Props interface for Home
 interface HomeProps {
   selectedModule: string;
@@ -145,6 +146,7 @@ const Home: React.FC<HomeProps> = ({
                   onBack={() => setSelectedModule('cm')} 
               />
           )}
+          {selectedModule === 'station-settings' && <StationConfiguration />}
           
 
         </main>
