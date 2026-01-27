@@ -248,6 +248,8 @@ class FourMChangeSerializer(serializers.ModelSerializer):
 
     # ✅ Send the Data (If it exists, so we can view it)
     setup_sheet_data = serializers.SerializerMethodField()
+    is_machine_sheet_done = serializers.SerializerMethodField()
+    machine_sheet_result = serializers.SerializerMethodField()
 
     class Meta:
         model = FourMChange
@@ -333,6 +335,28 @@ class FourMChangeSerializer(serializers.ModelSerializer):
             # Return the JSON data from the first related sheet
             return obj.setup_sheet.first().data
         return None
+    def get_is_machine_sheet_done(self, obj):
+        """
+        Returns True if a MachineCheckSheet exists and is_submitted is True.
+        """
+        try:
+            # Accessing via the related_name="machine_check_sheet" defined in your model
+            sheet = obj.machine_check_sheet
+            return sheet.is_submitted
+        except MachineCheckSheet.DoesNotExist:
+            return False
+
+    def get_machine_sheet_result(self, obj):
+        """
+        Returns the overall_result (PASS/FAIL) if the sheet is submitted.
+        """
+        try:
+            sheet = obj.machine_check_sheet
+            if sheet.is_submitted:
+                return sheet.overall_result
+            return "DRAFT"
+        except MachineCheckSheet.DoesNotExist:
+            return None
         
 
 
@@ -977,3 +1001,65 @@ class PersonnelSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.photo.url)
             return obj.photo.url
         return None
+
+
+
+
+from rest_framework import serializers
+from .models import (
+    MachineCheckSheet,
+    MachineCheckPointStatus
+)
+
+class MachineCheckPointStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MachineCheckPointStatus
+        fields = [
+            'id',
+            'check_point_no',
+            'status',
+            'remarks'
+        ]
+
+
+class MachineCheckSheetSerializer(serializers.ModelSerializer):
+    checkpoints = MachineCheckPointStatusSerializer(many=True)
+    record_id = serializers.CharField(
+        source='four_m_change.record_id',
+        read_only=True
+    )
+
+    class Meta:
+        model = MachineCheckSheet
+        fields = [
+            'id',
+            'record_id',
+            'four_m_change',
+            'machine_no',
+            'shift',
+            'operator_signature',
+            'supervisor_signature',
+            'overall_result',
+            'is_submitted',
+            'submitted_at',
+            'checkpoints',
+            'created_at'
+        ]
+        read_only_fields = ['overall_result', 'submitted_at']
+
+    def create(self, validated_data):
+        checkpoints_data = validated_data.pop('checkpoints')
+
+        sheet = MachineCheckSheet.objects.create(**validated_data)
+
+        for cp in checkpoints_data:
+            MachineCheckPointStatus.objects.create(
+                sheet=sheet,
+                **cp
+            )
+
+        # Auto calculate result (draft save)
+        sheet.calculate_result()
+        sheet.save()
+
+        return sheet

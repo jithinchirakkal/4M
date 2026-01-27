@@ -221,7 +221,8 @@ from django.contrib.auth import get_user_model
 from .models import FourMApproval, Role
 from .serializers import FourMApprovalSerializer
 from .utils.email import send_customer_approval_email  # Adjust path if needed
-
+from django.db.models import Q, Count
+from rest_framework.decorators import action
 User = get_user_model()
 
 class FourMChangeViewSet(viewsets.ModelViewSet):
@@ -263,6 +264,22 @@ class FourMChangeViewSet(viewsets.ModelViewSet):
                         send_customer_approval_email(customer.email, change.record_id)
             except Role.DoesNotExist:
                 pass
+
+
+    @action(detail=False, methods=['get'])
+    def closed_list(self, request): # <--- ADD 'request' HERE
+        queryset = FourMChange.objects.annotate(
+            total_approvals=Count('approvals'),
+            pending_approvals=Count('approvals', filter=Q(approvals__status='pending')),
+            rejected_approvals=Count('approvals', filter=Q(approvals__status='rejected'))
+        ).filter(
+            total_approvals__gt=0,
+            pending_approvals=0,
+            rejected_approvals=0
+        )
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     
 ############### set up approval  ###########
@@ -1191,3 +1208,58 @@ class PersonnelViewSet(viewsets.ModelViewSet):
         personnel.save()
         serializer = self.get_serializer(personnel)
         return Response(serializer.data)
+
+
+
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
+
+from .models import MachineCheckSheet
+from .serializers import MachineCheckSheetSerializer
+
+
+class MachineCheckSheetViewSet(ModelViewSet):
+    queryset = MachineCheckSheet.objects.all().select_related(
+        'four_m_change'
+    ).prefetch_related('checkpoints')
+
+    serializer_class = MachineCheckSheetSerializer
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        record_id = self.request.query_params.get('record_id')
+
+        if record_id:
+            queryset = queryset.filter(
+                four_m_change__record_id=record_id
+            )
+
+        return queryset
+    @action(detail=True, methods=['post'])
+    def submit(self, request, pk=None):
+        sheet = self.get_object()
+
+        if sheet.is_submitted:
+            return Response(
+                {"error": "Check sheet already submitted"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Ensure all 16 check points are filled
+        if sheet.checkpoints.count() != 16:
+            return Response(
+                {"error": "All 16 check points must be completed"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        sheet.submit()
+
+        return Response({
+            "record_id": sheet.four_m_change.record_id,
+            "overall_result": sheet.overall_result,
+            "submitted_at": sheet.submitted_at,
+            "status": "SUBMITTED"
+        }, status=status.HTTP_200_OK)
+
+

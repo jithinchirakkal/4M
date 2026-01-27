@@ -83,7 +83,9 @@ const Home: React.FC<HomeProps> = ({
           {/* {selectedModule === "4m-cts" && <FourMChangeTrackSheet />} */}
           {selectedModule === "4m-cts" && <FourMChangeTrackSheet setSelectedModule={setSelectedModule} />}
           {selectedModule === "cpf" && <ControlPlanForm />}
-          {selectedModule === "mcs" && <MachineCheckSheet />}
+          {/* {selectedModule === "mcs" && <MachineCheckSheet />} */}
+          {selectedModule === "mcs" && (  <MachineCheckSheet  onBack={() => setSelectedModule("cm")}  />)}
+
           {selectedModule === "pf" && (
             <ProcessFlowDiagram onNavigate={setSelectedModule} />
           )}

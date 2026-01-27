@@ -161,6 +161,8 @@ class FourMAction(models.Model):
     identification_psn_batch_no = models.BooleanField(default=False)
     ojt = models.BooleanField(default=False)
     containment_action = models.BooleanField(default=False)
+    machine_check_sheet = models.BooleanField(default=False)
+    in_process_sheet = models.BooleanField(default=False)
     approving_authority = models.TextField(blank=True, null=True)
     customer_approval = models.BooleanField(default=False)
     remarks = models.TextField(blank=True, null=True)
@@ -1344,3 +1346,74 @@ class Personnel(models.Model):
     class Meta:
         verbose_name_plural = "Personnel"
         ordering = ['shopfloor', 'name']
+
+
+
+class MachineCheckSheet(models.Model):
+    RESULT_CHOICES = [
+        ('PASS', 'PASS'),
+        ('FAIL', 'FAIL'),
+    ]
+
+    four_m_change = models.OneToOneField(
+        FourMChange,
+        on_delete=models.CASCADE,
+        related_name="machine_check_sheet"
+    )
+
+    machine_no = models.CharField(max_length=100)
+    shift = models.CharField(max_length=1, choices=[('A','A'),('B','B'),('C','C')])
+    operator_signature = models.CharField(max_length=100)
+    supervisor_signature = models.CharField(max_length=100)
+
+    overall_result = models.CharField(
+        max_length=4,
+        choices=RESULT_CHOICES,
+        blank=True,
+        null=True
+    )
+
+    is_submitted = models.BooleanField(default=False)
+    submitted_at = models.DateTimeField(blank=True, null=True)
+
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def calculate_result(self):
+        """
+        PASS → No NG
+        FAIL → Any NG
+        """
+        if self.checkpoints.filter(status='NG').exists():
+            self.overall_result = 'FAIL'
+        else:
+            self.overall_result = 'PASS'
+
+    def submit(self):
+        self.is_submitted = True
+        self.submitted_at = timezone.now()
+        self.calculate_result()
+        self.save()
+
+    def __str__(self):
+        return f"{self.four_m_change.record_id} - {self.overall_result or 'DRAFT'}"
+
+
+class MachineCheckPointStatus(models.Model):
+    STATUS_CHOICES = [
+        ('OK', 'OK'),
+        ('NG', 'NG'),
+        ('NA', 'NA'),
+    ]
+
+    sheet = models.ForeignKey(
+        MachineCheckSheet,
+        on_delete=models.CASCADE,
+        related_name='checkpoints'
+    )
+
+    check_point_no = models.PositiveIntegerField()
+    status = models.CharField(max_length=2, choices=STATUS_CHOICES)
+    remarks = models.TextField(blank=True, null=True)
+
+    class Meta:
+        unique_together = ('sheet', 'check_point_no')

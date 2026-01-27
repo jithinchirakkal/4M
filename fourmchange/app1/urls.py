@@ -36,7 +36,7 @@ from .views import InspectionReportViewSet, ProcessParameterViewSet, InProcessPa
 from .views import ProcessFlowViewSet, ProcessViewSet, RevisionViewSet
 from .views import ProcessInformationViewSet, FormatRecordViewSet
 from .views import ChangeValidationViewSet,OJTRecordViewSet,OJTDailyScoreViewSet
-
+from .views import *
 
 
 
@@ -85,6 +85,7 @@ router.register(r'identification', IdentificationPSNViewSet, basename='identific
 router.register(r'setup-sheet', SetupSheetViewSet)
 router.register(r'customer-approval-sheets', CustomerApprovalSheetViewSet, basename='customer-approval-sheets')
 router.register(r'personnel', PersonnelViewSet, basename='personnel')
+router.register(r'machine-check-sheets',MachineCheckSheetViewSet,basename='machine-check-sheet')
 
 urlpatterns = [
     path('', include(router.urls)),
