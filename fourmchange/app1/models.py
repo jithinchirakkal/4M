@@ -181,6 +181,7 @@ class FourMChange(models.Model):
     SHIFT_CHOICES = [
         ('A', 'Shift A'),
         ('B', 'Shift B'),
+        ('C', 'Shift C'),
     ]           
     shopfloor = models.ForeignKey(Shopfloor, on_delete=models.CASCADE, null=True, blank=True)
     line = models.ForeignKey(Line, on_delete=models.CASCADE, null=True, blank=True)
@@ -1417,3 +1418,107 @@ class MachineCheckPointStatus(models.Model):
 
     class Meta:
         unique_together = ('sheet', 'check_point_no')
+
+
+
+
+from django.db import models
+from django.utils import timezone
+
+
+class ValidationReport(models.Model):
+    record_id = models.CharField(
+        max_length=30,
+        unique=True,
+        editable=False,
+        verbose_name="Report ID"
+    )
+
+    product = models.CharField(max_length=100)
+    process = models.CharField(max_length=100)
+    line = models.CharField(max_length=50)
+    customer = models.CharField(max_length=100, blank=True, default="")
+    shift = models.CharField(max_length=20, blank=True, default="")
+    date = models.DateField()
+
+    unexpected_change = models.CharField(
+        max_length=20,
+        choices=[
+            ("Man", "Man"),
+            ("Machine", "Machine"),
+            ("Material", "Material"),
+            ("Method", "Method"),
+            ("Others", "Others"),
+        ]
+    )
+
+    change_point = models.TextField(blank=True, default="")
+
+    result_confirmation_status = models.CharField(
+        max_length=20,
+        choices=[
+            ("pass", "PASS"),
+            ("fail", "FAIL"),
+            ("pending", "PENDING"),
+        ],
+        default="pending"
+    )
+
+    prepared_by = models.CharField(max_length=100, blank=True, default="")
+    approved_by = models.CharField(max_length=100, blank=True, default="")
+
+    created_at = models.DateTimeField(default=timezone.now, editable=False)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-date", "-created_at"]
+        verbose_name = "Validation Report"
+        verbose_name_plural = "Validation Reports"
+
+    def save(self, *args, **kwargs):
+        if not self.record_id:
+            today = timezone.now().strftime("%Y%m%d")
+            prefix = f"VAL-{today}"
+            last = (
+                ValidationReport.objects.filter(record_id__startswith=prefix)
+                .order_by("-record_id")
+                .first()
+            )
+            seq = 1
+            if last:
+                try:
+                    seq = int(last.record_id.split("-")[-1]) + 1
+                except (ValueError, IndexError):
+                    seq = 1
+            self.record_id = f"{prefix}-{seq:03d}"
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.record_id} - {self.product} ({self.unexpected_change})"
+
+
+class ValidationRow(models.Model):
+    report = models.ForeignKey(
+        ValidationReport, on_delete=models.CASCADE, related_name="rows"
+    )
+    spec = models.CharField(max_length=250)
+
+    before_change_1 = models.CharField(max_length=100, blank=True, default="")
+    before_change_2 = models.CharField(max_length=100, blank=True, default="")
+    before_change_3 = models.CharField(max_length=100, blank=True, default="")
+
+    after_change_1 = models.CharField(max_length=100, blank=True, default="")
+    after_change_2 = models.CharField(max_length=100, blank=True, default="")
+    after_change_3 = models.CharField(max_length=100, blank=True, default="")
+
+    end_change_1 = models.CharField(max_length=100, blank=True, default="")
+    end_change_2 = models.CharField(max_length=100, blank=True, default="")
+    end_change_3 = models.CharField(max_length=100, blank=True, default="")
+
+    remarks = models.TextField(blank=True, default="")
+
+    class Meta:
+        ordering = ["id"]
+
+    def __str__(self):
+        return f"Row for {self.report.record_id} - {self.spec[:40]}..."

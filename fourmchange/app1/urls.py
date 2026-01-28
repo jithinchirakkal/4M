@@ -86,6 +86,7 @@ router.register(r'setup-sheet', SetupSheetViewSet)
 router.register(r'customer-approval-sheets', CustomerApprovalSheetViewSet, basename='customer-approval-sheets')
 router.register(r'personnel', PersonnelViewSet, basename='personnel')
 router.register(r'machine-check-sheets',MachineCheckSheetViewSet,basename='machine-check-sheet')
+router.register(r'change-validations', ValidationReportViewSet, basename='change-validation')
 
 urlpatterns = [
     path('', include(router.urls)),

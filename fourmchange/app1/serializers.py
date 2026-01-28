@@ -1063,3 +1063,81 @@ class MachineCheckSheetSerializer(serializers.ModelSerializer):
         sheet.save()
 
         return sheet
+
+
+
+
+
+from rest_framework import serializers
+from .models import ValidationReport, ValidationRow
+
+
+class ValidationRowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ValidationRow
+        fields = [
+            "id",
+            "spec",
+            "before_change_1",
+            "before_change_2",
+            "before_change_3",
+            "after_change_1",
+            "after_change_2",
+            "after_change_3",
+            "end_change_1",
+            "end_change_2",
+            "end_change_3",
+            "remarks",
+        ]
+
+
+class ValidationReportSerializer(serializers.ModelSerializer):
+    rows = ValidationRowSerializer(many=True, required=False)
+
+    class Meta:
+        model = ValidationReport
+        fields = [
+            "id",
+            "record_id",
+            "product",
+            "process",
+            "line",
+            "customer",
+            "shift",
+            "date",
+            "unexpected_change",
+            "change_point",
+            "result_confirmation_status",
+            "prepared_by",
+            "approved_by",
+            "created_at",
+            "rows",
+        ]
+        read_only_fields = ["id", "record_id", "created_at"]
+
+    def create(self, validated_data):
+        rows_data = validated_data.pop("rows", [])
+        report = ValidationReport.objects.create(**validated_data)
+
+        for row_data in rows_data:
+            # Only create if there's meaningful data
+            if any(row_data.get(k) for k in ["spec", "before_change_1", "after_change_1", "end_change_1", "remarks"]):
+                ValidationRow.objects.create(report=report, **row_data)
+
+        return report
+
+    def update(self, instance, validated_data):
+        rows_data = validated_data.pop("rows", None)
+
+        # Update main fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        if rows_data is not None:
+            instance.rows.all().delete()  # replace all rows on update
+            for row_data in rows_data:
+                if any(row_data.get(k) for k in ["spec", "before_change_1", "after_change_1", "end_change_1", "remarks"]):
+                    ValidationRow.objects.create(report=instance, **row_data)
+
+        return instance

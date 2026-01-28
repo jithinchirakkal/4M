@@ -1263,3 +1263,16 @@ class MachineCheckSheetViewSet(ModelViewSet):
         }, status=status.HTTP_200_OK)
 
 
+
+
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from .models import ValidationReport
+from .serializers import ValidationReportSerializer
+
+
+class ValidationReportViewSet(viewsets.ModelViewSet):
+    queryset = ValidationReport.objects.prefetch_related("rows").order_by("-date", "-created_at")
+    serializer_class = ValidationReportSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    lookup_field = "id"  # or change to "record_id" if you prefer

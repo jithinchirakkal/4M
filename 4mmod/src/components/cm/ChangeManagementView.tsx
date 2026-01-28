@@ -260,6 +260,7 @@ const categoryOptions = [
 const shiftOptions = [
   { value: "A", label: "Shift A" },
   { value: "B", label: "Shift B" },
+  { value: "C", label: "Shift C" },
 ];
 
 const today = new Date();   

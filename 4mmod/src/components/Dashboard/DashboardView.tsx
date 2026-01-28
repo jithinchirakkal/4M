@@ -650,7 +650,7 @@ const DashboardView = () => {
     <div className="min-h-screen p-6 font-sans">
       
       {/* 1. Main Header Card */}
-      <div className="rounded-3xl bg-white p-8 mb-10 shadow-2xl transition-all duration-500 transform hover:scale-[1.01] relative overflow-hidden ring-8 ring-blue-500/20 hover:ring-purple-500/30">
+      <div className="rounded-3xl bg-white p-2 mb-4 shadow-2xl transition-all duration-500 transform hover:scale-[1.01] relative overflow-hidden ring-8 ring-blue-500/20 hover:ring-purple-500/30">
         <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-3xl transition-opacity duration-500"></div>
         <div className="relative z-10">
           <h1 className="text-5xl font-extrabold text-gray-900 tracking-tight mb-2">
