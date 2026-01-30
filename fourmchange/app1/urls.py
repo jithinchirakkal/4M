@@ -93,6 +93,9 @@ urlpatterns = [
     path('auth/login/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/logout/', LogoutView.as_view(), name='logout'),
     path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('employees/', EmployeeListCreateAPIView.as_view(), name='employee-list-create'),
+    path('employees/upload/', EmployeeBulkUploadView.as_view(), name='employee-bulk-upload'),
+    path('employees/template/', DownloadEmployeeTemplateView.as_view(), name='employee-template-download'),
 ]
 
 

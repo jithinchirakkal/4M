@@ -3,7 +3,7 @@ from django.contrib import admin
 # Register your models here.
 from django.contrib import admin
 from .models import FourMChangeDetail, RCR, FourMAction, FourMCategories, FourMChange,FourMCategory, Line, Role, Shopfloor, Station, User,Personnel,MachineCheckSheet
-
+from .models import *
 
 admin.site.register(FourMChange)
 admin.site.register(FourMCategory)
@@ -104,6 +104,7 @@ class OJTDailyScoreAdmin(admin.ModelAdmin):
 
 admin.site.register(User)
 admin.site.register(Role)
+admin.site.register(Employee)
 
 @admin.register(Personnel)
 class PersonnelAdmin(admin.ModelAdmin):

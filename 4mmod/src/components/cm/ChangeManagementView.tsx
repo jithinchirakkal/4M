@@ -542,7 +542,7 @@ export default function ChangeManagementView({
     <div className="min-h-screen p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-4xl font-extrabold text-gray-900">
+          <h1 className="text-4xl py-6 font-extrabold text-gray-900">
             4M Change Management
           </h1>
           <p className="text-gray-500 text-lg">

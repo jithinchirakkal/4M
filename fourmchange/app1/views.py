@@ -1266,7 +1266,7 @@ class MachineCheckSheetViewSet(ModelViewSet):
 
 
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny
 from .models import ValidationReport
 from .serializers import ValidationReportSerializer
 
@@ -1274,5 +1274,121 @@ from .serializers import ValidationReportSerializer
 class ValidationReportViewSet(viewsets.ModelViewSet):
     queryset = ValidationReport.objects.prefetch_related("rows").order_by("-date", "-created_at")
     serializer_class = ValidationReportSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [AllowAny] 
     lookup_field = "id"  # or change to "record_id" if you prefer
+
+
+# views.py
+import pandas as pd
+from io import BytesIO
+from rest_framework import generics, status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.http import HttpResponse
+from .models import Employee
+from .serializers import EmployeeSerializer
+
+
+class EmployeeListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer
+
+
+class EmployeeBulkUploadView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, *args, **kwargs):
+        if 'file' not in request.FILES:
+            return Response({"error": "No file uploaded"}, status=400)
+
+        file = request.FILES['file']
+        if not file.name.endswith(('.xlsx', '.xls')):
+            return Response({"error": "Only .xlsx / .xls files allowed"}, status=400)
+
+        try:
+            # Read Excel WITHOUT skipping rows
+            df = pd.read_excel(file, engine='openpyxl')
+
+            # Convert date columns
+            for col in ['date_of_joining', 'birth_date']:
+                if col in df.columns:
+                    df[col] = pd.to_datetime(df[col], errors='coerce', dayfirst=True).dt.date
+
+            # Drop rows with missing required fields
+            # df = df.dropna(subset=['emp_id', 'first_name', 'last_name', 'date_of_joining'])
+            df = df.dropna(subset=['emp_id', 'first_name', 'date_of_joining'])
+
+            records = []
+            errors = []
+
+            for idx, row in df.iterrows():
+                try:
+                    data = row.to_dict()
+                    # Remove NaN / None values
+                    data = {k: v for k, v in data.items() if pd.notna(v)}
+
+                    serializer = EmployeeSerializer(data=data)
+                    if serializer.is_valid():
+                        records.append(serializer.save())
+                    else:
+                        errors.append({
+                            "row": idx + 2,  # +2 for Excel row number (header + 0-index)
+                            "errors": serializer.errors
+                        })
+                except Exception as e:
+                    errors.append({"row": idx + 2, "error": str(e)})
+
+            if errors:
+                return Response({
+                    "message": f"Imported {len(records)} records with {len(errors)} errors",
+                    "errors": errors
+                }, status=207)
+
+            return Response({
+                "message": f"Successfully imported {len(records)} employees"
+            }, status=201)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
+
+
+class DownloadEmployeeTemplateView(APIView):
+    def get(self, request, *args, **kwargs):
+        columns = [
+            "emp_id", "first_name", "last_name", "designation",
+            "department_name", "current_line", "current_station",
+            "date_of_joining", "birth_date", "sex", "email", "phone"
+        ]
+
+        df = pd.DataFrame(columns=columns)
+
+        # Optional: add one example row
+        example = {
+            "emp_id": "12345",
+            "first_name": "Rahul",
+            "last_name": "Kumar",
+            "designation": "OET",
+            "department_name": "Production",
+            "current_line": "Assy",
+            "current_station": "YIC/YNC Rear Line",
+            "date_of_joining": "2023-05-15",
+            "birth_date": "1998-07-20",
+            "sex": "M",
+            "email": "example@company.com",
+            "phone": "9876543210"
+        }
+        df = pd.concat([df, pd.DataFrame([example])], ignore_index=True)
+
+        buffer = BytesIO()
+        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name="EmployeeTemplate")
+
+        buffer.seek(0)
+
+        response = HttpResponse(
+            buffer,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="Employee_Upload_Template.xlsx"'
+        return response

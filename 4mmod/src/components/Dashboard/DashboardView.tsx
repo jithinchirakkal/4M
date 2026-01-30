@@ -654,7 +654,7 @@ const DashboardView = () => {
         <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-3xl transition-opacity duration-500"></div>
         <div className="relative z-10">
           <h1 className="text-5xl font-extrabold text-gray-900 tracking-tight mb-2">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-purple-700">Dashboard</span>
+            <span className="text-transparent py-6 bg-clip-text bg-gradient-to-r from-blue-700 to-purple-700">Dashboard</span>
           </h1>
           <p className="text-gray-600 text-lg mb-6 max-w-2xl font-medium">
             Monitor, manage, and track all manufacturing changes in real-time to maintain peak quality standards.
@@ -679,7 +679,7 @@ const DashboardView = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         {stats.map((stat, idx) => (
           <div key={idx} className={`bg-white rounded-2xl p-6 relative overflow-hidden transition-all duration-300 transform hover:scale-[1.03] border border-gray-100/50 shadow-lg ${stat.shadow}`}>
-            <div className={`absolute -right-8 -top-8 w-28 h-28 rounded-full opacity-20 bg-gradient-to-br ${stat.gradient} blur-sm`}></div>
+            <div className={`absolute -right-8 -top-8 w-20 h-20 rounded-full opacity-20 bg-gradient-to-br ${stat.gradient} blur-sm`}></div>
             <div className="flex flex-col gap-4 relative z-10">
               <div className={`w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br ${stat.gradient} shadow-xl shadow-gray-400/40`}>
                 {stat.icon}

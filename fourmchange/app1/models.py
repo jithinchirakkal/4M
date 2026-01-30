@@ -1522,3 +1522,53 @@ class ValidationRow(models.Model):
 
     def __str__(self):
         return f"Row for {self.report.record_id} - {self.spec[:40]}..."
+
+
+# models.py  (in your app)
+from django.db import models
+from django.core.validators import RegexValidator
+
+class Employee(models.Model):
+    emp_id = models.CharField(
+        max_length=10,
+        unique=True,
+        verbose_name="Employee ID",
+        help_text="e.g. 10476, 10519"
+    )
+    
+    first_name = models.CharField(max_length=100)
+    last_name  = models.CharField(max_length=100)
+    
+    designation = models.CharField(max_length=50, blank=True)          # OET / others
+    department_name = models.CharField(max_length=100, blank=True)
+    
+    current_line = models.CharField(max_length=100, blank=True)
+    current_station = models.CharField(max_length=100, blank=True, null=True)
+    
+    date_of_joining = models.DateField()
+    birth_date      = models.DateField(verbose_name="Date of Birth")
+    
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('O', 'Other'),
+    ]
+    sex = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    
+    email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(
+        max_length=15,
+        blank=True,
+        validators=[RegexValidator(r'^\+?1?\d{9,15}$', "Enter valid phone number")],
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-date_of_joining', 'emp_id']
+        verbose_name = "Employee"
+        verbose_name_plural = "Employees"
+
+    def __str__(self):
+        return f"{self.emp_id} - {self.first_name} {self.last_name}"

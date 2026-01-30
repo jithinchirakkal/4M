@@ -34,6 +34,7 @@ import FourMChangeHistory from "./components/FourMChangeHistory/FourMChangeHisto
 import CustomerApprovalSheet from "./components/CustomerApprovalsView/CustomerApprovalSheet";
 import OnJobTraining from "./components/Level2OjtTable/Level2OjtTable";
 import StationConfiguration from "./components/StationConfiguration/StationConfiguration";
+import EmployeeManagement from "./components/EmployeeManagement/EmployeeManagement";
 // Define the Props interface for Home
 interface HomeProps {
   selectedModule: string;
@@ -149,6 +150,7 @@ const Home: React.FC<HomeProps> = ({
               />
           )}
           {selectedModule === 'station-settings' && <StationConfiguration />}
+          {selectedModule === 'mastertable'  && <EmployeeManagement/>}
           
 
         </main>

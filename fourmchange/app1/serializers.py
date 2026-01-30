@@ -1141,3 +1141,54 @@ class ValidationReportSerializer(serializers.ModelSerializer):
                     ValidationRow.objects.create(report=instance, **row_data)
 
         return instance
+
+
+# # serializers.py
+# from rest_framework import serializers
+# from .models import Employee
+# from datetime import datetime
+
+# class EmployeeSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Employee
+#         fields = [
+#             'id', 'emp_id', 'first_name', 'last_name', 'designation',
+#             'department_name', 'current_line', 'current_station',
+#             'date_of_joining', 'birth_date', 'sex', 'email', 'phone',
+#             'created_at', 'updated_at'
+#         ]
+#         read_only_fields = ['id', 'created_at', 'updated_at']
+
+#     def validate_date_of_joining(self, value):
+#         if value > datetime.now().date():
+#             raise serializers.ValidationError("Joining date cannot be in future")
+#         return value
+
+#     def validate_birth_date(self, value):
+#         if value > datetime.now().date():
+#             raise serializers.ValidationError("Birth date cannot be in future")
+#         return value
+
+
+# serializers.py
+from rest_framework import serializers
+from .models import Employee
+
+class EmployeeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Employee
+        fields = [
+            'id','emp_id', 'first_name', 'last_name', 'designation',
+            'department_name', 'current_line', 'current_station',
+            'date_of_joining', 'birth_date', 'sex', 'email', 'phone'
+        ]
+        
+        # Make these fields optional
+        extra_kwargs = {
+            'last_name':    {'required': False, 'allow_blank': True, 'allow_null': True},
+            'email':        {'required': False, 'allow_blank': True, 'allow_null': True},
+            'phone':        {'required': False, 'allow_blank': True, 'allow_null': True},
+            # Also recommended:
+            'current_line':    {'required': False, 'allow_blank': True},
+            'current_station': {'required': False, 'allow_blank': True},
+        }
