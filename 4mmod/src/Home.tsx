@@ -91,7 +91,8 @@ const Home: React.FC<HomeProps> = ({
             <ProcessFlowDiagram onNavigate={setSelectedModule} />
           )}
           {selectedModule === "rcr" && <RetroactiveCheckRecord setSelectedModule={setSelectedModule} />}
-          {selectedModule === "iic-sar" && <InspectionForm />}
+          {/* {selectedModule === "iic-sar" && <InspectionForm />} */}
+          {selectedModule === "iic-sar" && <InspectionForm setSelectedModule={setSelectedModule} />}
           {selectedModule === "mmm" && <ManMachineMatrix />}
           {/* {selectedModule === 'cm' && <ChangeManagementView />} */}
           {selectedModule === "cm" && (

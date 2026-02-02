@@ -60,16 +60,7 @@ export const navModules: NavModule[] = [
 		status: "active",
 		allowedRoles: ["PROD_HOD", "QA_HOD"],
 	},
-	{
-		id: "mmc",
-		title: "Material Movement",
-		fullName: "Material Management Control",
-		color: "from-green-500 to-green-600",
-		icon: Package,
-		description:
-			"Control and monitor material specifications and movements",
-		status: "active",
-	},
+	
 	{
 		id: "4m-cts",
 		title: "4M Tracking Sheet",
@@ -80,16 +71,7 @@ export const navModules: NavModule[] = [
 			"Real-time tracking of 4M (Man, Machine, Material, Method) changes",
 		status: "active",
 	},
-	{
-		id: "cpf",
-		title: "Control Plans",
-		fullName: "Control Plan Framework Sheet",
-		color: "from-indigo-500 to-indigo-600",
-		icon: Shield,
-		description:
-			"Framework for creating and managing quality control plans",
-		status: "active",
-	},
+
 	{
 		id: "mcs",
 		title: "Machine Check Sheet",
@@ -190,15 +172,15 @@ export const navModules: NavModule[] = [
 		status: "active",
 	},
 
-		{
-		id: "ojt",
-		title: "OJT",
-		fullName: "OJT Sheet",
-		color: "from-gray-500 to-gray-600", // CHANGED: Unique color
-		icon: Settings,
-		description: "On Job Training",
-		status: "active",
-	},
+	// 	{
+	// 	id: "ojt",
+	// 	title: "OJT",
+	// 	fullName: "OJT Sheet",
+	// 	color: "from-gray-500 to-gray-600", // CHANGED: Unique color
+	// 	icon: Settings,
+	// 	description: "On Job Training",
+	// 	status: "active",
+	// },
 	
 		
 	// {
@@ -240,15 +222,7 @@ export const navModules: NavModule[] = [
 	// 	status: "active",
 		
 	// },
-	{
-		id: "users",
-		title: "User-Management",
-		fullName: "User Management",
-		color: "from-gray-500 to-gray-600", // CHANGED: Unique color
-		icon: Settings,
-		description: "process-characteritics",
-		status: "active",
-	},
+	
 	{
 		id: "customer-approvals",
 		title: "Customer Approvals ",
@@ -270,14 +244,15 @@ export const navModules: NavModule[] = [
         status: "active",
     },
 	{
-        id: "mastertable",
-        title: "mastertable",
-        fullName: "mastertable",
-        color: "from-orange-400 to-red-500", // A distinct warm gradient
-        icon: ClipboardList,
-        description: "Define containment actions, risk levels, and trial validations",
-        status: "active",
-    },
+		id: "4MP",
+		title: "4M-Procedure",
+		fullName: "4M Change Procedure",
+		color: "from-violet-500 to-violet-600", // CHANGED: Unique color
+		icon: FileCog,
+		description: "Define and manage 4M change procedures",
+		status: "active",
+	},
+	
 	{
         id: "FourMChangeHistory",
         title: "FourMChangeHistory",
@@ -287,6 +262,24 @@ export const navModules: NavModule[] = [
         description: "Define containment actions, risk levels, and trial validations",
         status: "active",
     },
+	{
+		id: "users",
+		title: "User-Management",
+		fullName: "User Management",
+		color: "from-gray-500 to-gray-600", // CHANGED: Unique color
+		icon: Settings,
+		description: "process-characteritics",
+		status: "active",
+	},
+	{
+        id: "mastertable",
+        title: "Mastertable",
+        fullName: "mastertable",
+        color: "from-orange-400 to-red-500", // A distinct warm gradient
+        icon: ClipboardList,
+        description: "Mastertable details",
+        status: "active",
+    },
 		{
 		id: "4m-method",
 		title: "Methods",
@@ -294,6 +287,26 @@ export const navModules: NavModule[] = [
 		color: "from-gray-500 to-gray-600", // CHANGED: Unique color
 		icon: Settings,
 		description: "Manage categories, actions, and activities",
+		status: "active",
+	},
+	{
+		id: "mmc",
+		title: "Material Movement",
+		fullName: "Material Management Control",
+		color: "from-green-500 to-green-600",
+		icon: Package,
+		description:
+			"Control and monitor material specifications and movements",
+		status: "active",
+	},
+		{
+		id: "cpf",
+		title: "Control Plans",
+		fullName: "Control Plan Framework Sheet",
+		color: "from-indigo-500 to-indigo-600",
+		icon: Shield,
+		description:
+			"Framework for creating and managing quality control plans",
 		status: "active",
 	},
 ];

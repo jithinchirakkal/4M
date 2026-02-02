@@ -2602,7 +2602,7 @@ const ManMachineMatrix: React.FC = () => {
         onEdit={() => detailModal.operator && handleEdit(detailModal.operator.id!)}
       />
 
-      <div className="max-w-7xl mx-auto">
+      <div className=" mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">

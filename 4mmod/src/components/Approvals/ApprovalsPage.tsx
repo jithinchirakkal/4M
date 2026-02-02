@@ -317,7 +317,7 @@ const ApprovalsPage: React.FC<PageProps> = ({ setSelectedModule }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-full flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin h-12 w-12 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
           <p className="text-gray-600 text-lg">Loading approvals...</p>
@@ -327,7 +327,7 @@ const ApprovalsPage: React.FC<PageProps> = ({ setSelectedModule }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-8">
+    <div className="max-full bg-gray-50 pb-8">
       {/* Feedback Toast */}
       {feedback && (
         <div className="fixed top-4 right-4 z-50 max-w-sm">
@@ -342,7 +342,7 @@ const ApprovalsPage: React.FC<PageProps> = ({ setSelectedModule }) => {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+      <div className="max-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         {/* Page Header */}
         <div className="flex items-center gap-4 mb-6">
           <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-md">

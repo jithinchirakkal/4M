@@ -1745,7 +1745,7 @@ const Suspected: React.FC = () => {
                   <AlertTriangle size={36} className="text-yellow-300" />
                 </div>
                 <div>
-                  <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
+                  <h1 className="text-3xl sm:text-2xl font-black tracking-tight">
                     Suspected Lot Traceability
                   </h1>
                   <p className="text-indigo-200 mt-2 text-lg">
