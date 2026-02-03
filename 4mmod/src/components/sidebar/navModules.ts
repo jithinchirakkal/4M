@@ -172,56 +172,6 @@ export const navModules: NavModule[] = [
 		status: "active",
 	},
 
-	// 	{
-	// 	id: "ojt",
-	// 	title: "OJT",
-	// 	fullName: "OJT Sheet",
-	// 	color: "from-gray-500 to-gray-600", // CHANGED: Unique color
-	// 	icon: Settings,
-	// 	description: "On Job Training",
-	// 	status: "active",
-	// },
-	
-		
-	// {
-	// id: "product-sheet",
-	// title: "Product Characteristics",
-	// fullName: "Product Characteristics Check Sheet",
-	// color: "from-fuchsia-500 to-pink-600",
-	// icon: CheckCircle,
-	// description: "Monitor and verify product quality characteristics during assembly",
-	// status: "active",
-    // }, 
-	// {
-	// id: "tool-sheet",
-	// title: "Perishable Tool",
-	// fullName: "Perishable Tool Change Frequency Check Sheet",
-	// color: "from-rose-500 to-rose-600",
-	// icon: Settings, 
-	// description: "Track and manage perishable tool change frequency and maintenance",
-	// status: "active",
-    // }  
-	// ,
-	// {
-	// 	id: "process-sheet",
-	// 	title: "process-characteritics",
-	// 	fullName: "process-characteritics",
-	// 	color: "from-gray-500 to-gray-600", // CHANGED: Unique color
-	// 	icon: Settings,
-	// 	description: "process-characteritics",
-	// 	status: "active",
-		
-	// },
-	// {
-	// 	id: "paint-sheet",
-	// 	title: "Paintshop Quality Checksheet",
-	// 	fullName: "process-characteritics",
-	// 	color: "from-gray-500 to-gray-600", // CHANGED: Unique color
-	// 	icon: Settings,
-	// 	description: "process-characteritics",
-	// 	status: "active",
-		
-	// },
 	
 	{
 		id: "customer-approvals",
@@ -308,5 +258,57 @@ export const navModules: NavModule[] = [
 		description:
 			"Framework for creating and managing quality control plans",
 		status: "active",
+	},
+
+	
+		{
+		id: "ojt",
+		title: "OJT",
+		fullName: "OJT Sheet",
+		color: "from-gray-500 to-gray-600", // CHANGED: Unique color
+		icon: Settings,
+		description: "On Job Training",
+		status: "active",
+	},
+	
+		
+	{
+	id: "product-sheet",
+	title: "Product Characteristics",
+	fullName: "Product Characteristics Check Sheet",
+	color: "from-fuchsia-500 to-pink-600",
+	icon: CheckCircle,
+	description: "Monitor and verify product quality characteristics during assembly",
+	status: "active",
+    }, 
+	{
+	id: "tool-sheet",
+	title: "Perishable Tool",
+	fullName: "Perishable Tool Change Frequency Check Sheet",
+	color: "from-rose-500 to-rose-600",
+	icon: Settings, 
+	description: "Track and manage perishable tool change frequency and maintenance",
+	status: "active",
+    }  
+	,
+	{
+		id: "process-sheet",
+		title: "process-characteritics",
+		fullName: "process-characteritics",
+		color: "from-gray-500 to-gray-600", // CHANGED: Unique color
+		icon: Settings,
+		description: "process-characteritics",
+		status: "active",
+		
+	},
+	{
+		id: "paint-sheet",
+		title: "Paintshop Quality Checksheet",
+		fullName: "process-characteritics",
+		color: "from-gray-500 to-gray-600", // CHANGED: Unique color
+		icon: Settings,
+		description: "process-characteritics",
+		status: "active",
+		
 	},
 ];

@@ -1135,7 +1135,7 @@
 //                                       const [date = '', time = ''] = e.target.value.split(' ');
 //                                       updateProcessRow(i, key, { ...block, date, time });
 //                                     }}
-//                                     placeholder="YYYY-MM-DD HH:MM"
+//                                     placeholder=""
 //                                   />
 //                                 </div>
 //                               </div>
@@ -4379,7 +4379,7 @@ const navigate4MChange = (reportId: number, reportData: any) => {
                                       const time = parts.slice(1).join(' ') || '';
                                       updateProcessRow(i, key, { ...block, date, time });
                                     }}
-                                    placeholder="YYYY-MM-DD HH:MM"
+                                    placeholder=""
                                   />
                                 </div>
                               </div>

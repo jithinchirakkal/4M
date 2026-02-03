@@ -2524,7 +2524,7 @@ const FourMChangeTrackingSheet: React.FC<PageProps> = ({ setSelectedModule }) =>
       />
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white rounded-2xl shadow-2xl mb-6">
+      <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-400 text-white rounded-2xl shadow-2xl mb-6">
         <div className="p-6">
           <div className="flex justify-between items-center">
             <div>
