@@ -269,7 +269,7 @@ export const fetchHeatmapData = async (date: string, deptId: number, filters: an
 
                         const empObj: any = {
                             emp_id: emp.emp_id,
-                            name: `${emp.first_name} ${emp.last_name}`,
+                            name: emp.name,
                             shift: shKey,
                             skill_level: skillRecord ? `L${skillRecord.level}` : 'L1',
                             presence: isSub ? 'Present' : presenceVal,
