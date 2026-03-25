@@ -23,17 +23,23 @@ export function HeatCell({ cell, process, delay, onClick }: { cell: CellData; pr
           ? "#f1f5f9" // Gray for N/A
           : empty 
             ? "rgba(248, 250, 252, 0.5)" 
-            : (hov ? `linear-gradient(150deg,${cfg!.gto},${cfg!.gfrom})` : `linear-gradient(135deg,${cfg!.gfrom},${cfg!.gto})`),
+            : (cell.presence === 'Present' && !cell.requiresApproval)
+              ? (hov ? "linear-gradient(135deg, #10b981, #059669)" : "linear-gradient(135deg, #34d399, #10b981)")
+              : (hov ? `linear-gradient(150deg,${cfg!.gto},${cfg!.gfrom})` : `linear-gradient(135deg,${cfg!.gfrom},${cfg!.gto})`),
         backdropFilter: empty || !cell.isApplicable ? "none" : "blur(8px)",
         border: !cell.isApplicable
           ? `1.5px dashed ${D.border}`
-          : (cell.presence === 'Absent' || cell.requiresApproval)
+          : (cell.presence === 'Absent' || (cell.requiresApproval && !cell.isApproved))
             ? `2px solid ${D.red}`
-            : `1.5px solid ${hov && !empty ? cfg!.bdr : (empty ? D.border : (cfg?.bdr ?? D.border))}`,
+            : (cell.presence === 'Present' && !cell.requiresApproval)
+              ? `2.5px solid #059669`
+              : `1.5px solid ${hov && !empty ? cfg!.bdr : (empty ? D.border : (cfg?.bdr ?? D.border))}`,
         cursor: !cell.isApplicable ? "default" : "pointer",
         transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
         transform: hov && cell.isApplicable && !empty ? "translateY(-4px) scale(1.05)" : "scale(1)",
-        boxShadow: hov && !empty ? `0 15px 30px ${cfg?.glow ?? "rgba(0,0,0,0.1)"}` : D.sh,
+        boxShadow: hov && !empty 
+          ? ((cell.presence === 'Present' && !cell.requiresApproval) ? "0 15px 30px rgba(16,185,129,0.3)" : `0 15px 30px ${cfg?.glow ?? "rgba(0,0,0,0.1)"}`)
+          : D.sh,
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4,
         animation: `cellPop 0.4s cubic-bezier(0.34,1.56,0.64,1) ${delay}ms both`,
         zIndex: hov && !empty ? 10 : 1,
@@ -81,15 +87,35 @@ export function HeatCell({ cell, process, delay, onClick }: { cell: CellData; pr
               position: "absolute", 
               top: 8, 
               right: 8, 
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-end",
+              gap: 2,
+              zIndex: 3 
+            }} 
+          >
+            <div style={{ 
               width: 10, 
               height: 10, 
               borderRadius: "50%", 
               background: cell.presence === 'Present' ? '#10b981' : '#ef4444', 
               border: `1.5px solid white`,
-              zIndex: 3 
-            }} 
-            title={`Status: ${cell.presence}`} 
-          />
+              boxShadow: "0 0 4px rgba(0,0,0,0.2)"
+            }} title={`Status: ${cell.presence}`} />
+            {hov && (
+              <span style={{ 
+                fontSize: 7, 
+                fontWeight: 900, 
+                color: cell.presence === 'Present' ? '#059669' : '#b91c1c',
+                background: "rgba(255,255,255,0.8)",
+                padding: "1px 3px",
+                borderRadius: 4,
+                letterSpacing: "0.05em"
+              }}>
+                {cell.presence === 'Present' ? "BIOMETRIC ✓" : "ABSENT"}
+              </span>
+            )}
+          </div>
         </>
       )}
       {cell.isApplicable && empty && (

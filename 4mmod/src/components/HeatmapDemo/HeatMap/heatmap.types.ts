@@ -2,21 +2,14 @@
  * heatmap.types.ts
  *
  * Strict domain type definitions for the Heatmap module.
- * These types mirror the canonical API response envelope from heatmap_data.
- *
- * ⚠ Do NOT use `any` anywhere in this module.
- *
- * @see app1/services/heatmap_service.py — the backend counterpart
  */
-
-// ─── API Response Types (mirror backend canonical envelope) ──────────────────
 
 export type SkillLevel = "L0" | "L1" | "L2" | "L3" | "L4" | null;
 
 export interface EmployeeAssignment {
   emp_id:            string;
   name:              string;
-  shift:             string;    // e.g. "A", "B", "C", "Off", "WO"
+  shift:             string;
   skill_level:       SkillLevel;
   presence?:         "Present" | "Absent";
   is_substitute?:    boolean;
@@ -27,10 +20,11 @@ export interface EmployeeAssignment {
 export interface StationData {
   station_id:   number;
   station_name: string;
-  min_skill:    SkillLevel;     // null = no requirement defined; frontend should not assume L3
+  min_skill:    SkillLevel;
   required:     number;
   available:    number;
   gap:          number;
+  is_applicable?: boolean;
   employees:    EmployeeAssignment[];
 }
 
@@ -42,12 +36,19 @@ export interface LineData {
   stations:  StationData[];
 }
 
+export interface HeatmapFilters {
+  department_id:  number;
+  line_id?:       number;
+  subline_id?:    number;
+  station_id?:    number;
+}
+
 export interface HeatmapMeta {
   date:             string;
   applied_filters:  HeatmapFilters;
   total_stations:   number;
   total_assigned:   number;
-  coverage_pct:     number;   // 0–100
+  coverage_pct:     number;
   total_gaps:       number;
 }
 
@@ -57,24 +58,11 @@ export interface HeatmapSummary {
   gap:       number;
 }
 
-/** The canonical API response envelope returned by /shifts/heatmap_data/ */
 export interface HeatmapApiResponse {
   meta:    HeatmapMeta;
   summary: HeatmapSummary;
   lines:   LineData[];
 }
-
-// ─── Filter / Selection State ─────────────────────────────────────────────────
-
-/** Query-level filters sent to the backend */
-export interface HeatmapFilters {
-  department_id:  number;
-  line_id?:       number;
-  subline_id?:    number;
-  station_id?:    number;
-}
-
-// ─── Hierarchy (fetched from /hierarchy-simple/) ─────────────────────────────
 
 export interface HierarchyStation {
   id:           number;
@@ -91,14 +79,14 @@ export interface HierarchyLine {
   id:        number;
   line_name: string;
   sublines:  HierarchySubLine[];
-  stations:  HierarchyStation[];   // direct (no sub-line)
+  stations:  HierarchyStation[];
 }
 
 export interface HierarchyDepartment {
   id:              number;
   department_name: string;
   lines:           HierarchyLine[];
-  stations:        HierarchyStation[];  // direct (flat departments)
+  stations:        HierarchyStation[];
 }
 
 export interface HierarchyStructure {
@@ -109,59 +97,36 @@ export interface HierarchyStructure {
 
 export type HierarchyData = HierarchyStructure[];
 
-// ─── Grid / View Types (frontend-internal, not from API) ─────────────────────
-
-/** A single heatmap cell in the matrix view */
 export interface CellData {
-  processId:  string;         // station_id as string (grid key)
-  emp:           string | null;  // emp_id
+  processId:     string;
+  emp:           string | null;
   name:          string | null;
   skill:         SkillLevel;
   hrs:           number;
-  hasSkillGap:   boolean;       // pre-computed from skill vs min_skill
+  hasSkillGap:   boolean;
   presence?:     "Present" | "Absent";
   isSubstitute?: boolean;
   requiresApproval?: boolean;
   isApproved?:   boolean;
-  isApplicable:  boolean;       // false if station not in this line's hierarchy
+  isApplicable:  boolean;
 }
 
-/** A row in the matrix view (one per Line) */
 export interface RowData {
   line:  string;
   cells: CellData[];
 }
 
-/** A column header in the matrix view (one per Station) */
 export interface ProcessColumn {
-  id:       string;           // station_id as string
-  sh:       string;           // abbreviated name
-  full:     string;           // full station name
-  minSkill: SkillLevel;       // from StationData.min_skill
+  id:       string;
+  sh:       string;
+  full:     string;
+  minSkill: SkillLevel;
 }
-
-// ─── Hook State ───────────────────────────────────────────────────────────────
-
-export interface HeatmapState {
-  data:        HeatmapApiResponse | null;
-  isLoading:   boolean;
-  error:       string | null;
-}
-
-export interface HierarchySelections {
-  selectedDeptId:    number | null;
-  selectedLineId:    number | null;
-  selectedSubLineId: number | null;
-  selectedStationId: number | null;
-  selectedDate:      string;         // YYYY-MM-DD
-}
-
-// ─── Transformation Output ────────────────────────────────────────────────────
 
 export interface TransformedHeatmap {
   procs:    ProcessColumn[];
   rows:     RowData[];
-  allCells: CellData[];        // flattened, assigned only
+  allCells: CellData[];
   gapCount: number;
   coverage: number;
 }

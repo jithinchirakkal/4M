@@ -576,7 +576,19 @@ export default function HeatMap() {
                         <div><span style={{ background: cfg?.badge, color: cfg?.btext, fontSize: 12, fontWeight: 800, padding: "4px 12px", borderRadius: 20, border: `1px solid ${cfg?.bdr}`, display: "inline-block" }}>{x.skill}</span></div>
                         <div style={{ fontSize: 13, fontWeight: 700, color: D.g600 }}>{proc.minSkill ?? "—"}</div>
                         <div style={{ fontSize: 13, color: D.g600, fontWeight: 600 }}>{x.hrs ? `${x.hrs}h` : "—"}</div>
-                        <div><span style={{ background: g ? D.redL : D.greenL, color: g ? D.red : D.green, fontSize: 11, fontWeight: 800, padding: "4px 12px", borderRadius: 20, border: `1px solid ${g ? "#fca5a5" : "#86efac"}`, display: "inline-block" }}>{g ? "⚠️ SUBSTITUTE" : "✓ ASSIGNED"}</span></div>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          {x.presence === 'Absent' ? (
+                            <span style={{ background: D.redL, color: D.red, fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 20, border: `1px solid ${D.red}40` }}>ABSENT</span>
+                          ) : (
+                            <span style={{ background: D.greenL, color: D.green, fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 20, border: `1px solid ${D.green}40` }}>PRESENT</span>
+                          )}
+                          {g ? (
+                             <span style={{ background: D.amberL, color: D.amber, fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 20, border: `1px solid ${D.amber}40` }}>SKILL GAP</span>
+                          ) : (
+                             <span style={{ background: D.blueL, color: D.blue, fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 20, border: `1px solid ${D.blue}40` }}>QUALIFIED</span>
+                          )}
+                        </div>
+                        <div><span style={{ background: g || x.presence === 'Absent' ? D.redL : D.greenL, color: g || x.presence === 'Absent' ? D.red : D.green, fontSize: 12, fontWeight: 800, padding: "4px 12px", borderRadius: 20, border: `1px solid ${g || x.presence === 'Absent' ? "#fca5a5" : "#86efac"}`, display: "inline-block" }}>{x.presence === 'Absent' ? "🚨 NEEDS REPLACEMENT" : (g ? "⚠️ SUBSTITUTE" : "✓ ASSIGNED")}</span></div>
                       </div>
                     );
                   })}

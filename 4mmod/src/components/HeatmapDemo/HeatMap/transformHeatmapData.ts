@@ -135,7 +135,7 @@ export function transformForShift(
         isSubstitute: emp?.is_substitute,
         requiresApproval: emp?.requires_approval,
         isApproved:   emp?.is_approved,
-        isApplicable: true, // This station belongs to this line
+        isApplicable: !!station.is_applicable,
       };
       cellMap.set(procId, cell);
     }

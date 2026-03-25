@@ -14,18 +14,27 @@ export const DUMMY_SECTIONS: Section[] = [
 ];
 
 export const DUMMY_OPERATIONS: Operation[] = [
-    { id: 1, name: "Station 1 Assembly", minimum_skill_required: 2, section: 1, section_name: "Assembly", number: 1, matrix: 1, department: 1 },
-    { id: 2, name: "Station 2 Fitting", minimum_skill_required: 3, section: 1, section_name: "Assembly", number: 2, matrix: 1, department: 1 },
-    { id: 3, name: "Station 3 Painting", minimum_skill_required: 2, section: 1, section_name: "Assembly", number: 3, matrix: 1, department: 1 },
-    { id: 4, name: "Initial QC", minimum_skill_required: 3, section: 2, section_name: "Inspection", number: 4, matrix: 2, department: 2 },
+    { id: 1, name: "Station 1", minimum_skill_required: 2, section: 1, section_name: "Assembly", number: 1, matrix: 1, department: 1 },
+    { id: 2, name: "Station 2", minimum_skill_required: 3, section: 1, section_name: "Assembly", number: 2, matrix: 1, department: 1 },
+    { id: 3, name: "Station 3", minimum_skill_required: 2, section: 1, section_name: "Assembly", number: 3, matrix: 1, department: 1 },
+    { id: 4, name: "Station 4", minimum_skill_required: 4, section: 1, section_name: "Assembly", number: 4, matrix: 1, department: 1 },
     { id: 5, name: "Final QC", minimum_skill_required: 4, section: 2, section_name: "Inspection", number: 5, matrix: 2, department: 2 },
-    { id: 6, name: "Packing", minimum_skill_required: 1, section: 3, section_name: "Warehouse", number: 6, matrix: 3, department: 3 },
+    { id: 6, name: "Initial QC", minimum_skill_required: 3, section: 2, section_name: "Inspection", number: 6, matrix: 2, department: 2 },
+    { id: 8, name: "Packing", minimum_skill_required: 1, section: 3, section_name: "Warehouse", number: 8, matrix: 3, department: 3 },
+    { id: 9, name: "Sorting", minimum_skill_required: 2, section: 3, section_name: "Warehouse", number: 9, matrix: 3, department: 3 },
+    { id: 10, name: "Station B1", minimum_skill_required: 2, section: 1, section_name: "Assembly", number: 10, matrix: 1, department: 1 },
+    { id: 11, name: "Station B2", minimum_skill_required: 3, section: 1, section_name: "Assembly", number: 11, matrix: 1, department: 1 },
+    { id: 12, name: "Station B3", minimum_skill_required: 2, section: 1, section_name: "Assembly", number: 12, matrix: 1, department: 1 },
 ];
 
 export const DUMMY_STATION_REQUIREMENTS: StationRequirement[] = [
     { id: 1, station_id: 1, station_name: "Station 1", department_id: 1, department_name: "Production", minimum_operators: 2, minimum_level_required: 'Intermediate', minimum_level_number: 2 },
     { id: 2, station_id: 2, station_name: "Station 2", department_id: 1, department_name: "Production", minimum_operators: 1, minimum_level_required: 'Advanced', minimum_level_number: 3 },
-    { id: 3, station_id: 5, station_name: "Final QC", department_id: 2, department_name: "Quality", minimum_operators: 1, minimum_level_required: 'Expert', minimum_level_number: 4 },
+    { id: 3, station_id: 3, station_name: "Station 3", department_id: 1, department_name: "Production", minimum_operators: 1, minimum_level_required: 'Intermediate', minimum_level_number: 2 },
+    { id: 4, station_id: 4, station_name: "Station 4", department_id: 1, department_name: "Production", minimum_operators: 1, minimum_level_required: 'Expert', minimum_level_number: 4 },
+    { id: 5, station_id: 10, station_name: "Station B1", department_id: 1, department_name: "Production", minimum_operators: 2, minimum_level_required: 'Intermediate', minimum_level_number: 2 },
+    { id: 6, station_id: 11, station_name: "Station B2", department_id: 1, department_name: "Production", minimum_operators: 1, minimum_level_required: 'Advanced', minimum_level_number: 3 },
+    { id: 7, station_id: 12, station_name: "Station B3", department_id: 1, department_name: "Production", minimum_operators: 1, minimum_level_required: 'Intermediate', minimum_level_number: 2 },
 ];
 
 // Generate Monthly Skills for each employee
@@ -87,7 +96,7 @@ const generateOperatorLevels = (): OperatorLevel[] => {
             },
             operation: {
                 ...op,
-                department: String(op.department) // Fix type mismatch if necessary
+                department: String(op.department)
             } as any,
             level: (index % 4) + 1
         };
@@ -116,6 +125,7 @@ export const DUMMY_HIERARCHY = [
                     { station_id: 1, station_name: "Station 1", station_type: "STD" },
                     { station_id: 2, station_name: "Station 2", station_type: "STD" },
                     { station_id: 3, station_name: "Station 3", station_type: "STD" },
+                    { station_id: 4, station_name: "Station 4", station_type: "STD" },
                 ]
             },
             {
@@ -125,6 +135,7 @@ export const DUMMY_HIERARCHY = [
                 stations: [
                     { station_id: 10, station_name: "Station B1", station_type: "STD" },
                     { station_id: 11, station_name: "Station B2", station_type: "STD" },
+                    { station_id: 12, station_name: "Station B3", station_type: "STD" },
                 ]
             }
         ],

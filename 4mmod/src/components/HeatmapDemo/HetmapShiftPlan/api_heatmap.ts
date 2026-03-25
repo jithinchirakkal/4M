@@ -188,6 +188,14 @@ export const fetchHeatmapData = async (date: string, deptId: number, filters: an
     if (!targetDept) return { data: { meta: {}, summary: {}, lines: [] } };
 
     // 2. Iterate through the hierarchy of the selected department
+    const allDeptStations = [
+        ...(targetDept.stations || []),
+        ...(targetDept.lines || []).flatMap((l: any) => [
+            ...(l.stations || []),
+            ...(l.sublines || []).flatMap((sl: any) => sl.stations || [])
+        ])
+    ];
+
     (targetDept.lines || []).forEach((l: any) => {
         // Filter by lineId if provided
         if (filters.lineId && l.line_id !== filters.lineId) return;
@@ -200,14 +208,12 @@ export const fetchHeatmapData = async (date: string, deptId: number, filters: an
             stations: []
         };
 
-        const allStations = [
-            ...(l.stations || []),
-            ...(l.sublines || []).flatMap((sl: any) => sl.stations || [])
-        ];
-
-        allStations.forEach((st: any) => {
-            // Filter by stationId if provided
-            if (filters.stationId && st.station_id !== filters.stationId) return;
+        // We want THIS line to show ALL stations to ensure full columns, 
+        // but transformForShift will mark un-owned ones as N/A.
+        allDeptStations.forEach((st: any) => {
+            // Find if this station actually belongs to THIS line or its sublines
+            const isOwnedByLine = (l.stations || []).some((s: any) => s.station_id === st.station_id) ||
+                                 (l.sublines || []).some((sl: any) => (sl.stations || []).some((s: any) => s.station_id === st.station_id));
 
             // Find min skill requirement
             const req = (DUMMY_STATION_REQUIREMENTS as any[]).find(r => r.station_id === st.station_id);
@@ -218,51 +224,54 @@ export const fetchHeatmapData = async (date: string, deptId: number, filters: an
                 station_id: st.station_id,
                 station_name: st.station_name,
                 min_skill: `L${minLevelNum}`,
-                required: req?.minimum_operators || 1,
+                required: isOwnedByLine ? (req?.minimum_operators || 1) : 0,
                 available: 0,
                 gap: 0,
+                is_applicable: isOwnedByLine, // Flag for frontend N/A logic
                 employees: []
             };
 
             // 3. Find anyone in the FULL roster assigned to this station on this date
-            fullRoster.forEach(emp => {
-                const shift = emp.days[date] || 'Off';
-                const subKey = `${date}_${shift}_${st.station_id}`;
-                const subRecord = cachedSubstitutions[subKey];
-                
-                // If this employee is the one manually assigned as a substitute, OR they are the original assignment and no sub exists
-                const isManualSub = subRecord && subRecord.emp_id === emp.emp_id;
-                const isOriginal = !subRecord && emp.hierarchy_id === st.station_id;
+            if (isOwnedByLine) {
+                fullRoster.forEach(emp => {
+                    const shift = emp.days[date] || 'Off';
+                    const subKey = `${date}_${shift}_${st.station_id}`;
+                    const subRecord = cachedSubstitutions[subKey];
+                    
+                    const isManualSub = subRecord && subRecord.emp_id === emp.emp_id;
+                    const isOriginal = !subRecord && emp.hierarchy_id === st.station_id;
 
-                if (isManualSub || isOriginal) {
-                    if (shift !== 'WO' && shift !== 'Off') {
-                        const skillRecord = (DUMMY_SKILL_MATRIX_API_DATA as any[]).find(sm => 
-                            sm.emp_id === emp.emp_id && 
-                            sm.station_id === st.station_id
-                        );
-                        const actualLevelNum = skillRecord?.level || 1;
-                        
-                        // Mock Presence
-                        const empSuffix = parseInt(emp.emp_id.replace(/\D/g, '')) || 0;
-                        const isPresent = (empSuffix + day) % 10 !== 0; 
-                        
-                        const reqLevel = parseInt(station.min_skill.replace('L', '')) || 0;
-                        const hasSkillGap = actualLevelNum < reqLevel;
+                    if (isManualSub || isOriginal) {
+                        if (shift !== 'WO' && shift !== 'Off') {
+                            const skillRecord = (DUMMY_SKILL_MATRIX_API_DATA as any[]).find(sm => 
+                                sm.emp_id === emp.emp_id && 
+                                sm.station_id === st.station_id
+                            );
+                            const actualLevelNum = skillRecord?.level || 1;
+                            
+                            // Mock Presence: Deterministic based on date/emp
+                            const empSuffix = parseInt(emp.emp_id.replace(/\D/g, '')) || 0;
+                            const dNum = parseInt(date.split('-')[2]) || 1;
+                            const isPresent = (empSuffix + dNum) % 12 !== 0; // More present than absent
+                            
+                            const reqLevel = parseInt(station.min_skill.replace('L', '')) || 0;
+                            const hasSkillGap = actualLevelNum < reqLevel;
 
-                        station.employees.push({
-                            emp_id: emp.emp_id,
-                            name: emp.name,
-                            shift: shift,
-                            skill_level: `L${actualLevelNum}`,
-                            presence: isPresent ? 'Present' : 'Absent',
-                            is_substitute: isManualSub,
-                            requires_approval: hasSkillGap,
-                            is_approved: subRecord?.is_approved ?? false
-                        });
-                        station.available += 1;
+                            station.employees.push({
+                                emp_id: emp.emp_id,
+                                name: emp.name,
+                                shift: shift,
+                                skill_level: `L${actualLevelNum}`,
+                                presence: isPresent ? 'Present' : 'Absent',
+                                is_substitute: isManualSub,
+                                requires_approval: hasSkillGap,
+                                is_approved: subRecord?.is_approved ?? false
+                            });
+                            station.available += 1;
+                        }
                     }
-                }
-            });
+                });
+            }
 
             station.gap = Math.max(0, station.required - station.available);
             lineData.stations.push(station);
