@@ -35,6 +35,9 @@ import CustomerApprovalSheet from "./components/CustomerApprovalsView/CustomerAp
 import OnJobTraining from "./components/Level2OjtTable/Level2OjtTable";
 import StationConfiguration from "./components/StationConfiguration/StationConfiguration";
 import EmployeeManagement from "./components/EmployeeManagement/EmployeeManagement";
+import MasterTable from "./components/HeatmapDemo/MasterTable/MasterTable";
+import SkillMatrixPage from "./components/HeatmapDemo/Skillmatrix/pages/SkillMatrixPage";
+import HeatMapShiftPlanner from "./components/HeatmapDemo/HetmapShiftPlan/HeatMapShiftPlanner";
 // Define the Props interface for Home
 interface HomeProps {
   selectedModule: string;
@@ -151,7 +154,9 @@ const Home: React.FC<HomeProps> = ({
               />
           )}
           {selectedModule === 'station-settings' && <StationConfiguration />}
-          {selectedModule === 'mastertable'  && <EmployeeManagement/>}
+          {selectedModule === 'mastertable'  && <MasterTable/>}
+          {selectedModule === 'skillmatrix'  && <SkillMatrixPage/>}
+          {selectedModule === 'shiftplan'  && <HeatMapShiftPlanner/>}
           
 
         </main>

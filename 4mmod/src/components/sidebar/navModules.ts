@@ -17,6 +17,7 @@ import {
 	Bell,
 	CheckSquare,
 	Tag,
+	Calendar,
 } from "lucide-react";
 
 interface NavModule {
@@ -221,13 +222,31 @@ export const navModules: NavModule[] = [
 		description: "process-characteritics",
 		status: "active",
 	},
-	{
+    {
         id: "mastertable",
-        title: "Mastertable",
-        fullName: "mastertable",
+        title: "Master Table",
+        fullName: "Employee Master for Heatmap",
         color: "from-orange-400 to-red-500", // A distinct warm gradient
         icon: ClipboardList,
-        description: "Mastertable details",
+        description: "Employee master table for Heatmap (Dummy Data)",
+        status: "active",
+    },
+    {
+        id: "skillmatrix",
+        title: "Skill Matrix",
+        fullName: "Skill Matrix for Heatmap",
+        color: "from-blue-400 to-indigo-500",
+        icon: ClipboardList,
+        description: "Skill matrix for Heatmap (Dummy Data)",
+        status: "active",
+    },
+    {
+        id: "shiftplan",
+        title: "Shift Plan",
+        fullName: "Shift Plan for Heatmap",
+        color: "from-purple-400 to-indigo-500",
+        icon: Calendar,
+        description: "Shift plan for Heatmap (Dummy Data)",
         status: "active",
     },
 		{
