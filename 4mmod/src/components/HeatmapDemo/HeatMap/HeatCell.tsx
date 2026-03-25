@@ -23,22 +23,22 @@ export function HeatCell({ cell, process, delay, onClick }: { cell: CellData; pr
           ? "#f1f5f9" // Gray for N/A
           : empty 
             ? "rgba(248, 250, 252, 0.5)" 
-            : (cell.presence === 'Present' && !cell.requiresApproval)
-              ? (hov ? "linear-gradient(135deg, #10b981, #059669)" : "linear-gradient(135deg, #34d399, #10b981)")
+            : (cell.presence === 'Present' && !g && (!cell.requiresApproval || cell.isApproved)) 
+              ? (hov ? "linear-gradient(135deg, #059669, #10b981)" : "linear-gradient(135deg, #10b981, #34d399)")
               : (hov ? `linear-gradient(150deg,${cfg!.gto},${cfg!.gfrom})` : `linear-gradient(135deg,${cfg!.gfrom},${cfg!.gto})`),
         backdropFilter: empty || !cell.isApplicable ? "none" : "blur(8px)",
         border: !cell.isApplicable
           ? `1.5px dashed ${D.border}`
-          : (cell.presence === 'Absent' || (cell.requiresApproval && !cell.isApproved))
-            ? `2px solid ${D.red}`
-            : (cell.presence === 'Present' && !cell.requiresApproval)
+            : (cell.presence === 'Absent' || (cell.requiresApproval && !cell.isApproved))
+              ? `2.5px solid ${D.red}`
+            : (cell.presence === 'Present' && !g && (!cell.requiresApproval || cell.isApproved))
               ? `2.5px solid #059669`
               : `1.5px solid ${hov && !empty ? cfg!.bdr : (empty ? D.border : (cfg?.bdr ?? D.border))}`,
         cursor: !cell.isApplicable ? "default" : "pointer",
         transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
         transform: hov && cell.isApplicable && !empty ? "translateY(-4px) scale(1.05)" : "scale(1)",
         boxShadow: hov && !empty 
-          ? ((cell.presence === 'Present' && !cell.requiresApproval) ? "0 15px 30px rgba(16,185,129,0.3)" : `0 15px 30px ${cfg?.glow ?? "rgba(0,0,0,0.1)"}`)
+          ? ((cell.presence === 'Present' && !g && (!cell.requiresApproval || cell.isApproved)) ? "0 15px 30px rgba(16,185,129,0.3)" : `0 15px 30px ${cfg?.glow ?? "rgba(0,0,0,0.1)"}`)
           : D.sh,
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4,
         animation: `cellPop 0.4s cubic-bezier(0.34,1.56,0.64,1) ${delay}ms both`,
@@ -112,7 +112,7 @@ export function HeatCell({ cell, process, delay, onClick }: { cell: CellData; pr
                 borderRadius: 4,
                 letterSpacing: "0.05em"
               }}>
-                {cell.presence === 'Present' ? "BIOMETRIC ✓" : "ABSENT"}
+                {cell.presence === 'Present' ? "PRESENT" : "ABSENT"}
               </span>
             )}
           </div>

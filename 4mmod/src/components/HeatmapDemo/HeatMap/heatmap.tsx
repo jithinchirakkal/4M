@@ -6,7 +6,7 @@ import { HeatCell } from "./HeatCell";
 import { useHeatmapData } from "./useHeatmapData";
 import { transformForShift } from "./transformHeatmapData";
 import { SubstitutionModal } from "./SubstitutionModal";
-import { approveSubstitute } from "../HetmapShiftPlan/api_heatmap";
+import { approveSubstitute, clearSubstitutions } from "../HetmapShiftPlan/api_heatmap";
 
 // ─── Loading Skeleton ─────────────────────────────────────────────────────────
 function HeatmapSkeleton() {
@@ -265,10 +265,11 @@ export default function HeatMap() {
               style={{ 
                   background: "#fff", color: D.red, border: "none", 
                   padding: "8px 20px", borderRadius: 10, fontWeight: 800, 
-                  fontSize: 13, cursor: "pointer", transition: "all 0.2s" 
+                  fontSize: 13, cursor: "pointer", transition: "all 0.2s",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
               }}
             >
-              APPROVE ALL GAPS
+              APPROVE ALL SUBSTITUTIONS
             </button>
           </div>
         )}

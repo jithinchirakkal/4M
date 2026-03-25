@@ -62,9 +62,20 @@ export const fetchShifts = async () => {
     ] };
 };
 
+// Persist substitutions in localStorage for demo stability
+const STORAGE_KEY = 'heatmap_substitutions';
 let cachedRoster: ShiftPlanData[] | null = null;
-let cachedSubstitutions: Record<string, { emp_id: string; is_approved: boolean }> = {
-    "2026-03-25_A_1": { emp_id: "EMP011", is_approved: false }
+let cachedSubstitutions: Record<string, { emp_id: string; is_approved: boolean }> = {};
+
+try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) cachedSubstitutions = JSON.parse(saved);
+} catch (e) {
+    console.error('Failed to load substitutions from localStorage', e);
+}
+
+const saveToStorage = () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cachedSubstitutions));
 };
 
 export const fetchHeatMapRoster = async (deptId: number, month: number, year: number, filter: HierarchyFilter) => {
@@ -231,44 +242,43 @@ export const fetchHeatmapData = async (date: string, deptId: number, filters: an
                 employees: []
             };
 
-            // 3. Find anyone in the FULL roster assigned to this station on this date
+            // 3. Find anyone assigned to this station on this date/shift
             if (isOwnedByLine) {
-                fullRoster.forEach(emp => {
-                    const shift = emp.days[date] || 'Off';
-                    const subKey = `${date}_${shift}_${st.station_id}`;
+                (['A', 'B', 'C', 'G'] as const).forEach(shKey => {
+                    const subKey = `${date}_${shKey}_${st.station_id}`;
                     const subRecord = cachedSubstitutions[subKey];
                     
-                    const isManualSub = subRecord && subRecord.emp_id === emp.emp_id;
-                    const isOriginal = !subRecord && emp.hierarchy_id === st.station_id;
+                    let emp: any = null;
+                    let isSub = false;
 
-                    if (isManualSub || isOriginal) {
-                        if (shift !== 'WO' && shift !== 'Off') {
-                            const skillRecord = (DUMMY_SKILL_MATRIX_API_DATA as any[]).find(sm => 
-                                sm.emp_id === emp.emp_id && 
-                                sm.station_id === st.station_id
-                            );
-                            const actualLevelNum = skillRecord?.level || 1;
-                            
-                            // Mock Presence: Deterministic based on date/emp
-                            const empSuffix = parseInt(emp.emp_id.replace(/\D/g, '')) || 0;
-                            const dNum = parseInt(date.split('-')[2]) || 1;
-                            const isPresent = (empSuffix + dNum) % 12 !== 0; // More present than absent
-                            
-                            const reqLevel = parseInt(station.min_skill.replace('L', '')) || 0;
-                            const hasSkillGap = actualLevelNum < reqLevel;
+                    if (subRecord) {
+                        emp = fullRoster.find((e: any) => e.emp_id === subRecord.emp_id);
+                        isSub = true;
+                    } else {
+                        emp = fullRoster.find((e: any) => e.hierarchy_id === st.station_id && e.days[date] === shKey);
+                        isSub = false;
+                    }
 
-                            station.employees.push({
-                                emp_id: emp.emp_id,
-                                name: emp.name,
-                                shift: shift,
-                                skill_level: `L${actualLevelNum}`,
-                                presence: isPresent ? 'Present' : 'Absent',
-                                is_substitute: isManualSub,
-                                requires_approval: hasSkillGap,
-                                is_approved: subRecord?.is_approved ?? false
-                            });
-                            station.available += 1;
-                        }
+                    if (emp) {
+                        const skillRecord = (DUMMY_SKILL_MATRIX_API_DATA as any[]).find(sm => 
+                            sm.emp_id === emp.emp_id && 
+                            sm.station_id === st.station_id
+                        );
+                        
+                        const presenceVal = (parseInt(emp.emp_id.replace(/\D/g, '')) + parseInt(date.split('-')[2])) % 10 !== 0 ? 'Present' : 'Absent';
+
+                        const empObj: any = {
+                            emp_id: emp.emp_id,
+                            name: `${emp.first_name} ${emp.last_name}`,
+                            shift: shKey,
+                            skill_level: skillRecord ? `L${skillRecord.level}` : 'L1',
+                            presence: isSub ? 'Present' : presenceVal,
+                            is_substitute: isSub,
+                            requires_approval: isSub && skillRecord && (skillRecord.level < minLevelNum),
+                            is_approved: isSub ? (subRecord?.is_approved || false) : true
+                        };
+                        station.employees.push(empObj);
+                        station.available += 1;
                     }
                 });
             }
@@ -310,6 +320,7 @@ export const assignSubstitute = async (payload: { date: string; shift: string; s
     const { date, shift, station_id, emp_id } = payload;
     const subKey = `${date}_${shift}_${station_id}`;
     cachedSubstitutions[subKey] = { emp_id, is_approved: false };
+    saveToStorage();
     return { success: true };
 };
 
@@ -318,15 +329,26 @@ export const approveSubstitute = async (payload: { date: string; shift: string; 
     const subKey = `${date}_${shift}_${station_id}`;
     if (cachedSubstitutions[subKey]) {
         cachedSubstitutions[subKey].is_approved = true;
+        saveToStorage();
     }
     return { success: true };
 };
 
-export const getAvailableSubstitutes = async (date: string, shift: string) => {
+export const clearSubstitutions = async () => {
+    cachedSubstitutions = {};
+    localStorage.removeItem(STORAGE_KEY);
+    return { success: true };
+};
+
+export const getAvailableSubstitutes = async (date: string, shift: string, station_id?: number) => {
     // Return all employees WHO ARE PRESENT but NOT ASSIGNED to anything else on this shift/date
-    // For the demo, we'll just return all employees with their presence status and current assignment
     const allEmps = (DUMMY_EMPLOYEES as any[]).map(emp => {
-        const sm = (DUMMY_SKILL_MATRIX_API_DATA as any[]).find(s => s.emp_id === emp.emp_id);
+        const smData = (DUMMY_SKILL_MATRIX_API_DATA as any[]).filter(s => s.emp_id === emp.emp_id);
+        
+        // If station_id is provided, check if employee has ANY skill for that station
+        const stationSkill = station_id ? smData.find(s => s.station_id === station_id) : null;
+        const hasAnySkill = !station_id || !!stationSkill;
+
         const empSuffix = parseInt(emp.emp_id.replace(/\D/g, '')) || 0;
         const day = parseInt(date.split('-')[2]) || 1;
         const isPresent = (empSuffix + day) % 10 !== 0; 
@@ -335,9 +357,10 @@ export const getAvailableSubstitutes = async (date: string, shift: string) => {
             emp_id: emp.emp_id,
             name: `${emp.first_name} ${emp.last_name}`,
             isPresent,
-            level: sm?.level || 1,
-            department: emp.department?.department_name
+            level: stationSkill?.level || 1,
+            isQualified: hasAnySkill
         };
-    });
+    }).filter(e => e.isQualified && e.isPresent); // Only show present and qualified-ish workers
+
     return { data: allEmps };
 };

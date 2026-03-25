@@ -20,7 +20,7 @@ export function SubstitutionModal({ date, shift, station, currentCell, onClose, 
     useEffect(() => {
         const load = async () => {
             setLoading(true);
-            const res = await getAvailableSubstitutes(date, shift);
+            const res = await getAvailableSubstitutes(date, shift, parseInt(station.id));
             setAvailable(res.data);
             setLoading(false);
         };
