@@ -316,22 +316,24 @@ export default function HeatMap() {
         <div style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(16px)", borderRadius: 20, boxShadow: D.sh, border: `1px solid ${D.border}`, marginBottom: 16, overflow: "hidden" }}>
           {/* Top Row */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 24px", borderBottom: `1px solid ${D.border}`, flexWrap: "wrap", gap: 12 }}>
-            {/* Shift toggle */}
-            <div style={{ display: "flex", alignItems: "center", gap: 10, opacity: view === "24h" ? 0.3 : 1, pointerEvents: view === "24h" ? "none" : "auto", transition: "all .2s" }}>
-              <div style={{ width: 3, height: 20, borderRadius: 2, background: `linear-gradient(180deg,${D.purple},${D.purpleMid})` }} />
-              <span style={{ fontSize: 11, fontWeight: 800, color: D.g500, textTransform: "uppercase", letterSpacing: "0.08em" }}>Shift</span>
-              <div style={{ display: "flex", background: D.g100, borderRadius: 10, padding: 3, gap: 3, border: `1px solid ${D.border}` }}>
-                {(["A", "B", "C", "G"] as const).map(s => (
-                  <button key={s} onClick={() => handleShift(s)} style={{
-                    padding: "7px 22px", fontSize: 13, fontWeight: 800, fontFamily: "inherit", cursor: "pointer", border: "none", borderRadius: 8,
-                    background: shift === s ? `linear-gradient(135deg, ${D.purple}, ${D.purpleMid})` : "transparent",
-                    color: shift === s ? "white" : D.g500,
-                    transition: "all .25s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-                    boxShadow: shift === s ? "0 4px 12px rgba(15,39,68,0.32)" : "none",
-                    letterSpacing: "0.02em",
-                  }}>Shift {s}</button>
-                ))}
+            {/* Shift toggle & Reset */}
+            <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, opacity: view === "24h" ? 0.3 : 1, pointerEvents: view === "24h" ? "none" : "auto", transition: "all .2s" }}>
+                <div style={{ width: 3, height: 20, borderRadius: 2, background: `linear-gradient(180deg,${D.purple},${D.purpleMid})` }} />
+                <span style={{ fontSize: 11, fontWeight: 800, color: D.g500, textTransform: "uppercase", letterSpacing: "0.08em" }}>Shift</span>
+                <div style={{ display: "flex", background: D.g100, borderRadius: 10, padding: 3, gap: 3, border: `1px solid ${D.border}` }}>
+                  {(["A", "B", "C", "G"] as const).map(s => (
+                    <button key={s} onClick={() => handleShift(s)} style={{
+                      padding: "7px 22px", fontSize: 13, fontWeight: 800, fontFamily: "inherit", cursor: "pointer", border: "none", borderRadius: 8,
+                      background: shift === s ? `linear-gradient(135deg, ${D.purple}, ${D.purpleMid})` : "transparent",
+                      color: shift === s ? "white" : D.g500,
+                      transition: "all .25s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                      boxShadow: shift === s ? "0 4px 12px rgba(15,39,68,0.32)" : "none",
+                    }}>Shift {s}</button>
+                  ))}
+                </div>
               </div>
+
             </div>
 
             {/* Hierarchy Filters */}
@@ -434,6 +436,28 @@ export default function HeatMap() {
                   }}>{ico}</span>{lbl}
                 </button>
               ))}
+
+              {/* Subdued Reset/Refresh button at the very end */}
+              <button 
+                onClick={async () => {
+                   if(confirm("Fresh Demo? This will clear all manual substitutions.")) {
+                      await clearSubstitutions();
+                      actions.retry();
+                   }
+                }}
+                title="Reset Demo Data"
+                style={{
+                  background: "transparent", color: D.g400, border: "none",
+                  width: 32, height: 32, borderRadius: 6, padding: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 14, cursor: "pointer", transition: "all .2s ease",
+                  marginLeft: 4
+                }}
+                onMouseEnter={e => { e.currentTarget.style.color = D.purple; e.currentTarget.style.background = D.g100; }}
+                onMouseLeave={e => { e.currentTarget.style.color = D.g400; e.currentTarget.style.background = "transparent"; }}
+              >
+                ↻
+              </button>
             </div>
           </div>
         </div>
