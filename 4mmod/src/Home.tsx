@@ -38,6 +38,7 @@ import EmployeeManagement from "./components/EmployeeManagement/EmployeeManageme
 import MasterTable from "./components/HeatmapDemo/MasterTable/MasterTable";
 import SkillMatrixPage from "./components/HeatmapDemo/Skillmatrix/pages/SkillMatrixPage";
 import HeatMapShiftPlanner from "./components/HeatmapDemo/HetmapShiftPlan/HeatMapShiftPlanner";
+import HeatMap from "./components/HeatmapDemo/HeatMap/heatmap";
 // Define the Props interface for Home
 interface HomeProps {
   selectedModule: string;
@@ -157,6 +158,7 @@ const Home: React.FC<HomeProps> = ({
           {selectedModule === 'mastertable'  && <MasterTable/>}
           {selectedModule === 'skillmatrix'  && <SkillMatrixPage/>}
           {selectedModule === 'shiftplan'  && <HeatMapShiftPlanner/>}
+          {selectedModule === 'heatmap' && <HeatMap />}
           
 
         </main>

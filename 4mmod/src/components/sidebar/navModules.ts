@@ -249,6 +249,15 @@ export const navModules: NavModule[] = [
         description: "Shift plan for Heatmap (Dummy Data)",
         status: "active",
     },
+    {
+        id: "heatmap",
+        title: "Heat Map",
+        fullName: "Manpower Heat Map Visualization",
+        color: "from-orange-400 to-amber-500",
+        icon: LayoutDashboard,
+        description: "Visual gap analysis and coverage (Dummy Data)",
+        status: "active",
+    },
 		{
 		id: "4m-method",
 		title: "Methods",
