@@ -64,7 +64,7 @@ export const fetchShifts = async () => {
 
 // Persist substitutions in localStorage for demo stability
 const STORAGE_KEY = 'heatmap_substitutions';
-let cachedRoster: ShiftPlanData[] | null = null;
+let cachedRoster: ShiftPlanData[] | null = null; // Always regenerate from fresh dummy data
 let cachedSubstitutions: Record<string, { emp_id: string; is_approved: boolean }> = {};
 
 try {
@@ -336,6 +336,7 @@ export const approveSubstitute = async (payload: { date: string; shift: string; 
 
 export const clearSubstitutions = async () => {
     cachedSubstitutions = {};
+    cachedRoster = null; // Force fresh roster generation
     localStorage.removeItem(STORAGE_KEY);
     return { success: true };
 };
